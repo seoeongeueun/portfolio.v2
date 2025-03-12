@@ -40,6 +40,11 @@
 	--spacing-40: 4rem;
 	--spacing-60: 6rem; */
 
+	--font-dunggeunmo: DungGeunMo, sans-serif;
+	--font-nanumbarunpen: NanumBarunpen, sans-serif;
+
+	--text-xxxs: 0.7rem;
+	--text-xxxs-line: 0.9rem;
 	--text-xxs: 1.2rem;
 	--text-xxs-line: 1.6rem;
 	--text-xs: 1.3rem;
@@ -58,10 +63,6 @@
 	--text-xxl-line: 3rem;
 
 	--animate-slide-down: slide-down 2s ease-in-out infinite;
-}
-
-* {
-	font-family: "NanumBarunpen";
 }
 
 :root {
