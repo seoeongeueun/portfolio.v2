@@ -1,0 +1,62 @@
+@import "./animations.css";
+
+.main-title {
+	font-weight: bold;
+	--text: #ffff00;
+	--shadow: #ff0000;
+	-webkit-animation: tracking-in-contract-bck-bottom 1s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+	animation: tracking-in-contract-bck-bottom 1s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+	font-size: 6.5rem;
+	color: #ffff00;
+	text-shadow:
+		0px 12px var(--shadow),
+		0px 11.75px var(--shadow),
+		0px 11.5px var(--shadow),
+		0px 11.25px var(--shadow),
+		0px 11px var(--shadow),
+		0px 10.75px var(--shadow),
+		0px 10.5px var(--shadow),
+		0px 10.25px var(--shadow),
+		0px 10px var(--shadow),
+		0px 9.75px var(--shadow),
+		0px 9.5px var(--shadow),
+		0px 9.25px var(--shadow),
+		0px 9px var(--shadow),
+		0px 8.75px var(--shadow),
+		0px 8.5px var(--shadow),
+		0px 8.25px var(--shadow),
+		0px 8px var(--shadow),
+		0px 7.75px var(--shadow),
+		0px 7.5px var(--shadow),
+		0px 7.25px var(--shadow),
+		0px 7px var(--shadow),
+		0px 6.75px var(--shadow),
+		0px 6.5px var(--shadow),
+		0px 6.25px var(--shadow),
+		0px 6px var(--shadow),
+		0px 5.75px var(--shadow),
+		0px 5.5px var(--shadow),
+		0px 5.25px var(--shadow),
+		0px 5px var(--shadow),
+		0px 4.75px var(--shadow),
+		0px 4.5px var(--shadow),
+		0px 4.25px var(--shadow),
+		0px 4px var(--shadow),
+		0px 3.75px var(--shadow),
+		0px 3.5px var(--shadow),
+		0px 3.25px var(--shadow),
+		0px 3px var(--shadow),
+		0px 2.75px var(--shadow),
+		0px 2.5px var(--shadow),
+		0px 2.25px var(--shadow),
+		0px 2px var(--shadow),
+		0px 1.75px var(--shadow),
+		0px 1.5px var(--shadow),
+		0px 1.25px var(--shadow),
+		0px 1px var(--shadow),
+		0px 0.75px var(--shadow),
+		0px 0.5px var(--shadow),
+		0px 0.25px var(--shadow);
+	margin-bottom: 1rem;
+	margin-top: 2rem;
+}
