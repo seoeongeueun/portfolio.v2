@@ -62,6 +62,9 @@
 	--text-xxl: 2.2rem;
 	--text-xxl-line: 3rem;
 
+	--color-gray-1: #b0acb4;
+	--color-gray-2: #757177;
+
 	--animate-slide-down: slide-down 2s ease-in-out infinite;
 }
 

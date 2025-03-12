@@ -4,6 +4,7 @@ import StackIcon from "tech-stack-icons";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
 import {useState} from "react";
+import Cartridge from "./components/cartridge";
 
 type TextFileType = Record<string, string>;
 
@@ -46,6 +47,7 @@ export default function Home() {
 				<span>{textFile["000"]}</span>
 				<MdKeyboardDoubleArrowDown color="white" size="1rem" className="animate-slide-down"></MdKeyboardDoubleArrowDown>
 			</div>
+			<Cartridge />
 		</div>
 	);
 }
