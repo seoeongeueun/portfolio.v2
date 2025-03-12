@@ -1,28 +1,82 @@
 @import "tailwindcss";
+
 @import "./styles/animations.css";
 @import "./styles/global.scss";
 
+@font-face {
+	font-family: "DungGeunMo";
+	src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+	font-display: block;
+}
+
+@font-face {
+	font-family: "NanumBarunpen";
+	src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumBarunpen.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@theme {
+	/* --spacing-2: 0.2rem;
+	--spacing-3: 0.3rem;
+	--spacing-4: 0.4rem;
+	--spacing-5: 0.5rem;
+	--spacing-6: 0.6rem;
+	--spacing-8: 0.8rem;
+	--spacing-10: 1rem;
+	--spacing-12: 1.2rem;
+	--spacing-13: 1.3rem;
+	--spacing-14: 1.4rem;
+	--spacing-16: 1.6rem;
+	--spacing-18: 1.8rem;
+	--spacing-20: 2rem;
+	--spacing-24: 2.4rem;
+	--spacing-28: 2.8rem;
+	--spacing-29: 2.9rem;
+	--spacing-32: 3.2rem;
+	--spacing-36: 3.6rem;
+	--spacing-40: 4rem;
+	--spacing-60: 6rem; */
+
+	--text-xxs: 1.2rem;
+	--text-xxs-line: 1.6rem;
+	--text-xs: 1.3rem;
+	--text-xs-line: 2.08rem;
+	--text-s: 1.4rem;
+	--text-s-line: 2.24rem;
+	--text-m: 1.5rem;
+	--text-m-line: 2.56rem;
+	--text-md: 1.6rem;
+	--text-md-line: 2.6rem;
+	--text-lg: 1.7rem;
+	--text-lg-line: 2.7rem;
+	--text-xl: 1.9rem;
+	--text-xl-line: 3rem;
+	--text-xxl: 2.2rem;
+	--text-xxl-line: 3rem;
+
+	--animate-slide-down: slide-down 2s ease-in-out infinite;
+}
+
+* {
+	font-family: "NanumBarunpen";
+}
+
 :root {
-	--background: #ffffff;
-	--foreground: #171717;
 }
 
-@theme inline {
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--font-sans: var(--font-geist-sans);
-	--font-mono: var(--font-geist-mono);
-}
+/* html {
+	font-size: 62.5%;
+} */
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--background: #0a0a0a;
-		--foreground: #ededed;
-	}
-}
-
-body {
-	background: var(--background);
-	color: var(--foreground);
-	font-family: Arial, Helvetica, sans-serif;
+body,
+html {
+	background-color: rgb(0, 0, 0);
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
 }

@@ -13,16 +13,19 @@
 	"dependencies": {
 		"next": "15.2.2",
 		"react": "^19.0.0",
-		"react-dom": "^19.0.0"
+		"react-dom": "^19.0.0",
+		"react-icons": "^5.5.0",
+		"tech-stack-icons": "^2.1.0"
 	},
 	"devDependencies": {
-		"@tailwindcss/postcss": "^4",
+		"@tailwindcss/postcss": "^4.0.13",
 		"@types/node": "^20",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
+		"autoprefixer": "^10.4.21",
 		"prettier": "^3.5.3",
 		"sass": "^1.85.1",
-		"tailwindcss": "^4",
+		"tailwindcss": "^4.0.13",
 		"typescript": "^5.9.0-dev.20250311"
 	}
 }
