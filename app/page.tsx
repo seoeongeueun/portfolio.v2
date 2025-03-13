@@ -53,7 +53,7 @@ export default function Home() {
 					}
 					if (cardContainer) {
 						//카드 중앙으로 스크롤
-						const halfScroll = cardContainer.scrollWidth / 2 - 500;
+						const halfScroll = cardContainer.scrollWidth / 2;
 						cardContainer.scrollLeft = halfScroll;
 						observer.unobserve(entry.target);
 					}
@@ -77,14 +77,14 @@ export default function Home() {
 
 		const setupCardHoverEvents = () => {
 			const cardList = document.querySelectorAll<HTMLElement>(".cartridge-cards #card");
-			const parentContainer = document.querySelector<HTMLDivElement>(".cartridge-cards");
+			const parentContainer = document.querySelector<HTMLDivElement>("#cartridge-cards-container");
 
 			if (!parentContainer) return;
 
 			const handleMouseEnter = (event: MouseEvent) => {
 				const hoveredCard = event.currentTarget as HTMLElement;
 				cardList.forEach(card => card.classList.remove("selected"));
-				hoveredCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+				//hoveredCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
 
 				const addSelectedClass = () => {
 					document.querySelectorAll(".cartridge-cards #card").forEach(card => card.classList.remove("selected"));
@@ -100,32 +100,66 @@ export default function Home() {
 
 			const handleCardClick = (event: MouseEvent) => {
 				const clickedCard = event.currentTarget as HTMLElement;
+				const rect = clickedCard.getBoundingClientRect();
+				const cardsDiv = document.querySelector<HTMLDivElement>("#cartridge-cards");
+				if (!cardsDiv) return;
+
+				if (!rect) return;
 
 				document.querySelectorAll(".cartridge-cards #card").forEach(card => card.classList.remove("clicked"));
-
+				clickedCard.style.left = "0";
+				const parentWidth = parentContainer.clientWidth;
+				const scrollWidth = parentContainer.scrollWidth;
+				const cardLeft = clickedCard.offsetLeft;
+				const cardWidth = clickedCard.clientWidth;
 				const scrollLeft = parentContainer.scrollLeft;
-				const leftPosition = `calc(50% - ${scrollLeft}px - ${clickedCard.offsetWidth / 2}px)`;
 
-				//가운데로 이동하기 위한 거리를 지정
-				clickedCard.style.setProperty("--distance", leftPosition);
-				clickedCard.classList.add("clicked");
+				/* 
+					선택된 카드를 중앙으로 위치하게 스크롤 하는 로직 + 자동으로 필요한 만큼 여백 추가
+					어떤 디자인을 택할지에 따라 사용하지 않을 수도 있음
+				*/
+				/*
+				//첫번째 카드의 시작 위치를 빼서 여백 없는 정확한 카드 뭉치의 너비를 계산
+				const firstCard = document.querySelector<HTMLDivElement>(".card-1");
+				if (!firstCard) return;
+
+				const leftMargin = Math.abs(firstCard.offsetLeft);
+				const absoluteCenter = window.innerWidth / 2 - cardWidth / 2;
+				const distanceNeeded = rect.left - absoluteCenter;
+
+				parentContainer.scrollLeft = scrollLeft + distanceNeeded;
+				//스크롤이 이미 가장자리이기 때문에 추가 여백이 필요함
+				if (rect.left + distanceNeeded > scrollWidth || rect.left + distanceNeeded < 0) {
+					console.log("adding margin");
+					const margin =
+						rect.left + distanceNeeded < 0 ? leftMargin + Math.abs(distanceNeeded) - cardWidth / 2 : scrollWidth - rect.left - distanceNeeded;
+					cardsDiv.style.left = `${margin}px`;
+				} else {
+					cardsDiv.style.left = "";
+				}
+				parentContainer.scrollLeft = rect.left - absoluteCenter;
+				*/
+
+				//clickedCard.classList.add("clicked");
 
 				//게임기로 이동하기 위해 필요한 거리 계산
 				const gameboyHead = document.querySelector("#gameboy-head");
 				if (gameboyHead) {
 					const position = gameboyHead.getBoundingClientRect()?.top;
-					const current = clickedCard.getBoundingClientRect()?.top;
+					const current = rect?.top;
+					const currentScroll = document.querySelector("#main")?.scrollTop || 0;
 
-					// 계산된 위치 70px 전 위치에서 멈춤
-					const distance = position - current - 70;
+					// 게임기 위치 - 카드의 현재 y 위치 - 현재 스크롤 위치 / 2
+					const distance = position - current - currentScroll / 2;
 					clickedCard.style.setProperty("--y-distance", `${distance}px`);
 				}
 
 				const handleAnimationEnd = () => {
-					gameboyHead.scrollIntoView({behavior: "smooth"});
+					//gameboyHead.scrollIntoView({behavior: "smooth"});
 					setTimeout(() => {
 						clickedCard.classList.remove("clicked");
 						clickedCard.removeEventListener("animationend", handleAnimationEnd);
+						cardsDiv.style.left = "";
 					}, 700);
 				};
 

@@ -85,15 +85,18 @@
 		.card:not(.clicked) {
 			pointer-events: none !important;
 		}
+
+		&.spread {
+			transition: left 0.1s ease-in-out;
+		}
 	}
 
 	&.spread {
 		width: calc(var(--stack-width) * 2);
-		left: calc(var(--card-width) + var(--gap));
+		left: calc(var(--stack-width) + var(--gap));
 		justify-content: start;
-		padding: 0 10rem;
 
-		> .card:not(.clicked) {
+		> .card {
 			filter: brightness(100%);
 
 			&.card-4 {
@@ -167,11 +170,10 @@
 
 		&.clicked {
 			transition:
+				left 0.5s ease-in-out,
 				top 0.5s ease-in-out,
 				transform 0.3s ease-in-out 0.1s;
-			position: fixed;
 			filter: brightness(100%);
-			left: var(--distance);
 			animation: insert 1.5s ease-in-out 0.2s forwards;
 		}
 	}
