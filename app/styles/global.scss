@@ -60,6 +60,105 @@
 	margin-top: 2rem;
 }
 
+.cartridge-cards {
+	--stack-width: 30rem;
+	--card-width: 50rem;
+	--gap: 10rem;
+
+	border: 2px solid white;
+	height: 30rem;
+	gap: 3rem;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+	transform-origin: center;
+	overflow: visible;
+	top: var(--gap);
+
+	width: var(--width-lg);
+	left: 0;
+
+	&:hover {
+		width: calc(var(--stack-width) * 2);
+		left: calc(var(--stack-width) / 2);
+		padding: 0 2rem;
+
+		> .card {
+			filter: brightness(100%);
+
+			&.card-4 {
+				/* 카드 너비 --card-lg에서 이동할 1rem을 더한 값 */
+				left: calc(-100% + calc(var(--card-width) / 2 + var(--gap)));
+			}
+
+			&.card-3 {
+				left: calc(-100% + calc((var(--card-width) * 2)) - calc(var(--gap) * 3));
+			}
+
+			&.card-2 {
+				left: calc(-100% + calc((var(--card-width) * 3)) - calc(var(--gap) * 4));
+			}
+
+			&.card-1 {
+				left: -100%;
+			}
+
+			&:nth-child(2n + 1) {
+				top: 3rem;
+			}
+		}
+	}
+
+	> .card {
+		transition:
+			left 0.5s ease,
+			filter 0.2s linear;
+		position: absolute;
+		filter: brightness(80%);
+
+		&.card-4 {
+			transform: rotate(-3deg);
+			left: -2rem;
+			top: 1rem;
+			border: 5px solid blue;
+		}
+
+		&.card-3 {
+			transform: rotate(2deg);
+			left: 2rem;
+			top: -1rem;
+			border: 5px solid orange;
+		}
+
+		/* 킥을 위해 2번째 카드는 강한 회전값 */
+		&.card-2 {
+			transform: rotate(-4deg);
+			left: 3rem;
+			top: -2rem;
+			border: 5px solid green;
+		}
+
+		/* 첫번째 카드는 음영 효과 x */
+		&.card-1 {
+			transform: rotate(-1deg);
+			left: 1rem;
+			top: 0rem;
+			filter: brightness(100%);
+			border: 5px solid red;
+		}
+
+		&:hover {
+			transition:
+				top 0.5s ease-in-out 0.1s,
+				transform 0.1s ease-in-out;
+			top: -6rem !important;
+			transform: rotate(0deg);
+		}
+	}
+}
+
 .cartridge-container {
 	--gray-0: #f0f0f0;
 	--gray-0-rgb: 240, 240, 240;
@@ -76,6 +175,7 @@
 	min-height: calc(30rem * (22 / 18));
 	max-height: calc(40rem * (22 / 18));
 	flex-shrink: 0;
+	filter: drop-shadow(2px 1px 7px rgba(66, 66, 66, 0.7));
 
 	@media screen and (max-width: 640px) {
 		width: 18rem;

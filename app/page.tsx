@@ -28,7 +28,7 @@ export default function Home() {
 		ps: "photo\nshop",
 	};
 	return (
-		<div className="text-white w-full h-full p-[1.2rem] md:p-[1.2rem] lg:p-[4rem] flex flex-col items-center justify-start overflow-y-scroll gap-4">
+		<div className="text-white w-full h-full p-[1.2rem] md:p-[1.2rem] lg:p-[4rem] flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
 			<p className="main-title font-dunggeunmo font-normal text-center text-[5rem] md:text-[10rem] lg:text-[12rem]">SEOEONGEUEUN</p>
 			<p className="text-cyan-300 text-s">{textFile["001"]}</p>
 			<p className="text-white text-s">@seoeongeueun</p>
@@ -47,7 +47,22 @@ export default function Home() {
 				<span>{textFile["000"]}</span>
 				<MdKeyboardDoubleArrowDown color="white" size="1rem" className="animate-slide-down"></MdKeyboardDoubleArrowDown>
 			</div>
-			<Cartridge />
+			<div className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[130vh] bg-white">
+				<div className="cartridge-cards relative">
+					<div className="card card-4">
+						<Cartridge />
+					</div>
+					<div className="card card-3">
+						<Cartridge />
+					</div>
+					<div className="card card-2">
+						<Cartridge />
+					</div>
+					<div className="card card-1">
+						<Cartridge />
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 }
