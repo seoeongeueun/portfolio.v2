@@ -25,3 +25,26 @@
 		transform: translateY(5px);
 	}
 }
+
+@keyframes insert {
+	0% {
+		transform: scale(1) rotate(-2deg);
+		z-index: 99;
+	}
+	5% {
+		transform: scale(1.2) rotate(2deg);
+		z-index: 99;
+	}
+	30% {
+		transform: scale(0.2) rotate(-2deg);
+		z-index: 99;
+	}
+	98% {
+		transform: scale(0.2) translateY(calc(var(--y-distance) / 0.2));
+		z-index: 1;
+	}
+	100% {
+		transform: scale(0.2) translateY(calc(var(--y-distance) / 0.2));
+		z-index: -1;
+	}
+}

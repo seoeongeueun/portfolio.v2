@@ -5,6 +5,8 @@ import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
 import {useEffect, useState} from "react";
 import Cartridge from "./components/cartridge";
+import Gameboy from "./components/gameboy";
+import "./styles/global.scss";
 
 type TextFileType = Record<string, string>;
 
@@ -96,15 +98,55 @@ export default function Home() {
 				hoveredCard.classList.remove("selected");
 			};
 
+			const handleCardClick = (event: MouseEvent) => {
+				const clickedCard = event.currentTarget as HTMLElement;
+
+				document.querySelectorAll(".cartridge-cards #card").forEach(card => card.classList.remove("clicked"));
+
+				const scrollLeft = parentContainer.scrollLeft;
+				const leftPosition = `calc(50% - ${scrollLeft}px - ${clickedCard.offsetWidth / 2}px)`;
+
+				//가운데로 이동하기 위한 거리를 지정
+				clickedCard.style.setProperty("--distance", leftPosition);
+				clickedCard.classList.add("clicked");
+
+				//게임기로 이동하기 위해 필요한 거리 계산
+				const gameboyHead = document.querySelector("#gameboy-head");
+				if (gameboyHead) {
+					const position = gameboyHead.getBoundingClientRect()?.top;
+					const current = clickedCard.getBoundingClientRect()?.top;
+
+					// 계산된 위치 70px 전 위치에서 멈춤
+					const distance = position - current - 70;
+					clickedCard.style.setProperty("--y-distance", `${distance}px`);
+				}
+
+				const handleAnimationEnd = () => {
+					gameboyHead.scrollIntoView({behavior: "smooth"});
+					setTimeout(() => {
+						clickedCard.classList.remove("clicked");
+						clickedCard.removeEventListener("animationend", handleAnimationEnd);
+					}, 700);
+				};
+
+				clickedCard.addEventListener("animationend", handleAnimationEnd);
+
+				return () => {
+					clickedCard.removeEventListener("animationend", handleAnimationEnd);
+				};
+			};
+
 			cardList.forEach(card => {
 				card.addEventListener("mouseenter", handleMouseEnter);
 				card.addEventListener("mouseleave", handleMouseLeave);
+				card.addEventListener("click", handleCardClick);
 			});
 
 			return () => {
 				cardList.forEach(card => {
 					card.removeEventListener("mouseenter", handleMouseEnter);
 					card.removeEventListener("mouseleave", handleMouseLeave);
+					card.removeEventListener("click", handleCardClick);
 				});
 			};
 		};
@@ -114,7 +156,7 @@ export default function Home() {
 	}, []);
 
 	return (
-		<div className="text-white w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
+		<div id="main" className="text-white w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
 			<p className="main-title font-dunggeunmo font-normal text-center text-[5rem] md:text-[10rem] lg:text-[12rem]">SEOEONGEUEUN</p>
 			<p className="text-cyan-300 text-s">{textFile["001"]}</p>
 			<p className="text-white text-s">@seoeongeueun</p>
@@ -151,6 +193,9 @@ export default function Home() {
 						<Cartridge />
 					</div>
 				</div>
+			</div>
+			<div className="relative">
+				<Gameboy />
 			</div>
 		</div>
 	);
