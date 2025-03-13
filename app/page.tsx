@@ -3,7 +3,7 @@ import Image from "next/image";
 import StackIcon from "tech-stack-icons";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Cartridge from "./components/cartridge";
 
 type TextFileType = Record<string, string>;
@@ -27,8 +27,94 @@ export default function Home() {
 		tailwindcss: "tailwind css",
 		ps: "photo\nshop",
 	};
+
+	useEffect(() => {
+		const throttle = (callback: Function, delay: number) => {
+			let lastCall = 0;
+			return (...args: any) => {
+				const now = Date.now();
+				if (now - lastCall >= delay) {
+					lastCall = now;
+					callback(...args);
+				}
+			};
+		};
+
+		const handleMobileCardIntersection: IntersectionObserverCallback = (entries, observer) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					const cardContainer = document.querySelector<HTMLDivElement>("#cartridge-cards-container");
+					const firstChild = cardContainer?.firstElementChild as HTMLElement | null;
+
+					if (firstChild) {
+						firstChild.classList.add("spread");
+					}
+					if (cardContainer) {
+						//카드 중앙으로 스크롤
+						const halfScroll = cardContainer.scrollWidth / 2 - 500;
+						cardContainer.scrollLeft = halfScroll;
+						observer.unobserve(entry.target);
+					}
+				}
+			});
+		};
+
+		const setupObservers = () => {
+			const cardContainer = document.querySelector<HTMLDivElement>(".cartridge-cards");
+			if (!cardContainer) return;
+
+			const mobileCardObserver = new IntersectionObserver(handleMobileCardIntersection, {
+				root: null,
+				rootMargin: "0px",
+				threshold: 0.6,
+			});
+
+			mobileCardObserver.observe(cardContainer);
+			return () => mobileCardObserver.disconnect();
+		};
+
+		const setupCardHoverEvents = () => {
+			const cardList = document.querySelectorAll<HTMLElement>(".cartridge-cards #card");
+			const parentContainer = document.querySelector<HTMLDivElement>(".cartridge-cards");
+
+			if (!parentContainer) return;
+
+			const handleMouseEnter = (event: MouseEvent) => {
+				const hoveredCard = event.currentTarget as HTMLElement;
+				cardList.forEach(card => card.classList.remove("selected"));
+				hoveredCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+
+				const addSelectedClass = () => {
+					document.querySelectorAll(".cartridge-cards #card").forEach(card => card.classList.remove("selected"));
+					hoveredCard.classList.add("selected");
+				};
+				setTimeout(addSelectedClass, 100);
+			};
+
+			const handleMouseLeave = (event: MouseEvent) => {
+				const hoveredCard = event.currentTarget as HTMLElement;
+				hoveredCard.classList.remove("selected");
+			};
+
+			cardList.forEach(card => {
+				card.addEventListener("mouseenter", handleMouseEnter);
+				card.addEventListener("mouseleave", handleMouseLeave);
+			});
+
+			return () => {
+				cardList.forEach(card => {
+					card.removeEventListener("mouseenter", handleMouseEnter);
+					card.removeEventListener("mouseleave", handleMouseLeave);
+				});
+			};
+		};
+
+		setupObservers();
+		setupCardHoverEvents();
+	}, []);
+
 	return (
-		<div className="text-white w-full h-full p-[1.2rem] md:p-[1.2rem] lg:p-[4rem] flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
+		<div className="text-white w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
 			<p className="main-title font-dunggeunmo font-normal text-center text-[5rem] md:text-[10rem] lg:text-[12rem]">SEOEONGEUEUN</p>
 			<p className="text-cyan-300 text-s">{textFile["001"]}</p>
 			<p className="text-white text-s">@seoeongeueun</p>
@@ -47,18 +133,21 @@ export default function Home() {
 				<span>{textFile["000"]}</span>
 				<MdKeyboardDoubleArrowDown color="white" size="1rem" className="animate-slide-down"></MdKeyboardDoubleArrowDown>
 			</div>
-			<div className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[130vh] bg-white">
-				<div className="cartridge-cards relative">
-					<div className="card card-4">
+			<div
+				id="cartridge-cards-container"
+				className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[130vh] bg-white"
+			>
+				<div id="cartridge-cards" className="cartridge-cards relative">
+					<div id="card" className="card card-4">
 						<Cartridge />
 					</div>
-					<div className="card card-3">
+					<div id="card" className="card card-3">
 						<Cartridge />
 					</div>
-					<div className="card card-2">
+					<div id="card" className="card card-2">
 						<Cartridge />
 					</div>
-					<div className="card card-1">
+					<div id="card" className="card card-1">
 						<Cartridge />
 					</div>
 				</div>

@@ -74,16 +74,17 @@
 	align-items: center;
 	position: relative;
 	transform-origin: center;
+	box-sizing: border-box;
 	overflow: visible;
 	top: var(--gap);
-
 	width: var(--width-lg);
-	left: 0;
+	left: -10rem;
 
-	&:hover {
+	&.spread {
 		width: calc(var(--stack-width) * 2);
-		left: calc(var(--stack-width) / 2);
-		padding: 0 2rem;
+		left: calc(var(--card-width) + var(--gap));
+		justify-content: start;
+		padding: 0 10rem;
 
 		> .card {
 			filter: brightness(100%);
@@ -106,15 +107,15 @@
 			}
 
 			&:nth-child(2n + 1) {
-				top: 3rem;
+				top: 2rem;
 			}
 		}
 	}
 
 	> .card {
 		transition:
-			left 0.5s ease,
-			filter 0.2s linear;
+			left 0.5s ease-in-out,
+			filter 0.3s ease 0.1s;
 		position: absolute;
 		filter: brightness(80%);
 
@@ -149,11 +150,11 @@
 			border: 5px solid red;
 		}
 
-		&:hover {
+		&.selected {
 			transition:
-				top 0.5s ease-in-out 0.1s,
-				transform 0.1s ease-in-out;
-			top: -6rem !important;
+				top 0.5s ease-in-out,
+				transform 0.3s ease-in-out 0.1s;
+			top: -7rem !important;
 			transform: rotate(0deg);
 		}
 	}
