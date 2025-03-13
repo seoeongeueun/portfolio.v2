@@ -77,8 +77,7 @@
 	box-sizing: border-box;
 	overflow: visible;
 	top: var(--gap);
-	width: var(--width-lg);
-	left: -10rem;
+	width: var(--stack-width);
 
 	//클릭 이벤트 진행 중에는 모든 카드의 마우스 이벤트를 차단
 	&:has(.clicked) {
@@ -169,14 +168,29 @@
 		}
 
 		&.clicked {
-			transition:
-				left 0.5s ease-in-out,
-				top 0.5s ease-in-out,
-				transform 0.3s ease-in-out 0.1s;
 			filter: brightness(100%);
-			animation: insert 1.5s ease-in-out 0.2s forwards;
+			transition:
+				transform 0.8s ease-in-out 0.5s,
+				top 0.3s ease-in-out;
+			transform: scale(0.2);
+			top: -10rem !important;
+			//animation: insert 1.5s ease-in-out 0.2s forwards;
+			// transition:
+			// 	left 0.5s ease-in-out,
+			// 	top 0.5s ease-in-out,
+			// 	transform 0.3s ease-in-out 0.1s;
+			// //left: calc((var(--stack-width) * -1)) !important;
+			// z-index: 99;
+			// filter: brightness(100%);
+			// transform: scale(0.2);
+			// //animation: insert 1.5s ease-in-out 0.2s forwards;
 		}
 	}
+}
+
+.mini-card {
+	position: relative;
+	top: -70rem;
 }
 
 .cartridge-container {

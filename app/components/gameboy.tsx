@@ -1,3 +1,4 @@
+import Cartridge from "./cartridge";
 export default function Gameboy() {
 	return (
 		<div className="w-full flex items-center justify-start md:justify-center overflow-auto z-[99]">

@@ -107,7 +107,7 @@ export default function Home() {
 				if (!rect) return;
 
 				document.querySelectorAll(".cartridge-cards #card").forEach(card => card.classList.remove("clicked"));
-				clickedCard.style.left = "0";
+
 				const parentWidth = parentContainer.clientWidth;
 				const scrollWidth = parentContainer.scrollWidth;
 				const cardLeft = clickedCard.offsetLeft;
@@ -118,7 +118,7 @@ export default function Home() {
 					선택된 카드를 중앙으로 위치하게 스크롤 하는 로직 + 자동으로 필요한 만큼 여백 추가
 					어떤 디자인을 택할지에 따라 사용하지 않을 수도 있음
 				*/
-				/*
+
 				//첫번째 카드의 시작 위치를 빼서 여백 없는 정확한 카드 뭉치의 너비를 계산
 				const firstCard = document.querySelector<HTMLDivElement>(".card-1");
 				if (!firstCard) return;
@@ -127,20 +127,21 @@ export default function Home() {
 				const absoluteCenter = window.innerWidth / 2 - cardWidth / 2;
 				const distanceNeeded = rect.left - absoluteCenter;
 
-				parentContainer.scrollLeft = scrollLeft + distanceNeeded;
+				parentContainer.scrollTo({top: 0, left: scrollLeft + distanceNeeded, behavior: "smooth"});
 				//스크롤이 이미 가장자리이기 때문에 추가 여백이 필요함
 				if (rect.left + distanceNeeded > scrollWidth || rect.left + distanceNeeded < 0) {
 					console.log("adding margin");
 					const margin =
-						rect.left + distanceNeeded < 0 ? leftMargin + Math.abs(distanceNeeded) - cardWidth / 2 : scrollWidth - rect.left - distanceNeeded;
+						rect.left + distanceNeeded < 0
+							? leftMargin + Math.abs(distanceNeeded) - cardWidth / 2 - 80
+							: scrollWidth - rect.left - distanceNeeded - 140;
 					cardsDiv.style.left = `${margin}px`;
 				} else {
 					cardsDiv.style.left = "";
 				}
-				parentContainer.scrollLeft = rect.left - absoluteCenter;
-				*/
+				//parentContainer.scrollLeft = rect.left - absoluteCenter;
 
-				//clickedCard.classList.add("clicked");
+				clickedCard.classList.add("clicked");
 
 				//게임기로 이동하기 위해 필요한 거리 계산
 				const gameboyHead = document.querySelector("#gameboy-head");
@@ -155,7 +156,7 @@ export default function Home() {
 				}
 
 				const handleAnimationEnd = () => {
-					//gameboyHead.scrollIntoView({behavior: "smooth"});
+					//gameboyHead?.scrollIntoView({behavior: "smooth"});
 					setTimeout(() => {
 						clickedCard.classList.remove("clicked");
 						clickedCard.removeEventListener("animationend", handleAnimationEnd);
@@ -211,7 +212,7 @@ export default function Home() {
 			</div>
 			<div
 				id="cartridge-cards-container"
-				className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[130vh] bg-white"
+				className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh] bg-white"
 			>
 				<div id="cartridge-cards" className="cartridge-cards relative">
 					<div id="card" className="card card-4">
