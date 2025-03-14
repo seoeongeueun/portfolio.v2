@@ -208,10 +208,10 @@ export default function Home() {
 			main.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
 		};
 
-		main.addEventListener("scroll", () => handleBackgroundColorChange([0, 255, 255], [0, 0, 46]));
+		main.addEventListener("scroll", () => handleBackgroundColorChange([216, 221, 224], [0, 0, 46]));
 
 		return () => {
-			main.removeEventListener("scroll", () => handleBackgroundColorChange([0, 255, 255], [0, 0, 46]));
+			main.removeEventListener("scroll", () => handleBackgroundColorChange([216, 221, 224], [0, 0, 46]));
 		};
 	}, []);
 
