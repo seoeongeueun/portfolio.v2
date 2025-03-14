@@ -60,6 +60,11 @@
 	margin-top: 2rem;
 }
 
+.subtitle{
+	font-size: 4rem;
+	color: var(--color-gray-4);
+}
+
 #cartridge-cards-container {
 	&::-webkit-scrollbar {
 		display: none;

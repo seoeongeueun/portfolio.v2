@@ -6,13 +6,26 @@ import TextEn from "./data/text-en.json" assert {type: "json"};
 import {useEffect, useState} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
-import Projects from "./data/projects.json" assert {type: "json"};
+import ProjectsData from "./data/projects.json" assert {type: "json"};
 import "./styles/global.scss";
 
 type TextFileType = Record<string, string>;
+interface Project {
+	title: string;
+	subtitle: string;
+	thumbnail: string;
+	tags: string[];
+	theme: string;
+}
+
+interface Projects {
+	[key: string]: Project;
+}
 
 export default function Home() {
 	const [textFile, setTextFile] = useState<TextFileType>(TextEn);
+	const [projects, setProjects] = useState<Projects>(ProjectsData);
+	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
 	const stacks = {
 		js: "java\nscript",
 		typescript: "type\nscript",
@@ -215,6 +228,32 @@ export default function Home() {
 		};
 	}, []);
 
+	const handleProjectsFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const {name, checked} = e.target as HTMLInputElement;
+
+		setTags(prev => {
+			if (checked) {
+				return [...prev, name.toUpperCase()];
+			} else {
+				return prev.filter(filter => filter !== name.toUpperCase());
+			}
+		});
+	};
+
+	useEffect(() => {
+		if (!tags) {
+			setProjects({});
+		} else {
+			const filteredProjects = Object.entries(ProjectsData)
+				.filter(([_, project]) => project.tags.some(tag => tags.includes(tag)))
+				.reduce<Projects>((acc, [key, project]) => {
+					acc[key] = project;
+					return acc;
+				}, {});
+			setProjects(filteredProjects);
+		}
+	}, [tags]);
+
 	return (
 		<div id="main" className="text-white w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
 			<p className="main-title font-dunggeunmo font-normal text-center text-[5rem] md:text-[10rem] lg:text-[12rem]">SEOEONGEUEUN</p>
@@ -235,13 +274,14 @@ export default function Home() {
 				<span>{textFile["000"]}</span>
 				<MdKeyboardDoubleArrowDown color="white" size="1rem" className="animate-slide-down"></MdKeyboardDoubleArrowDown>
 			</div>
+			<p className="subtitle">PROJECTS</p>
 			<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">
 				<div className="filter-type flex flex-row items-center gap-8">
-					<input type="checkbox" id="filter-personal" name="filter-personal" defaultChecked className="cursor-pointer" />
+					<input type="checkbox" id="filter-personal" name="personal" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
 					<label>{textFile["002"]}</label>
 				</div>
 				<div className="filter-type flex flex-row items-center gap-8">
-					<input type="checkbox" id="filter-personal" name="filter-personal" defaultChecked className="cursor-pointer" />
+					<input type="checkbox" id="filter-work" name="work" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
 					<label>{textFile["003"]}</label>
 				</div>
 			</div>
@@ -262,7 +302,7 @@ export default function Home() {
 					<div id="card" className="card card-1">
 						<Cartridge />
 					</div> */}
-					{Object.entries(Projects).map(([k, v]) => (
+					{Object.entries(projects).map(([k, v]) => (
 						<div id="card" key={v.title} className={`card card-${k}`}>
 							<Cartridge project={v} />
 						</div>

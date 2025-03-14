@@ -3,7 +3,7 @@
 		"title": "Minor Questions",
 		"subtitle": "ORGD 2024",
 		"thumbnail": "/images/orgd_main.JPG",
-		"tags": ["1 DEV", "TEAM", "EXHIBITION"],
+		"tags": ["1 DEV", "PERSONAL", "EXHIBITION"],
 		"theme": "#2e2e2e"
 	},
 	"2": {
@@ -39,7 +39,7 @@
 		"title": "...And More!",
 		"subtitle": "Other Projects",
 		"thumbnail": "/images/other_main.png",
-		"tags": ["1 DEV", "PERSONAL", "WEB"],
+		"tags": ["1 DEV", "WORK", "WEB"],
 		"theme": "#2febf1"
 	}
 }
