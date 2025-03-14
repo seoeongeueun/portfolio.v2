@@ -268,50 +268,104 @@ export default function Home() {
 
 	return (
 		<div id="main" className="py-52 text-gray-4 w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
-			<div className="flex flex-col justify-center items-center max-w-2/3">
-				<p id="mini-title" className="underline-text opacity-0 ml-auto text-gray-4 text-xl rotate-10 -mb-[5rem] z-30">
-					FRONTEND DEVELOPER
-				</p>
-				<p id="main-title" className="main-title font-normal text-center text-[5rem] md:text-[10rem] lg:text-[12rem]">
-					SEONGEUN PARK
-				</p>
-			</div>
+			<section>
+				<div className="flex flex-col justify-center items-center">
+					<p id="mini-title" className="underline-text opacity-0 ml-auto text-gray-4 text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
+						FRONTEND DEVELOPER
+					</p>
+					<p id="main-title" className="main-title md:whitespace-nowrap font-normal text-center text-[7rem] md:text-[10rem] lg:text-[12rem]">
+						SEONGEUN PARK
+					</p>
+				</div>
 
-			<div className="flex flex-wrap items-center justify-center w-full gap-1 md:gap-10">
-				{Object.entries(stacks).map(([k, v]) => (
-					<div key={k} className="group relative w-12 h-12 md:w-[5rem] md:h-[5rem] shrink-0">
-						<StackIcon name={k} className="w-full h-full" />
-						<div className="group-hover:opacity-100 opacity-0 transition-opacity duration-300 overflow-hidden absolute text-center w-full h-full top-0 left-0 flex items-center justify-center bg-black/75">
-							<span className="text-white text-xxxs whitespace-pre-line">{v.toUpperCase()}</span>
+				<div className="flex flex-wrap items-center justify-center w-full gap-1 md:gap-8 shrink-0">
+					{Object.entries(stacks).map(([k, v]) => (
+						<div key={k} className="p-2 group relative w-12 h-12 md:w-20 md:h-20 shrink-0">
+							<StackIcon name={k} className="w-full h-full" />
+							<div className="group-hover:opacity-100 opacity-0 transition-opacity duration-300 overflow-hidden absolute text-center w-full h-full top-0 left-0 flex items-center justify-center bg-black/75">
+								<span className=" font-nanumbarunpen text-white !font-extralight text-xxs whitespace-pre-line">{v.toUpperCase()}</span>
+							</div>
 						</div>
+					))}
+				</div>
+				<img src="/assets/thekid.gif" alt="kid" className="mt-[10rem]" />
+				<div className="fixed bottom-0 p-20 pointer-events-none z-[99]">
+					<div className="flex flex-col items-center justify-center text-white text-xl">
+						<span className="drop-shadow-md">{textFile["000"]}</span>
+						<MdKeyboardDoubleArrowDown color="white" size="3rem" className="animate-slide-down drop-shadow-lg"></MdKeyboardDoubleArrowDown>
 					</div>
-				))}
-			</div>
-			<img src="/assets/thekid.gif" alt="kid" />
-			<p className="subtitle">INTRODUCTION</p>
-			<p className="text-s max-w-1/2">{textFile["001"]}</p>
-
-			<div className="flex flex-col items-center justify-center text-white">
-				<span>{textFile["000"]}</span>
-				<MdKeyboardDoubleArrowDown color="white" size="1rem" className="animate-slide-down"></MdKeyboardDoubleArrowDown>
-			</div>
-			<p className="subtitle">PROJECTS</p>
-			<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">
-				<div className="filter-type flex flex-row items-center gap-8">
-					<input type="checkbox" id="filter-personal" name="personal" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
-					<label>{textFile["002"]}</label>
 				</div>
-				<div className="filter-type flex flex-row items-center gap-8">
-					<input type="checkbox" id="filter-work" name="work" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
-					<label>{textFile["003"]}</label>
+			</section>
+			<section className="!items-end px-80">
+				<div className="fade-up flex flex-col justify-start items-start mr-auto">
+					<p className="subtitle">CAREER</p>
+					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
-			</div>
-			<div
-				id="cartridge-cards-container"
-				className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh]"
-			>
-				<div id="cartridge-cards" className="cartridge-cards relative">
-					{/* <div id="card" className="card card-4">
+				<div className="career-cards-container fade-left">
+					<div className="career-card w-full bg-red-500 p-10 rounded-xl">
+						<p className="text-lg text-white">Frontend Developer</p>
+						<div className="mb-2 flex flex-row items-center justify-between w-full">
+							<p>BATON</p>
+							<p>2023년 8월 - 2024년 11월</p>
+						</div>
+						<ul>
+							<li>
+								React.js, Next.js, Typescript, jQuery 등을 사용하여 다양한 클라이언트의 웹 애플리케이션과 관리자 페이지를 개발하고, 반응형
+								디자인과 최적화된 애니메이션을 구현했습니다.
+							</li>
+							<li>
+								필요에 따라 API 설계와 MySQL과 PostgreSQL 데이터베이스 설계 및 쿼리 작성 등 백엔드 작업을 포함한 통합 개발을 수행하여 프론트-백
+								간의 원활한 데이터 연동을 구현했습니다.
+							</li>
+							<li>
+								팀의 개발 효율성을 위해 적극적으로 새로운 스택을 테스트하고 도입하여 팀의 개발 시스템을 현대화하고 작업 생산성 향상에
+								기여했습니다.
+							</li>
+						</ul>
+					</div>
+					<div className="career-card centered w-full bg-yellow-500 p-10 rounded-xl">
+						<p className="text-lg text-white">Software Engineer</p>
+						<div className="mb-2 flex flex-row items-center justify-between w-full">
+							<p>Market Stadium</p>
+							<p>2023년 8월 - 2024년 11월</p>
+						</div>
+						<ul>
+							<li>
+								풀스택 개발자 인턴으로 React.js, Semantic UI, Chart.js를 사용하여 macroeconomics 지표 데이터를 그래프로 시각화하는 대시보드
+								기능을 구현했습니다.
+							</li>
+							<li>DynamoDB 와 연동된 RESTful API를 개발하여 관련 데이터를 관리하고 조회하는 기능을 만들었습니다.</li>
+							<li>Mocha와 Chai를 이용해 데이터 유효성 검증 테스트를 추가하여 안정성을 높였습니다.</li>
+						</ul>
+					</div>
+					<div className="career-card w-full flex flex-col items-start justify-start bg-cyan-500 p-10 rounded-xl">
+						<p className="text-lg text-white">Bachelor's Degree of Computer Science</p>
+						<div className="mb-2 flex flex-row items-center justify-between w-full">
+							<p>The State University of New York, Stony Brook</p>
+							<p>2023년 8월 - 2024년 11월</p>
+						</div>
+						<p>Stony Brook University에서 Computer Science를 전공했습니다.</p>
+					</div>
+				</div>
+			</section>
+			<section>
+				<p className="subtitle">PROJECTS</p>
+				<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">
+					<div className="filter-type flex flex-row items-center gap-8">
+						<input type="checkbox" id="filter-personal" name="personal" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
+						<label>{textFile["002"]}</label>
+					</div>
+					<div className="filter-type flex flex-row items-center gap-8">
+						<input type="checkbox" id="filter-work" name="work" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
+						<label>{textFile["003"]}</label>
+					</div>
+				</div>
+				<div
+					id="cartridge-cards-container"
+					className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh]"
+				>
+					<div id="cartridge-cards" className="cartridge-cards relative">
+						{/* <div id="card" className="card card-4">
 						<Cartridge />
 					</div>
 					<div id="card" className="card card-3">
@@ -323,16 +377,17 @@ export default function Home() {
 					<div id="card" className="card card-1">
 						<Cartridge />
 					</div> */}
-					{Object.entries(projects).map(([k, v]) => (
-						<div id="card" key={v.title} className={`card card-${k}`}>
-							<Cartridge project={v} />
-						</div>
-					))}
+						{Object.entries(projects).map(([k, v]) => (
+							<div id="card" key={v.title} className={`card card-${k}`}>
+								<Cartridge project={v} />
+							</div>
+						))}
+					</div>
 				</div>
-			</div>
-			<div className="relative">
-				<Gameboy />
-			</div>
+				<div className="relative">
+					<Gameboy />
+				</div>
+			</section>
 		</div>
 	);
 }
