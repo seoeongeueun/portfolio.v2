@@ -122,24 +122,28 @@ export default function Home() {
 				//첫번째 카드의 시작 위치를 빼서 여백 없는 정확한 카드 뭉치의 너비를 계산
 				const firstCard = document.querySelector<HTMLDivElement>(".card-1");
 				if (!firstCard) return;
+				const computedLeft = (getComputedStyle(cardsDiv).left || "0").replace("px", "");
+				const currentLeft = parseFloat(computedLeft);
 
-				const leftMargin = Math.abs(firstCard.offsetLeft);
+				const leftMargin = Math.abs(firstCard.offsetLeft) - currentLeft;
 				const absoluteCenter = window.innerWidth / 2 - cardWidth / 2;
 				const distanceNeeded = rect.left - absoluteCenter;
+				const remainingScroll = parentContainer.scrollWidth - parentContainer.clientWidth - parentContainer.scrollLeft;
 
-				parentContainer.scrollTo({top: 0, left: scrollLeft + distanceNeeded, behavior: "smooth"});
+				console.log("remianing: ", remainingScroll);
+				console.log("distnace: ", distanceNeeded);
+				parentContainer.scrollTo({top: 0, left: parentContainer.scrollLeft + distanceNeeded, behavior: "smooth"});
 				//스크롤이 이미 가장자리이기 때문에 추가 여백이 필요함
-				if (rect.left + distanceNeeded > scrollWidth || rect.left + distanceNeeded < 0) {
+
+				if (remainingScroll - Math.abs(distanceNeeded) < 0) {
 					console.log("adding margin");
-					const margin =
-						rect.left + distanceNeeded < 0
-							? leftMargin + Math.abs(distanceNeeded) - cardWidth / 2 - 80
-							: scrollWidth - rect.left - distanceNeeded - 140;
-					cardsDiv.style.left = `${margin}px`;
+					const margin = distanceNeeded - remainingScroll;
+
+					// 왼쪽 가장자리인지, 오른쪽 가장자리인지에 따라 다른 계산 (margin < 0 => 왼쪽 가장자리)
+					cardsDiv.style.left = `${margin < 0 ? currentLeft + leftMargin + Math.abs(distanceNeeded) - remainingScroll : margin * -1}px`;
 				} else {
 					cardsDiv.style.left = "";
 				}
-				//parentContainer.scrollLeft = rect.left - absoluteCenter;
 
 				clickedCard.classList.add("clicked");
 
