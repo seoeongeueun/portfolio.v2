@@ -223,6 +223,18 @@ export default function Home() {
 
 		main.addEventListener("scroll", () => handleBackgroundColorChange([216, 221, 224], [0, 0, 46]));
 
+		const title = document.querySelector<HTMLDivElement>("#main-title");
+		const miniTitle = document.querySelector<HTMLDivElement>("#mini-title");
+
+		if (!title || !miniTitle) return;
+
+		const handleAnimationEnd = () => {
+			miniTitle.classList.add("loaded");
+			title.removeEventListener("animationend", handleAnimationEnd); // Cleanup
+		};
+
+		title.addEventListener("animationend", handleAnimationEnd);
+
 		return () => {
 			main.removeEventListener("scroll", () => handleBackgroundColorChange([216, 221, 224], [0, 0, 46]));
 		};
@@ -255,14 +267,19 @@ export default function Home() {
 	}, [tags]);
 
 	return (
-		<div id="main" className="text-white w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
-			<p className="main-title font-dunggeunmo font-normal text-center text-[5rem] md:text-[10rem] lg:text-[12rem]">SEOEONGEUEUN</p>
-			<p className="text-cyan-300 text-s">{textFile["001"]}</p>
-			<p className="text-white text-s">@seoeongeueun</p>
+		<div id="main" className="py-52 text-gray-4 w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
+			<div className="flex flex-col justify-center items-center max-w-2/3">
+				<p id="mini-title" className="underline-text opacity-0 ml-auto text-gray-4 text-xl rotate-10 -mb-[5rem] z-30">
+					FRONTEND DEVELOPER
+				</p>
+				<p id="main-title" className="main-title font-normal text-center text-[5rem] md:text-[10rem] lg:text-[12rem]">
+					SEONGEUN PARK
+				</p>
+			</div>
 
-			<div className="flex flex-wrap items-center justify-center w-full gap-1 md:gap-3">
+			<div className="flex flex-wrap items-center justify-center w-full gap-1 md:gap-10">
 				{Object.entries(stacks).map(([k, v]) => (
-					<div key={k} className="group relative w-12 h-12 md:w-12 md:h-12 shrink-0">
+					<div key={k} className="group relative w-12 h-12 md:w-[5rem] md:h-[5rem] shrink-0">
 						<StackIcon name={k} className="w-full h-full" />
 						<div className="group-hover:opacity-100 opacity-0 transition-opacity duration-300 overflow-hidden absolute text-center w-full h-full top-0 left-0 flex items-center justify-center bg-black/75">
 							<span className="text-white text-xxxs whitespace-pre-line">{v.toUpperCase()}</span>
@@ -270,7 +287,11 @@ export default function Home() {
 					</div>
 				))}
 			</div>
-			<div className="flex flex-col items-center justify-center">
+			<img src="/assets/thekid.gif" alt="kid" />
+			<p className="subtitle">INTRODUCTION</p>
+			<p className="text-s max-w-1/2">{textFile["001"]}</p>
+
+			<div className="flex flex-col items-center justify-center text-white">
 				<span>{textFile["000"]}</span>
 				<MdKeyboardDoubleArrowDown color="white" size="1rem" className="animate-slide-down"></MdKeyboardDoubleArrowDown>
 			</div>
