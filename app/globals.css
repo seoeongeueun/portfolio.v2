@@ -112,7 +112,7 @@ html {
 
 body,
 html {
-	background-color: var(--main-bg);
+	/* background-color: var(--main-bg); */
 	width: 100%;
 	height: 100%;
 	overflow: hidden;

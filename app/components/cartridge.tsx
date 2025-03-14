@@ -1,7 +1,18 @@
 import Image from "next/image";
 import {useState, useEffect} from "react";
 
-export default function Cartridge() {
+type CartridgePropsType = {
+	project: Project;
+};
+
+interface Project {
+	title: string;
+	subtitle: string;
+	thumbnail: string;
+	tags: string[];
+}
+
+export default function Cartridge({project}: CartridgePropsType) {
 	return (
 		<div className="relative cartridge-container">
 			<div className="head"></div>
@@ -14,8 +25,8 @@ export default function Cartridge() {
 					<div />
 					<div className="title-container">
 						<div className="title flex flex-col items-center justify-center text-m md:text-xxl font-tenada">
-							<p className="tracking-tighter">Project Title</p>
-							<span className="text-xxs md:text-xs">subtitle</span>
+							<p className="tracking-tighter">{project.title}</p>
+							<span className="text-xxs md:text-xs">{project.subtitle}</span>
 						</div>
 					</div>
 				</div>
@@ -23,13 +34,14 @@ export default function Cartridge() {
 					<div className="edge"></div>
 
 					<div className="image-frame">
-						<div className="thumbnail"></div>
+						<div className="thumbnail" style={{backgroundImage: `url(${project.thumbnail})`}}></div>
 					</div>
 					<div className="edge right"></div>
 				</div>
 				<div className="tags text-xxxxs md:text-xxxs w-full px-4 md:px-8 gap-1 md:gap-2 flex flex-wrap items-center justify-end">
-					<div className="tag">1 DEV</div>
-					<div className="tag">SOMETHING</div>
+					{project.tags.map(t => (
+						<div className="tag">{t}</div>
+					))}
 				</div>
 			</div>
 		</div>

@@ -6,6 +6,7 @@ import TextEn from "./data/text-en.json" assert {type: "json"};
 import {useEffect, useState} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
+import Projects from "./data/projects.json" assert {type: "json"};
 import "./styles/global.scss";
 
 type TextFileType = Record<string, string>;
@@ -192,6 +193,26 @@ export default function Home() {
 
 		setupObservers();
 		setupCardHoverEvents();
+
+		const main = document.querySelector<HTMLDivElement>("#main");
+		if (!main) return;
+
+		const handleBackgroundColorChange = (startColor: [number, number, number], endColor: [number, number, number]) => {
+			console.log("scrolling");
+			const scrollFraction = main.scrollHeight > main.clientHeight ? main.scrollTop / (main.scrollHeight - main.clientHeight) : 0;
+
+			const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * scrollFraction);
+			const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * scrollFraction);
+			const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * scrollFraction);
+
+			main.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+		};
+
+		main.addEventListener("scroll", () => handleBackgroundColorChange([0, 255, 255], [0, 0, 46]));
+
+		return () => {
+			main.removeEventListener("scroll", () => handleBackgroundColorChange([0, 255, 255], [0, 0, 46]));
+		};
 	}, []);
 
 	return (
@@ -216,10 +237,10 @@ export default function Home() {
 			</div>
 			<div
 				id="cartridge-cards-container"
-				className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh] bg-white"
+				className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh]"
 			>
 				<div id="cartridge-cards" className="cartridge-cards relative">
-					<div id="card" className="card card-4">
+					{/* <div id="card" className="card card-4">
 						<Cartridge />
 					</div>
 					<div id="card" className="card card-3">
@@ -230,7 +251,12 @@ export default function Home() {
 					</div>
 					<div id="card" className="card card-1">
 						<Cartridge />
-					</div>
+					</div> */}
+					{Object.values(Projects).map(p => (
+						<div id="card" key={p.title} className="card card-3">
+							<Cartridge project={p} />
+						</div>
+					))}
 				</div>
 			</div>
 			<div className="relative">
