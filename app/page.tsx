@@ -235,6 +235,16 @@ export default function Home() {
 				<span>{textFile["000"]}</span>
 				<MdKeyboardDoubleArrowDown color="white" size="1rem" className="animate-slide-down"></MdKeyboardDoubleArrowDown>
 			</div>
+			<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">
+				<div className="filter-type flex flex-row items-center gap-8">
+					<input type="checkbox" id="filter-personal" name="filter-personal" defaultChecked className="cursor-pointer" />
+					<label>{textFile["002"]}</label>
+				</div>
+				<div className="filter-type flex flex-row items-center gap-8">
+					<input type="checkbox" id="filter-personal" name="filter-personal" defaultChecked className="cursor-pointer" />
+					<label>{textFile["003"]}</label>
+				</div>
+			</div>
 			<div
 				id="cartridge-cards-container"
 				className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh]"
@@ -252,9 +262,9 @@ export default function Home() {
 					<div id="card" className="card card-1">
 						<Cartridge />
 					</div> */}
-					{Object.values(Projects).map(p => (
-						<div id="card" key={p.title} className="card card-3">
-							<Cartridge project={p} />
+					{Object.entries(Projects).map(([k, v]) => (
+						<div id="card" key={v.title} className={`card card-${k}`}>
+							<Cartridge project={v} />
 						</div>
 					))}
 				</div>

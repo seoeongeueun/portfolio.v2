@@ -70,10 +70,13 @@
 	--text-xl-line: 3rem;
 	--text-xxl: 2.2rem;
 	--text-xxl-line: 3rem;
+	--text-xxxl: 2.8rem;
+	--text-xxxl-line: 3rem;
 
 	--color-gray-1: #b0acb4;
 	--color-gray-2: #757177;
 	--color-body: var(--body);
+	--color-gray-4: rgb(46, 46, 46);
 
 	--breakpoint-md: 641px;
 	--breakpoint-lg: 1025px;

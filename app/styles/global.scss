@@ -71,7 +71,6 @@
 	--card-width: 50rem;
 	--gap: 10rem;
 
-	border: 2px solid white;
 	height: 30rem;
 	gap: 3rem;
 	display: flex;
@@ -139,14 +138,14 @@
 			transform: rotate(-3deg);
 			left: -2rem;
 			top: 1rem;
-			border: 5px solid blue;
+			// border: 5px solid blue;
 		}
 
 		&.card-3 {
 			transform: rotate(2deg);
 			left: 2rem;
 			top: -1rem;
-			border: 5px solid orange;
+			// border: 5px solid orange;
 		}
 
 		/* 킥을 위해 2번째 카드는 강한 회전값 */
@@ -154,7 +153,7 @@
 			transform: rotate(-4deg);
 			left: 3rem;
 			top: -2rem;
-			border: 5px solid green;
+			// border: 5px solid green;
 		}
 
 		/* 첫번째 카드는 음영 효과 x */
@@ -163,7 +162,7 @@
 			left: 1rem;
 			top: 0rem;
 			filter: brightness(100%);
-			border: 5px solid red;
+			// border: 5px solid red;
 		}
 
 		&.selected {
@@ -303,14 +302,14 @@
 						letter-spacing: -0.1rem;
 						color: rgb(46, 46, 46);
 						text-shadow:
-							1px 1px 0px var(--gray-3),
-							1px 0px 1px var(--gray-0);
+							1px 1px 0px rgb(77, 77, 77),
+							1px 0px 1px rgb(248, 248, 248);
 					}
 
 					> span {
 						color: var(--gray-2);
 						text-shadow:
-							1px 1px 0px var(--gray-3),
+							1px 1px 0px rgb(77, 77, 77),
 							1px 0px 1px var(--gray-0);
 					}
 				}
@@ -352,7 +351,7 @@
 					border-radius: 1rem;
 					background-size: cover;
 					background-repeat: no-repeat;
-					background-position: center center;
+					background-position: top center;
 				}
 			}
 
@@ -393,6 +392,47 @@
 				box-shadow:
 					1px 1px 1px 0px rgba(var(--gray-0-rgb), 0.7),
 					-1px -1px 1px -1px var(--gray-3);
+			}
+		}
+	}
+}
+
+.filter-type {
+	--text: #ff0;
+	--shadow: red;
+
+	> input[type="checkbox"] {
+		appearance: none;
+		width: 4rem;
+		height: 4rem;
+		border: 0.5rem solid cyan;
+		border-radius: 0.3rem;
+		background-color: transparent;
+		position: relative;
+		cursor: pointer;
+
+		&::after {
+			content: "";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: 6rem;
+			height: 3rem;
+			background-color: transparent;
+			border: solid 1rem transparent;
+			border-top: none;
+			border-right: none;
+			transform: translate(-45%, -105%) rotate(-45deg);
+			opacity: 0;
+			transition: opacity 0.3s ease;
+			box-shadow: -0.1rem 0.3rem 0 0 #ff0;
+		}
+
+		&:checked {
+			background-color: transparent;
+			&::after {
+				opacity: 1;
+				border-color: red;
 			}
 		}
 	}

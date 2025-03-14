@@ -10,6 +10,7 @@ interface Project {
 	subtitle: string;
 	thumbnail: string;
 	tags: string[];
+	theme: string;
 }
 
 export default function Cartridge({project}: CartridgePropsType) {
@@ -24,9 +25,11 @@ export default function Cartridge({project}: CartridgePropsType) {
 					<div />
 					<div />
 					<div className="title-container">
-						<div className="title flex flex-col items-center justify-center text-m md:text-xxl font-tenada">
-							<p className="tracking-tighter">{project.title}</p>
-							<span className="text-xxs md:text-xs">{project.subtitle}</span>
+						<div className="title flex flex-col items-center justify-center text-m md:text-xxl lg:text-xxxl font-tenada">
+							<p className="tracking-tighter md:mt-6" style={{color: project.theme}}>
+								{project.title}
+							</p>
+							<span className="text-xxs md:text-s md:-mt-2">{project.subtitle}</span>
 						</div>
 					</div>
 				</div>
@@ -38,9 +41,11 @@ export default function Cartridge({project}: CartridgePropsType) {
 					</div>
 					<div className="edge right"></div>
 				</div>
-				<div className="tags text-xxxxs md:text-xxxs w-full px-4 md:px-8 gap-1 md:gap-2 flex flex-wrap items-center justify-end">
-					{project.tags.map(t => (
-						<div className="tag">{t}</div>
+				<div className="tags text-xxxxs md:text-xxxs w-full px-4 md:px-8 gap-1 md:gap-2 lg:gap-3 flex flex-wrap items-center justify-end">
+					{project.tags.map((t, i) => (
+						<div key={t + i} className="tag" style={{backgroundColor: project.theme}}>
+							{t}
+						</div>
 					))}
 				</div>
 			</div>
