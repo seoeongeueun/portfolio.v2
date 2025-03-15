@@ -22,30 +22,36 @@ interface Projects {
 	[key: string]: Project;
 }
 
+const stacks = {
+	js: "java\nscript",
+	typescript: "type\nscript",
+	python: "python",
+	reactjs: "react.js",
+	nextjs2: "next.js",
+	electron: "electron",
+	nodejs: "node.js",
+	redux: "redux",
+	docker: "docker",
+	postgresql: "postgre\nsql",
+	mongodb: "mongo\ndb",
+	css3: "css",
+	html5: "html",
+	tailwindcss: "tailwind css",
+	ps: "photo\nshop",
+};
+
 export default function Home() {
 	const [textFile, setTextFile] = useState<TextFileType>(TextEn);
 	const [projects, setProjects] = useState<Projects>(ProjectsData);
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
 	const mainRef = useRef<HTMLDivElement>(null);
 	const longDivRef = useRef<HTMLDivElement>(null);
-	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
-	const stacks = {
-		js: "java\nscript",
-		typescript: "type\nscript",
-		python: "python",
-		reactjs: "react.js",
-		nextjs2: "next.js",
-		electron: "electron",
-		nodejs: "node.js",
-		redux: "redux",
-		docker: "docker",
-		postgresql: "postgre\nsql",
-		mongodb: "mongo\ndb",
-		css3: "css",
-		html5: "html",
-		tailwindcss: "tailwind css",
-		ps: "photo\nshop",
-	};
+
+	const cartridgeCardsContainerRef = useRef<HTMLDivElement>(null);
+	const cartridgeCardsRef = useRef<HTMLDivElement>(null);
+	const mainTitleRef = useRef<HTMLParagraphElement>(null);
+	const miniTitleRef = useRef<HTMLParagraphElement>(null);
+	const gameboyHeadRef = useRef<HTMLDivElement>(null);
 
 	function preventScroll(e: Event) {
 		e.preventDefault();
@@ -67,32 +73,19 @@ export default function Home() {
 	}
 
 	useEffect(() => {
-		const throttle = (callback: Function, delay: number) => {
-			let lastCall = 0;
-			return (...args: any) => {
-				const now = Date.now();
-				if (now - lastCall >= delay) {
-					lastCall = now;
-					callback(...args);
-				}
-			};
-		};
-
 		const handleMobileCardIntersection: IntersectionObserverCallback = (entries, observer) => {
 			entries.forEach(entry => {
 				if (entry.isIntersecting) {
-					const cardContainer = document.querySelector<HTMLDivElement>("#cartridge-cards-container");
-					const firstChild = cardContainer?.firstElementChild as HTMLElement | null;
-
-					if (firstChild) {
-						firstChild.classList.add("spread");
-					}
+					const cardContainer = cartridgeCardsContainerRef.current;
 					if (cardContainer) {
-						//카드 중앙으로 스크롤
+						const firstChild = cardContainer.firstElementChild as HTMLElement | null;
+						if (firstChild) {
+							firstChild.classList.add("spread");
+						}
 						const halfScroll = cardContainer.scrollWidth / 2;
 						cardContainer.scrollLeft = halfScroll;
-						observer.unobserve(entry.target);
 					}
+					observer.unobserve(entry.target);
 				}
 			});
 		};
@@ -106,8 +99,9 @@ export default function Home() {
 				}
 			});
 		};
+
 		const setupObservers = () => {
-			const cardContainer = document.querySelector<HTMLDivElement>(".cartridge-cards");
+			const cardContainer = cartridgeCardsRef.current;
 			if (!cardContainer) return;
 
 			const mobileCardObserver = new IntersectionObserver(handleMobileCardIntersection, {
@@ -144,128 +138,118 @@ export default function Home() {
 			};
 		};
 
-		const setupCardHoverEvents = () => {
-			const cardList = document.querySelectorAll<HTMLElement>(".cartridge-cards #card");
-			const parentContainer = document.querySelector<HTMLDivElement>("#cartridge-cards-container");
+		return setupObservers();
+	}, []);
 
-			if (!parentContainer) return;
+	/* 카트리지 (=통칭 카드) 호버 & 펼침 이벤트 관리 */
+	useEffect(() => {
+		const parentContainer = cartridgeCardsContainerRef.current;
+		const cardsDiv = cartridgeCardsRef.current;
+		if (!cardsDiv || !parentContainer) return;
 
-			const handleMouseEnter = (event: MouseEvent) => {
-				const hoveredCard = event.currentTarget as HTMLElement;
-				cardList.forEach(card => card.classList.remove("selected"));
-				//hoveredCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+		// const handleMouseEnter = (event: MouseEvent) => {
+		// 	const hoveredCard = event.currentTarget as HTMLElement;
+		// 	cardList.forEach(card => card.classList.remove("selected"));
+		// 	//hoveredCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
 
-				const addSelectedClass = () => {
-					document.querySelectorAll(".cartridge-cards #card").forEach(card => card.classList.remove("selected"));
-					hoveredCard.classList.add("selected");
-				};
-				setTimeout(addSelectedClass, 100);
-			};
+		// 	const addSelectedClass = () => {
+		// 		const allCards = cartridgeCardsRef.current?.querySelectorAll("#card");
+		// 		allCards?.forEach(card => card.classList.remove("selected"));
+		// 		hoveredCard.classList.add("selected");
+		// 	};
+		// 	setTimeout(addSelectedClass, 100);
+		// };
 
-			const handleMouseLeave = (event: MouseEvent) => {
-				const hoveredCard = event.currentTarget as HTMLElement;
-				hoveredCard.classList.remove("selected");
-			};
+		// const handleMouseLeave = (event: MouseEvent) => {
+		// 	const hoveredCard = event.currentTarget as HTMLElement;
+		// 	hoveredCard.classList.remove("selected");
+		// };
 
-			const handleCardClick = (event: MouseEvent) => {
-				const clickedCard = event.currentTarget as HTMLElement;
-				const rect = clickedCard.getBoundingClientRect();
-				const cardsDiv = document.querySelector<HTMLDivElement>("#cartridge-cards");
-				if (!cardsDiv) return;
+		function onCardClick(event: MouseEvent) {
+			const clickedCard = event.currentTarget as HTMLElement;
+			const rect = clickedCard.getBoundingClientRect();
+			if (!rect || !cardsDiv || !parentContainer) return;
 
-				if (!rect) return;
+			const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
+			cards.forEach(card => card.classList.remove("clicked"));
 
-				document.querySelectorAll(".cartridge-cards #card").forEach(card => card.classList.remove("clicked"));
-
-				const parentWidth = parentContainer.clientWidth;
-				const scrollWidth = parentContainer.scrollWidth;
-				const cardLeft = clickedCard.offsetLeft;
-				const cardWidth = clickedCard.clientWidth;
-				const scrollLeft = parentContainer.scrollLeft;
-
-				/* 
+			/* 
 					선택된 카드를 중앙으로 위치하게 스크롤 하는 로직 + 자동으로 필요한 만큼 여백 추가
 					어떤 디자인을 택할지에 따라 사용하지 않을 수도 있음
 				*/
 
+			const cardWidth = clickedCard.clientWidth;
+			const absoluteCenter = window.innerWidth / 2 - cardWidth / 2;
+			const distanceNeeded = rect.left - absoluteCenter;
+			parentContainer.scrollTo({top: 0, left: parentContainer.scrollLeft + distanceNeeded, behavior: "smooth"});
+
+			//스크롤이 이미 가장자리이기 때문에 추가 여백이 필요한 경우 로직
+			const remainingScroll = parentContainer.scrollWidth - parentContainer.clientWidth - parentContainer.scrollLeft;
+			const computedLeft = (getComputedStyle(cardsDiv).left || "0").replace("px", "");
+			const currentLeft = parseFloat(computedLeft);
+
+			const firstCard = cardsDiv.querySelector<HTMLDivElement>(".card-1");
+			if (firstCard) {
 				//첫번째 카드의 시작 위치를 빼서 여백 없는 정확한 카드 뭉치의 너비를 계산
-				const firstCard = document.querySelector<HTMLDivElement>(".card-1");
-				if (!firstCard) return;
-				const computedLeft = (getComputedStyle(cardsDiv).left || "0").replace("px", "");
-				const currentLeft = parseFloat(computedLeft);
-
 				const leftMargin = Math.abs(firstCard.offsetLeft) - currentLeft;
-				const absoluteCenter = window.innerWidth / 2 - cardWidth / 2;
-				const distanceNeeded = rect.left - absoluteCenter;
-				const remainingScroll = parentContainer.scrollWidth - parentContainer.clientWidth - parentContainer.scrollLeft;
-
-				console.log("remianing: ", remainingScroll);
-				console.log("distnace: ", distanceNeeded);
-				parentContainer.scrollTo({top: 0, left: parentContainer.scrollLeft + distanceNeeded, behavior: "smooth"});
-				//스크롤이 이미 가장자리이기 때문에 추가 여백이 필요함
-
 				if (remainingScroll - Math.abs(distanceNeeded) < 0) {
-					console.log("adding margin");
 					const margin = distanceNeeded - remainingScroll;
-
-					// 왼쪽 가장자리인지, 오른쪽 가장자리인지에 따라 다른 계산 (margin < 0 => 왼쪽 가장자리)
 					cardsDiv.style.left = `${margin < 0 ? currentLeft + leftMargin + Math.abs(distanceNeeded) - remainingScroll : margin * -1}px`;
 				} else {
 					cardsDiv.style.left = "";
 				}
+			}
 
-				clickedCard.classList.add("clicked");
+			clickedCard.classList.add("clicked");
 
-				//게임기로 이동하기 위해 필요한 거리 계산
-				const gameboyHead = document.querySelector("#gameboy-head");
-				if (gameboyHead) {
-					const position = gameboyHead.getBoundingClientRect()?.top;
-					const current = rect?.top;
-					const currentScroll = document.querySelector("#main")?.scrollTop || 0;
+			//게임기로 이동하기 위해 필요한 거리 계산
+			const gameboyHead = document.querySelector("#gameboy-head");
+			if (gameboyHead) {
+				const position = gameboyHead.getBoundingClientRect()?.top;
+				const current = rect?.top;
+				const currentScroll = mainRef.current?.scrollTop || 0;
 
-					// 게임기 위치 - 카드의 현재 y 위치 - 현재 스크롤 위치 / 2
-					const distance = position - current - currentScroll / 2;
-					clickedCard.style.setProperty("--y-distance", `${distance}px`);
-				}
+				// 게임기 위치 - 카드의 현재 y 위치 - 현재 스크롤 위치 / 2
+				const distance = position - current - currentScroll / 2;
+				clickedCard.style.setProperty("--y-distance", `${distance}px`);
+			}
 
-				const handleAnimationEnd = () => {
-					//gameboyHead?.scrollIntoView({behavior: "smooth"});
-					setTimeout(() => {
-						clickedCard.classList.remove("clicked");
-						clickedCard.removeEventListener("animationend", handleAnimationEnd);
-						cardsDiv.style.left = "";
-					}, 700);
-				};
-
-				clickedCard.addEventListener("animationend", handleAnimationEnd);
-
-				return () => {
+			const handleAnimationEnd = () => {
+				//gameboyHead?.scrollIntoView({behavior: "smooth"});
+				setTimeout(() => {
+					clickedCard.classList.remove("clicked");
 					clickedCard.removeEventListener("animationend", handleAnimationEnd);
-				};
+					cardsDiv.style.left = "";
+				}, 700);
 			};
 
-			cardList.forEach(card => {
-				card.addEventListener("mouseenter", handleMouseEnter);
-				card.addEventListener("mouseleave", handleMouseLeave);
-				card.addEventListener("click", handleCardClick);
+			clickedCard.addEventListener("animationend", handleAnimationEnd);
+		}
+		const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
+		cards.forEach(card => {
+			// card.addEventListener("mouseenter", handleMouseEnter);
+			// card.addEventListener("mouseleave", handleMouseLeave);
+			card.addEventListener("click", onCardClick);
+		});
+
+		return () => {
+			cards.forEach(card => {
+				// card.removeEventListener("mouseenter", handleMouseEnter);
+				// card.removeEventListener("mouseleave", handleMouseLeave);
+				card.removeEventListener("click", onCardClick);
 			});
-
-			return () => {
-				cardList.forEach(card => {
-					card.removeEventListener("mouseenter", handleMouseEnter);
-					card.removeEventListener("mouseleave", handleMouseLeave);
-					card.removeEventListener("click", handleCardClick);
-				});
-			};
 		};
+	}, []);
 
-		setupObservers();
-		setupCardHoverEvents();
+	/* 스크롤 위치에 따라 배경색을 변경하는 로직*/
+	useEffect(() => {
+		if (!mainRef.current) return;
+		const main = mainRef.current;
 
-		const main = document.querySelector<HTMLDivElement>("#main");
-		if (!main) return;
+		function handleBackgroundColorChange() {
+			const startColor: [number, number, number] = [216, 221, 224];
+			const endColor: [number, number, number] = [0, 0, 46];
 
-		const handleBackgroundColorChange = (startColor: [number, number, number], endColor: [number, number, number]) => {
 			const scrollFraction = main.scrollHeight > main.clientHeight ? main.scrollTop / (main.scrollHeight - main.clientHeight) : 0;
 
 			const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * scrollFraction);
@@ -273,37 +257,34 @@ export default function Home() {
 			const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * scrollFraction);
 
 			main.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+		}
+
+		main.addEventListener("scroll", handleBackgroundColorChange);
+		return () => {
+			main.removeEventListener("scroll", handleBackgroundColorChange);
 		};
+	}, []);
 
-		main.addEventListener("scroll", () => handleBackgroundColorChange([216, 221, 224], [0, 0, 46]));
+	/* 메인 페이지 타이틀에 애니메이션 추가 */
+	useEffect(() => {
+		if (!mainTitleRef.current || !miniTitleRef.current) return;
+		const title = mainTitleRef.current;
+		const miniTitle = miniTitleRef.current;
 
-		const title = document.querySelector<HTMLDivElement>("#main-title");
-		const miniTitle = document.querySelector<HTMLDivElement>("#mini-title");
-
-		if (!title || !miniTitle) return;
-
-		const handleAnimationEnd = () => {
+		function onTitleAnimationEnd() {
 			miniTitle.classList.add("loaded");
-			title.removeEventListener("animationend", handleAnimationEnd); // Cleanup
-		};
-
-		title.addEventListener("animationend", handleAnimationEnd);
+			title.removeEventListener("animationend", onTitleAnimationEnd);
+		}
+		title.addEventListener("animationend", onTitleAnimationEnd);
 
 		return () => {
-			main.removeEventListener("scroll", () => handleBackgroundColorChange([216, 221, 224], [0, 0, 46]));
+			title.removeEventListener("animationend", onTitleAnimationEnd);
 		};
 	}, []);
 
 	const handleProjectsFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const {name, checked} = e.target as HTMLInputElement;
-
-		setTags(prev => {
-			if (checked) {
-				return [...prev, name.toUpperCase()];
-			} else {
-				return prev.filter(filter => filter !== name.toUpperCase());
-			}
-		});
+		const {name, checked} = e.target;
+		setTags(prev => (checked ? [...prev, name.toUpperCase()] : prev.filter(filter => filter !== name.toUpperCase())));
 	};
 
 	useEffect(() => {
@@ -321,17 +302,13 @@ export default function Home() {
 	}, [tags]);
 
 	return (
-		<div
-			id="main"
-			ref={mainRef}
-			className="py-52 text-gray-4 w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4"
-		>
+		<div ref={mainRef} className="py-52 text-gray-4 w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
 			<section>
 				<div className="flex flex-col justify-center items-center">
-					<p id="mini-title" className="underline-text opacity-0 ml-auto text-gray-4 text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
+					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-gray-4 text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
 						FRONTEND DEVELOPER
 					</p>
-					<p id="main-title" className="main-title md:whitespace-nowrap font-normal text-center text-[7rem] md:text-[10rem] lg:text-[12rem]">
+					<p ref={mainTitleRef} className="main-title md:whitespace-nowrap font-normal text-center text-[7rem] md:text-[10rem] lg:text-[12rem]">
 						SEONGEUN PARK
 					</p>
 				</div>
@@ -419,10 +396,10 @@ export default function Home() {
 					</div>
 				</div>
 				<div
-					id="cartridge-cards-container"
+					ref={cartridgeCardsContainerRef}
 					className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh]"
 				>
-					<div id="cartridge-cards" className="cartridge-cards relative">
+					<div ref={cartridgeCardsRef} className="cartridge-cards relative">
 						{/* <div id="card" className="card card-4">
 						<Cartridge />
 					</div>
@@ -442,7 +419,7 @@ export default function Home() {
 						))}
 					</div>
 				</div>
-				<div className="relative">
+				<div ref={gameboyHeadRef} className="relative">
 					<Gameboy />
 				</div>
 			</section>
