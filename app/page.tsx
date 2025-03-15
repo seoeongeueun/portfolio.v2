@@ -3,7 +3,7 @@ import Image from "next/image";
 import StackIcon from "tech-stack-icons";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
@@ -26,6 +26,9 @@ export default function Home() {
 	const [textFile, setTextFile] = useState<TextFileType>(TextEn);
 	const [projects, setProjects] = useState<Projects>(ProjectsData);
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
+	const mainRef = useRef<HTMLDivElement>(null);
+	const longDivRef = useRef<HTMLDivElement>(null);
+	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 	const stacks = {
 		js: "java\nscript",
 		typescript: "type\nscript",
@@ -43,6 +46,25 @@ export default function Home() {
 		tailwindcss: "tailwind css",
 		ps: "photo\nshop",
 	};
+
+	function preventScroll(e: Event) {
+		e.preventDefault();
+		e.stopPropagation();
+	}
+
+	function lockScroll() {
+		window.addEventListener("wheel", preventScroll, {
+			passive: false,
+		});
+		window.addEventListener("touchmove", preventScroll, {
+			passive: false,
+		});
+	}
+
+	function unlockScroll() {
+		window.removeEventListener("wheel", preventScroll);
+		window.removeEventListener("touchmove", preventScroll);
+	}
 
 	useEffect(() => {
 		const throttle = (callback: Function, delay: number) => {
@@ -78,13 +100,12 @@ export default function Home() {
 		const handleTitleIntersection: IntersectionObserverCallback = (entries, observer) => {
 			entries.forEach(entry => {
 				if (entry.isIntersecting) {
-					const side = entry.target.dataset.side;
+					const side = (entry.target as HTMLElement).dataset.side;
 					entry.target.classList.add(`fade-${side}`);
 					observer.unobserve(entry.target);
 				}
 			});
 		};
-
 		const setupObservers = () => {
 			const cardContainer = document.querySelector<HTMLDivElement>(".cartridge-cards");
 			if (!cardContainer) return;
@@ -245,7 +266,6 @@ export default function Home() {
 		if (!main) return;
 
 		const handleBackgroundColorChange = (startColor: [number, number, number], endColor: [number, number, number]) => {
-			console.log("scrolling");
 			const scrollFraction = main.scrollHeight > main.clientHeight ? main.scrollTop / (main.scrollHeight - main.clientHeight) : 0;
 
 			const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * scrollFraction);
@@ -301,7 +321,11 @@ export default function Home() {
 	}, [tags]);
 
 	return (
-		<div id="main" className="py-52 text-gray-4 w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
+		<div
+			id="main"
+			ref={mainRef}
+			className="py-52 text-gray-4 w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4"
+		>
 			<section>
 				<div className="flex flex-col justify-center items-center">
 					<p id="mini-title" className="underline-text opacity-0 ml-auto text-gray-4 text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
@@ -335,7 +359,7 @@ export default function Home() {
 					<p className="subtitle">CAREER</p>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
-				<div className="career-cards-container fade-left-section">
+				<div ref={longDivRef} className="career-cards-container fade-left-section">
 					<div className="career-card w-full bg-red-500 p-10 rounded-xl">
 						<p className="text-lg text-white">Frontend Developer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
@@ -357,7 +381,7 @@ export default function Home() {
 							</li>
 						</ul>
 					</div>
-					<div className="career-card centered w-full bg-yellow-500 p-10 rounded-xl">
+					<div className="career-card w-full bg-yellow-500 p-10 rounded-xl">
 						<p className="text-lg text-white">Software Engineer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>Market Stadium</p>

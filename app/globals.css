@@ -123,6 +123,10 @@ html {
 	padding: 0;
 }
 
+::-webkit-scrollbar {
+	display: none;
+}
+
 section {
 	width: 100%;
 	min-height: 80vh;
