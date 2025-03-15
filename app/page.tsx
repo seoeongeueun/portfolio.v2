@@ -75,6 +75,16 @@ export default function Home() {
 			});
 		};
 
+		const handleTitleIntersection: IntersectionObserverCallback = (entries, observer) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					const side = entry.target.dataset.side;
+					entry.target.classList.add(`fade-${side}`);
+					observer.unobserve(entry.target);
+				}
+			});
+		};
+
 		const setupObservers = () => {
 			const cardContainer = document.querySelector<HTMLDivElement>(".cartridge-cards");
 			if (!cardContainer) return;
@@ -85,8 +95,32 @@ export default function Home() {
 				threshold: 0.6,
 			});
 
+			const titleObserver = new IntersectionObserver(handleTitleIntersection, {
+				root: null,
+				rootMargin: "0px",
+				threshold: 0.5,
+			});
+
 			mobileCardObserver.observe(cardContainer);
-			return () => mobileCardObserver.disconnect();
+
+			//fade 애니메이션 효과가 필요한 div
+			const upElements = document.querySelectorAll<HTMLElement>(".fade-up-section");
+			const leftElements = document.querySelectorAll<HTMLElement>(".fade-left-section");
+
+			upElements.forEach(element => {
+				element.dataset.side = "up";
+				titleObserver.observe(element);
+			});
+			leftElements.forEach(element => {
+				element.dataset.side = "left";
+				titleObserver.observe(element);
+			});
+
+			return () => {
+				mobileCardObserver.disconnect();
+				upElements.forEach(element => titleObserver.unobserve(element));
+				leftElements.forEach(element => titleObserver.unobserve(element));
+			};
 		};
 
 		const setupCardHoverEvents = () => {
@@ -282,7 +316,7 @@ export default function Home() {
 					{Object.entries(stacks).map(([k, v]) => (
 						<div key={k} className="p-2 group relative w-12 h-12 md:w-20 md:h-20 shrink-0">
 							<StackIcon name={k} className="w-full h-full" />
-							<div className="group-hover:opacity-100 opacity-0 transition-opacity duration-300 overflow-hidden absolute text-center w-full h-full top-0 left-0 flex items-center justify-center bg-black/75">
+							<div className="group-hover:opacity-100 opacity-0 transition-opacity duration-300 overflow-hidden absolute text-center w-full h-full top-0 left-0 flex items-center justify-center bg-black/50 rounded-sm">
 								<span className=" font-nanumbarunpen text-white !font-extralight text-xxs whitespace-pre-line">{v.toUpperCase()}</span>
 							</div>
 						</div>
@@ -297,11 +331,11 @@ export default function Home() {
 				</div>
 			</section>
 			<section className="!items-end px-80">
-				<div className="fade-up flex flex-col justify-start items-start mr-auto">
+				<div className="fade-up-section flex flex-col justify-start items-start mr-auto">
 					<p className="subtitle">CAREER</p>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
-				<div className="career-cards-container fade-left">
+				<div className="career-cards-container fade-left-section">
 					<div className="career-card w-full bg-red-500 p-10 rounded-xl">
 						<p className="text-lg text-white">Frontend Developer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
