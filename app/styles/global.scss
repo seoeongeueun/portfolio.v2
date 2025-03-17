@@ -94,6 +94,7 @@
 	width: 100%;
 	max-width: 50%;
 	height: fit-content;
+	will-change: transform;
 
 	> .career-card {
 		transition: transform 1s ease-in-out;
@@ -108,11 +109,14 @@
 
 		&.highlighted {
 			transform: scale(1.3);
+			opacity: 1 !important;
 		}
 	}
 
 	&.spread {
-		height: 100%;
+		height: fit-content;
+		opacity: 1;
+		transform: translateY(0);
 
 		> .career-card {
 			position: relative;
@@ -511,27 +515,6 @@
 }
 
 $transition: 0.5s ease-in-out;
-
-.gameboy-frames {
-	div,
-	div::before,
-	div::after,
-	span {
-		transition:
-			background-color $transition,
-			color $transition,
-			border-color $transition,
-			outline $transition,
-			box-shadow $transition,
-			text-shadow $transition;
-	}
-
-	.move-button div,
-	.start-buttons div,
-	.ab-buttons div {
-		transition: none !important;
-	}
-}
 
 .frame-top .top div,
 .frame-bottom .top div {

@@ -3,7 +3,7 @@ import Image from "next/image";
 import StackIcon from "tech-stack-icons";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
-import {useEffect, useState, useRef} from "react";
+import {useEffect, useState, useRef, useCallback} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
@@ -43,15 +43,19 @@ const stacks = {
 export default function Home() {
 	const [textFile, setTextFile] = useState<TextFileType>(TextEn);
 	const [projects, setProjects] = useState<Projects>(ProjectsData);
+	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
-	const mainRef = useRef<HTMLDivElement>(null);
-	const longDivRef = useRef<HTMLDivElement>(null);
 
+	const mainRef = useRef<HTMLDivElement>(null);
+	const stickyRef = useRef<HTMLDivElement>(null);
+	const careerCardsRef = useRef<HTMLDivElement>(null);
 	const cartridgeCardsContainerRef = useRef<HTMLDivElement>(null);
 	const cartridgeCardsRef = useRef<HTMLDivElement>(null);
 	const mainTitleRef = useRef<HTMLParagraphElement>(null);
 	const miniTitleRef = useRef<HTMLParagraphElement>(null);
 	const gameboyHeadRef = useRef<HTMLDivElement>(null);
+
+	const prevScrollTop = useRef(0);
 
 	function preventScroll(e: Event) {
 		e.preventDefault();
@@ -71,6 +75,120 @@ export default function Home() {
 		window.removeEventListener("wheel", preventScroll);
 		window.removeEventListener("touchmove", preventScroll);
 	}
+	//sticky div가 맨 위에 붙은 상황 (지금 화면의 중심인 경우)
+	useEffect(() => {
+		const handleScroll = (e: Event) => {
+			if (!stickyRef.current || !mainRef.current || !careerCardsRef.current) return;
+
+			const rect = stickyRef.current.getBoundingClientRect();
+			const mainRect = mainRef.current.getBoundingClientRect();
+
+			//메인 div의 py 값을 계산
+			const mainStyles = window.getComputedStyle(mainRef.current);
+			const paddingTop = parseInt(mainStyles.paddingTop, 10);
+			const scrollTop = mainRef.current.scrollTop;
+
+			// wheelevent의 deltaY를 흉내내기
+			const deltaY = scrollTop - prevScrollTop.current;
+			prevScrollTop.current = scrollTop;
+
+			if (rect.top <= mainRect.top + paddingTop) {
+				stickyRef.current.classList.add("stuck");
+				setTimeout(() => {
+					careerCardsRef.current?.classList.replace("fade-left", "spread");
+				}, 400);
+				//lockScroll();
+			} else {
+				stickyRef.current.classList.remove("stuck");
+			}
+
+			if (stickyRef.current.classList.contains("stuck")) {
+				handleStickyScroll(e, deltaY);
+			}
+		};
+
+		mainRef.current?.addEventListener("scroll", handleScroll);
+		return () => mainRef.current?.removeEventListener("scroll", handleScroll);
+	}, []);
+
+	const handleStickyScroll = useCallback(
+		(e: Event, deltaY: number) => {
+			if (!mainRef.current || !careerCardsRef.current) return;
+
+			//sticky가 발동된 이후 메인에서 발생하는 y 스크롤을 납치해 커리어 카드에 적용
+
+			const style = window.getComputedStyle(careerCardsRef.current);
+			const matrix = new DOMMatrixReadOnly(style.transform);
+			const currentTranslateY = matrix.m42 || 0;
+
+			const newTranslateY = currentTranslateY - deltaY;
+			careerCardsRef.current.style.transform = `translateY(${newTranslateY}px)`;
+			updateCardsVisibility();
+		},
+		[mainRef, careerCardsRef]
+	);
+
+	const updateCardsVisibility = useCallback(() => {
+		if (!mainRef.current || !careerCardsRef.current) return;
+
+		const mainRect = mainRef.current.getBoundingClientRect();
+		const centerY = mainRect.top + mainRect.height / 2;
+
+		const cards = Array.from(careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card"));
+
+		let closestIndex: number | null = null;
+		let minDistance = Number.MAX_VALUE;
+
+		cards.forEach((card, index) => {
+			const rect = card.getBoundingClientRect();
+
+			const intersectionHeight = Math.min(rect.bottom, mainRect.bottom) - Math.max(rect.top, mainRect.top);
+			const totalHeight = rect.height;
+			let ratio = intersectionHeight / totalHeight;
+			if (ratio < 0) ratio = 0;
+			if (ratio > 1) ratio = 1;
+
+			card.style.opacity = String(ratio);
+
+			// if (ratio > 0) {
+			// 	const cardCenterY = rect.top + rect.height / 2;
+			// 	const distance = Math.abs(cardCenterY - centerY);
+			// 	if (distance < minDistance) {
+			// 		minDistance = distance;
+			// 		closestIndex = index;
+			// 	}
+			// }
+
+			if (index === cards.length - 1 && mainRef.current) {
+				const mainStyles = window.getComputedStyle(mainRef.current);
+				const paddingTop = parseInt(mainStyles.paddingTop, 10);
+				console.log(rect.top, paddingTop);
+
+				// if (rect.top <= paddingTop && stickyRef.current) {
+				// 	stickyRef.current.classList.remove("sticky", "stuck");
+				// 	stickyRef.current.style.top = stickyRef.current.offsetTop + "px";
+				// }
+			}
+		});
+
+		// if (closestIndex !== highlightedIndex) {
+		// 	setHighlightedIndex(closestIndex);
+		// }
+	}, [highlightedIndex]);
+
+	useEffect(() => {
+		if (!careerCardsRef.current) return;
+
+		const cards = careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card");
+		cards.forEach((card, index) => {
+			// highlight only the one at `highlightedIndex`
+			if (index === highlightedIndex) {
+				card.classList.add("highlighted");
+			} else {
+				card.classList.remove("highlighted");
+			}
+		});
+	}, [highlightedIndex]);
 
 	useEffect(() => {
 		const handleMobileCardIntersection: IntersectionObserverCallback = (entries, observer) => {
@@ -100,6 +218,19 @@ export default function Home() {
 			});
 		};
 
+		const handleStickyIntersection: IntersectionObserverCallback = (entries, observer) => {
+			entries.forEach(entry => {
+				console.log(entry.boundingClientRect.top);
+				if (entry.boundingClientRect.top <= 0) {
+					entry.target.classList.add("stuck");
+					console.log("styck");
+					lockScroll();
+				} else {
+					entry.target.classList.remove("stuck");
+				}
+			});
+		};
+
 		const setupObservers = () => {
 			const cardContainer = cartridgeCardsRef.current;
 			if (!cardContainer) return;
@@ -116,7 +247,15 @@ export default function Home() {
 				threshold: 0.5,
 			});
 
+			const stickyObserver = new IntersectionObserver(handleStickyIntersection, {
+				root: mainRef.current,
+				threshold: [0],
+				rootMargin: "130px 0px 0px 0px", //mainRef의 py-52만큼
+			});
+
 			mobileCardObserver.observe(cardContainer);
+			const stickyDiv = stickyRef.current;
+			//if (stickyDiv) stickyObserver.observe(stickyDiv);
 
 			//fade 애니메이션 효과가 필요한 div
 			const upElements = document.querySelectorAll<HTMLElement>(".fade-up-section");
@@ -133,6 +272,7 @@ export default function Home() {
 
 			return () => {
 				mobileCardObserver.disconnect();
+				stickyObserver.disconnect();
 				upElements.forEach(element => titleObserver.unobserve(element));
 				leftElements.forEach(element => titleObserver.unobserve(element));
 			};
@@ -250,18 +390,23 @@ export default function Home() {
 			const startColor: [number, number, number] = [216, 221, 224];
 			const endColor: [number, number, number] = [0, 0, 46];
 
-			const scrollFraction = main.scrollHeight > main.clientHeight ? main.scrollTop / (main.scrollHeight - main.clientHeight) : 0;
+			// const scrollFraction = main.scrollHeight > main.clientHeight ? main.scrollTop / (main.scrollHeight - main.clientHeight) : 0;
+			const scrollTop = window.scrollY;
+			const scrollHeight = document.body.scrollHeight;
+			const clientHeight = window.innerHeight;
+			const scrollFraction = scrollTop / (scrollHeight - clientHeight);
 
 			const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * scrollFraction);
 			const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * scrollFraction);
 			const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * scrollFraction);
 
-			main.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+			//main.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+			document.documentElement.style.setProperty("--main-bg", `rgb(${r}, ${g}, ${b})`);
 		}
 
-		main.addEventListener("scroll", handleBackgroundColorChange);
+		window.addEventListener("scroll", handleBackgroundColorChange);
 		return () => {
-			main.removeEventListener("scroll", handleBackgroundColorChange);
+			window.removeEventListener("scroll", handleBackgroundColorChange);
 		};
 	}, []);
 
@@ -302,8 +447,8 @@ export default function Home() {
 	}, [tags]);
 
 	return (
-		<div ref={mainRef} className="py-52 text-gray-4 w-full h-full flex flex-col items-center justify-start overflow-y-scroll overflow-x-hidden gap-4">
-			<section>
+		<div ref={mainRef} className="py-52 text-gray-4 w-full h-[300vh] flex flex-col items-center justify-start gap-4">
+			<section className="flex-col">
 				<div className="flex flex-col justify-center items-center">
 					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-gray-4 text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
 						FRONTEND DEVELOPER
@@ -331,12 +476,12 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section className="!items-end px-80">
+			<section ref={stickyRef} className="sticky flex-row !items-start pt-32">
 				<div className="fade-up-section flex flex-col justify-start items-start mr-auto">
 					<p className="subtitle">CAREER</p>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
-				<div ref={longDivRef} className="career-cards-container fade-left-section">
+				<div ref={careerCardsRef} className="career-cards-container spread">
 					<div className="career-card w-full bg-red-500 p-10 rounded-xl">
 						<p className="text-lg text-white">Frontend Developer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
@@ -383,7 +528,7 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section>
+			<section className="flex-col mt-[80vh]">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
@@ -400,18 +545,6 @@ export default function Home() {
 					className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh]"
 				>
 					<div ref={cartridgeCardsRef} className="cartridge-cards relative">
-						{/* <div id="card" className="card card-4">
-						<Cartridge />
-					</div>
-					<div id="card" className="card card-3">
-						<Cartridge />
-					</div>
-					<div id="card" className="card card-2">
-						<Cartridge />
-					</div>
-					<div id="card" className="card card-1">
-						<Cartridge />
-					</div> */}
 						{Object.entries(projects).map(([k, v]) => (
 							<div id="card" key={v.title} className={`card card-${k}`}>
 								<Cartridge project={v} />

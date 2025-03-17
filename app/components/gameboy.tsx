@@ -2,7 +2,7 @@ import Cartridge from "./cartridge";
 export default function Gameboy() {
 	return (
 		<div className="w-full flex items-center justify-start md:justify-center overflow-auto z-[99]">
-			<div className="bg-green-100 gameboy-body w-[77rem] h-[30rem] flex items-center justify-center">
+			<div className="gameboy-body w-[77rem] h-[30rem] flex items-center justify-center">
 				<div id="gameboy-head" className="gameboy-frames flex flex-row items-center position-center">
 					<div className="body-left">
 						<div className="body-wing left">
