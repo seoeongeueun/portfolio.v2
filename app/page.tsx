@@ -77,6 +77,32 @@ export default function Home() {
 	}
 	//sticky div가 맨 위에 붙은 상황 (지금 화면의 중심인 경우)
 	useEffect(() => {
+		let ticking = false;
+
+		const handleStickyScroll = (deltaY: number) => {
+			if (!mainRef.current || !careerCardsRef.current) return;
+
+			window.requestAnimationFrame(() => {
+				const style = window.getComputedStyle(careerCardsRef.current as HTMLDivElement);
+				const matrix = new DOMMatrixReadOnly(style.transform);
+				let currentTranslateY = matrix.m42 || 0;
+				const paddingTop = parseInt(style.paddingTop, 10);
+
+				// Account for initial padding
+				if (currentTranslateY === 0 && paddingTop > 0) {
+					currentTranslateY = paddingTop;
+				}
+
+				const newTranslateY = currentTranslateY - deltaY;
+				careerCardsRef.current!.style.transform = `translateY(${newTranslateY}px)`;
+
+				// Update card visibility after transform change
+				updateCardsVisibility();
+
+				ticking = false;
+			});
+		};
+
 		const handleScroll = (e: Event) => {
 			if (!stickyRef.current || !mainRef.current || !careerCardsRef.current) return;
 
@@ -92,6 +118,7 @@ export default function Home() {
 			const deltaY = scrollTop - prevScrollTop.current;
 			prevScrollTop.current = scrollTop;
 
+			// sticky div이 상단 가장자리 + 패딩 위치에 도달했을 때 커리어 카드를 펼침
 			if (rect.top <= paddingTop) {
 				setTimeout(() => {
 					//careerCardsRef.current?.classList.replace("fade-left", "spread");
@@ -104,7 +131,7 @@ export default function Home() {
 			}
 
 			if (stickyRef.current.classList.contains("stuck")) {
-				handleStickyScroll(e, deltaY);
+				handleStickyScroll(deltaY);
 			}
 		};
 
@@ -112,34 +139,35 @@ export default function Home() {
 		return () => window.removeEventListener("scroll", handleScroll);
 	}, []);
 
-	const handleStickyScroll = useCallback(
-		(e: Event, deltaY: number) => {
-			if (!mainRef.current || !careerCardsRef.current) return;
+	// const handleStickyScroll = useCallback(
+	// 	(e: Event, deltaY: number) => {
+	// 		if (!mainRef.current || !careerCardsRef.current) return;
 
-			//sticky가 발동된 이후 메인에서 발생하는 y 스크롤을 납치해 커리어 카드에 적용
+	// 		//sticky가 발동된 이후 메인에서 발생하는 y 스크롤을 납치해 커리어 카드에 적용
 
-			const style = window.getComputedStyle(careerCardsRef.current);
-			const matrix = new DOMMatrixReadOnly(style.transform);
-			let currentTranslateY = matrix.m42 || 0;
-			const paddingTop = parseInt(style.paddingTop, 10);
+	// 		const style = window.getComputedStyle(careerCardsRef.current);
+	// 		const matrix = new DOMMatrixReadOnly(style.transform);
+	// 		let currentTranslateY = matrix.m42 || 0;
+	// 		const paddingTop = parseInt(style.paddingTop, 10);
 
-			// 커리어 카드 div에 적용된 패딩 값을 감안해서 적용
-			if (currentTranslateY === 0 && paddingTop > 0) {
-				currentTranslateY = paddingTop;
-			}
+	// 		// 커리어 카드 div에 적용된 패딩 값을 감안해서 적용
+	// 		if (currentTranslateY === 0 && paddingTop > 0) {
+	// 			currentTranslateY = paddingTop;
+	// 		}
 
-			const newTranslateY = currentTranslateY - deltaY;
-			careerCardsRef.current.style.transform = `translateY(${newTranslateY}px)`;
-			updateCardsVisibility();
-		},
-		[mainRef, careerCardsRef]
-	);
+	// 		const newTranslateY = currentTranslateY - deltaY;
+	// 		careerCardsRef.current.style.transform = `translateY(${newTranslateY}px)`;
+	// 		updateCardsVisibility();
+	// 	},
+	// 	[mainRef, careerCardsRef]
+	// );
 
 	const updateCardsVisibility = useCallback(() => {
 		if (!mainRef.current || !careerCardsRef.current) return;
 
-		const mainRect = mainRef.current.getBoundingClientRect();
-		const centerY = mainRect.top + mainRect.height / 2;
+		const viewportCenterY = window.innerHeight / 2;
+		// 페이드아웃을 시작할 위치 (= 여유를 둔 화면 중앙)
+		const fadeDistance = window.innerHeight * 0.6;
 
 		const cards = Array.from(careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card"));
 
@@ -149,37 +177,33 @@ export default function Home() {
 		cards.forEach((card, index) => {
 			const rect = card.getBoundingClientRect();
 
-			const intersectionHeight = Math.min(rect.bottom, mainRect.bottom) - Math.max(rect.top, mainRect.top);
-			const totalHeight = rect.height;
-			let ratio = intersectionHeight / totalHeight;
-			if (ratio < 0) ratio = 0;
-			if (ratio > 1) ratio = 1;
+			const cardCenterY = rect.top + rect.height / 2;
+			const distanceFromCenter = Math.abs(cardCenterY - viewportCenterY);
 
-			card.style.opacity = String(ratio);
+			let ratio = 1 - Math.pow(distanceFromCenter / fadeDistance, 2);
+			ratio = Math.max(0, Math.min(1, ratio));
 
-			// if (ratio > 0) {
-			// 	const cardCenterY = rect.top + rect.height / 2;
-			// 	const distance = Math.abs(cardCenterY - centerY);
-			// 	if (distance < minDistance) {
-			// 		minDistance = distance;
-			// 		closestIndex = index;
-			// 	}
-			// }
+			card.style.opacity = String(ratio.toFixed(2));
 
-			if (index === cards.length - 1 && mainRef.current) {
-				const mainStyles = window.getComputedStyle(mainRef.current);
-				const paddingTop = parseInt(mainStyles.paddingTop, 10);
+			if (ratio > 0 && distanceFromCenter < minDistance) {
+				minDistance = distanceFromCenter;
+				closestIndex = index;
+			}
 
-				// if (rect.top <= paddingTop && stickyRef.current) {
-				// 	stickyRef.current.classList.remove("sticky", "stuck");
-				// 	stickyRef.current.style.top = stickyRef.current.offsetTop + "px";
-				// }
+			//마지막 카드가 화면 가장자리까지 도착했다면 highlight 관련 설정을 모두 초기화
+			const style = window.getComputedStyle(careerCardsRef.current as HTMLDivElement);
+			const paddingTop = parseInt(style.paddingTop, 10);
+			if (index === cards.length - 1 && rect.top <= paddingTop) {
+				console.log("done!");
+				card.classList.remove("highlighted");
+				setHighlightedIndex(null);
+				card.style.opacity = "0";
 			}
 		});
 
-		// if (closestIndex !== highlightedIndex) {
-		// 	setHighlightedIndex(closestIndex);
-		// }
+		if (closestIndex !== highlightedIndex) {
+			setHighlightedIndex(closestIndex);
+		}
 	}, [highlightedIndex]);
 
 	useEffect(() => {
@@ -187,7 +211,7 @@ export default function Home() {
 
 		const cards = careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card");
 		cards.forEach((card, index) => {
-			// highlight only the one at `highlightedIndex`
+			console.log(highlightedIndex);
 			if (index === highlightedIndex) {
 				card.classList.add("highlighted");
 			} else {

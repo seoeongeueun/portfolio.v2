@@ -155,20 +155,16 @@
 			transform: translateY(0);
 			opacity: 1;
 		}
-
-		&.highlighted,
-		&:hover {
-			transform: scale(1.2);
-			opacity: 1 !important;
-		}
 	}
 
 	&.spread {
 		opacity: 1;
+
 		> .career-card {
 			position: relative;
 			opacity: 1;
 			transform: translateY(0);
+			transition: all 0.3s ease-in-out;
 
 			&:not(:last-child) {
 				margin-bottom: 15rem;
@@ -185,6 +181,12 @@
 			}
 			&:nth-child(4) {
 				transition-delay: 0.3s;
+			}
+
+			&.highlighted {
+				transform: scale(1.2);
+				opacity: 1 !important;
+				right: 10rem;
 			}
 		}
 	}
