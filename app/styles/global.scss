@@ -257,26 +257,45 @@
 		> .card {
 			filter: brightness(100%);
 
-			&.card-4 {
-				/* 카드 너비 --card-lg에서 이동할 1rem을 더한 값 */
-				left: calc(-100% + calc(var(--card-width) / 2 + var(--gap)));
+			$card-width: var(--card-width);
+			$gap: var(--gap);
+			//프로젝트 개수가 바뀌면 바꿔주기
+			$total-cards: 7;
+
+			@for $i from 1 through $total-cards {
+				&:nth-child(#{$i}) {
+					@if $i % 2 == 1 {
+						$random-offset: if($i % 3 == 0, 0rem, if($i % 3 == 1, 1rem, 2rem));
+						left: calc(-100% + (#{$card-width} * 2) - ((#{$card-width} / 2) * #{$i}) + #{$random-offset});
+					} @else {
+						$random-offset: if($i % 3 == 0, 0rem, if($i % 3 == 1, 1rem, 4rem));
+						left: calc(-100% + (#{$card-width} / 2) + ((#{$card-width} / 2) * (#{$i} + 1)) + #{$random-offset});
+					}
+				}
 			}
 
-			&.card-3 {
-				left: calc(-100% + calc((var(--card-width) * 2)) - calc(var(--gap) * 3));
+			&:first-child {
+				left: calc(-100% + calc(var(--card-width) / 1.5 + calc(var(--gap)) * 2.5));
+				top: -3rem;
 			}
 
-			&.card-2 {
-				left: calc(-100% + calc((var(--card-width) * 3)) - calc(var(--gap) * 4));
-			}
+			// //기본 4장 정도는 다양성을 위해 직접 위치를 지정
+			// &.card-4 {
+			// 	/* 카드 너비 --card-lg에서 이동할 1rem을 더한 값 */
+			// 	left: calc(-100% + calc(var(--card-width) / 2 + var(--gap)));
+			// }
 
-			&.card-1 {
-				left: -100%;
-			}
+			// &.card-3 {
+			// 	left: calc(-100% + calc((var(--card-width) * 2)) - calc(var(--gap) * 3));
+			// }
 
-			&:nth-child(2n + 1) {
-				top: 2rem;
-			}
+			// &.card-2 {
+			// 	left: calc(-100% + calc((var(--card-width) * 3)) - calc(var(--gap) * 4));
+			// }
+
+			// &:nth-child(2n + 1) {
+			// 	top: 2rem;
+			// }
 		}
 	}
 
@@ -288,8 +307,16 @@
 		position: absolute;
 		filter: brightness(80%);
 
+		&:nth-child(2n) {
+			transform: rotate(-1deg);
+		}
+		&:nth-child(2n + 1) {
+			transform: rotate(1deg);
+			top: 1rem;
+		}
+
 		&.card-4 {
-			transform: rotate(-3deg);
+			transform: rotate(1deg);
 			left: -2rem;
 			top: 1rem;
 			// border: 5px solid blue;

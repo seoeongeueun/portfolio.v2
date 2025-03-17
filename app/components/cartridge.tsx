@@ -26,7 +26,7 @@ export default function Cartridge({project}: CartridgePropsType) {
 					<div />
 					<div className="title-container">
 						<div className="title flex flex-col items-center justify-center text-m md:text-xxl lg:text-xxxl font-tenada">
-							<p className="tracking-tighter md:mt-6" style={{color: project.theme}}>
+							<p className="tracking-tighter md:mt-2" style={{color: project.theme}}>
 								{project.title}
 							</p>
 							<span className="text-xxs md:text-s md:-mt-2">{project.subtitle}</span>

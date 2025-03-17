@@ -344,7 +344,7 @@ export default function Home() {
 			const mobileCardObserver = new IntersectionObserver(handleMobileCardIntersection, {
 				root: null,
 				rootMargin: "0px",
-				threshold: 0.6,
+				threshold: 0.7,
 			});
 
 			const titleObserver = new IntersectionObserver(handleTitleIntersection, {
@@ -573,7 +573,7 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end">
+			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem]">
 				<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
 					<p className="subtitle">CAREER</p>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
@@ -625,7 +625,7 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section className="flex-col mt-[80vh] full-section">
+			<section className="flex-col full-section">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
