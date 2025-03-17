@@ -131,64 +131,92 @@
 // 	}
 // }
 
+// .career-cards-container {
+// 	position: relative;
+// 	width: 100%;
+// 	max-width: 50%;
+// 	height: fit-content;
+// 	will-change: transform;
+// 	opacity: 0;
+// 	transition: opacity 1s ease-in-out;
+// 	overflow: hidden;
+
+// 	> .career-card {
+// 		// position: absolute;
+// 		// right: 0;
+// 		// top: 0;
+// 		// margin-top: 0;
+// 		transform-origin: top;
+// 		transition:
+// 			transform 0.3s ease,
+// 			opacity 0.3s ease;
+// 		will-change: transform, opacity;
+// 		transform: translateY(50px);
+
+// 		&:first-child {
+// 			z-index: 20;
+// 			transform: translateY(0);
+// 			opacity: 1;
+// 		}
+// 	}
+
+// 	&.spread {
+// 		opacity: 1;
+
+// 		> .career-card {
+// 			position: relative;
+// 			opacity: 1;
+// 			//transform: translateY(0);
+// 			//transition: all 0.3s ease-in-out;
+
+// 			// &:not(:last-child) {
+// 			// 	margin-bottom: 15rem;
+// 			// }
+
+// 			// &:nth-child(1) {
+// 			// 	transition-delay: 0s;
+// 			// }
+// 			// &:nth-child(2) {
+// 			// 	transition-delay: 0.1s;
+// 			// }
+// 			// &:nth-child(3) {
+// 			// 	transition-delay: 0.2s;
+// 			// }
+// 			// &:nth-child(4) {
+// 			// 	transition-delay: 0.3s;
+// 			// }
+
+// 			&.highlighted {
+// 				transform: scale(1.2);
+// 				opacity: 1 !important;
+// 				right: 10rem;
+// 			}
+// 		}
+// 	}
+// }
+
 .career-cards-container {
 	position: relative;
-	width: 100%;
-	max-width: 50%;
-	height: fit-content;
+	overflow: visible;
+	height: 100%;
 	will-change: transform;
-	opacity: 0;
-	transition: opacity 1s ease-in-out;
+}
 
-	> .career-card {
-		position: absolute;
-		right: 0;
-		top: 0;
-		margin-top: 0;
+.career-card {
+	transition:
+		transform 0.5s ease-out,
+		right 0.3s ease-in-out 0.2s;
+	height: 20rem;
+	will-change: transform;
+	margin-top: -10rem;
+	transform: translateY(var(--y-distance));
+	position: relative;
+	right: 0;
+	box-shadow: 20px 20px 0px -10px #ff0;
+
+	&.highlighted {
 		transform-origin: top;
-		transition: all 1s ease-in-out;
-		opacity: 0;
-		transform: translateY(50px);
-
-		&:first-child {
-			z-index: 20;
-			transform: translateY(0);
-			opacity: 1;
-		}
-	}
-
-	&.spread {
-		opacity: 1;
-
-		> .career-card {
-			position: relative;
-			opacity: 1;
-			transform: translateY(0);
-			transition: all 0.3s ease-in-out;
-
-			&:not(:last-child) {
-				margin-bottom: 15rem;
-			}
-
-			&:nth-child(1) {
-				transition-delay: 0s;
-			}
-			&:nth-child(2) {
-				transition-delay: 0.1s;
-			}
-			&:nth-child(3) {
-				transition-delay: 0.2s;
-			}
-			&:nth-child(4) {
-				transition-delay: 0.3s;
-			}
-
-			&.highlighted {
-				transform: scale(1.2);
-				opacity: 1 !important;
-				right: 10rem;
-			}
-		}
+		right: 4rem;
 	}
 }
 

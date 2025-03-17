@@ -77,67 +77,144 @@ export default function Home() {
 	}
 	//sticky div가 맨 위에 붙은 상황 (지금 화면의 중심인 경우)
 	useEffect(() => {
-		let ticking = false;
+		if (!careerCardsRef.current || !stickyRef.current) return;
 
-		const handleStickyScroll = (deltaY: number) => {
-			if (!mainRef.current || !careerCardsRef.current) return;
+		const container = careerCardsRef.current;
+		const cards = Array.from(container.querySelectorAll<HTMLDivElement>(".career-card"));
+		const cardHeight = cards[0]?.offsetHeight || 0;
+		const totalCards = cards.length;
+		const totalScrollHeight = cardHeight * totalCards;
+		const marginTop = cardHeight / -2; //카드 사이 간격을 줄이기 위해 카드 높이 반을 뺌
 
-			window.requestAnimationFrame(() => {
-				const style = window.getComputedStyle(careerCardsRef.current as HTMLDivElement);
-				const matrix = new DOMMatrixReadOnly(style.transform);
-				let currentTranslateY = matrix.m42 || 0;
-				const paddingTop = parseInt(style.paddingTop, 10);
+		let currentOffset = 0;
+		let prevScrollTop = window.scrollY;
+		let positions = cards.map((_, i) => i * cardHeight);
 
-				// Account for initial padding
-				if (currentTranslateY === 0 && paddingTop > 0) {
-					currentTranslateY = paddingTop;
-				}
-
-				const newTranslateY = currentTranslateY - deltaY;
-				careerCardsRef.current!.style.transform = `translateY(${newTranslateY}px)`;
-
-				// Update card visibility after transform change
-				updateCardsVisibility();
-
-				ticking = false;
-			});
+		const isStickyVisible = () => {
+			//무한 카드 스위칭을 막기 위해 하단에 카드 세개가 남았을 때 루프를 종료
+			const rect = stickyRef.current!.getBoundingClientRect();
+			return rect.bottom > cardHeight * 3 && rect.top < window.innerHeight;
 		};
 
-		const handleScroll = (e: Event) => {
-			if (!stickyRef.current || !mainRef.current || !careerCardsRef.current) return;
+		const updateHighlight = () => {
+			let closestCard = null;
+			let closestDistance = Infinity;
 
-			const rect = stickyRef.current.getBoundingClientRect();
-			const mainRect = mainRef.current.getBoundingClientRect();
+			cards.forEach(card => {
+				const rect = card.getBoundingClientRect();
+				const distanceToTop = Math.abs(rect.top);
 
-			//메인 div의 py 값을 계산
-			const mainStyles = window.getComputedStyle(mainRef.current);
-			const paddingTop = parseInt(mainStyles.paddingTop, 10);
+				if (distanceToTop < closestDistance) {
+					closestDistance = distanceToTop;
+					closestCard = card;
+				}
+
+				card.classList.remove("highlighted");
+			});
+
+			if (closestCard) {
+				(closestCard as HTMLDivElement).classList.add("highlighted");
+			}
+		};
+
+		const updatePositions = deltaY => {
+			currentOffset += deltaY;
+			if (isStickyVisible()) {
+				cards.forEach((card, index) => {
+					positions[index] += deltaY;
+
+					// Loop card positions when they exit the viewport
+					if (positions[index] <= -cardHeight) {
+						positions[index] += (cardHeight + marginTop) * (totalCards * totalCards);
+					}
+
+					if (positions[index] >= totalScrollHeight) {
+						positions[index] -= (cardHeight + marginTop) * (totalCards * totalCards);
+					}
+					card.style.setProperty("--y-distance", positions[index] + "px");
+					//card.style.transform = `translateY(${positions[index]}px)`;
+				});
+			}
+			updateHighlight();
+		};
+
+		const handleScroll = () => {
 			const scrollTop = window.scrollY;
+			const deltaY = scrollTop - prevScrollTop;
+			prevScrollTop = scrollTop;
 
-			// wheelevent의 deltaY를 흉내내기
-			const deltaY = scrollTop - prevScrollTop.current;
-			prevScrollTop.current = scrollTop;
-
-			// sticky div이 상단 가장자리 + 패딩 위치에 도달했을 때 커리어 카드를 펼침
-			if (rect.top <= paddingTop) {
-				setTimeout(() => {
-					//careerCardsRef.current?.classList.replace("fade-left", "spread");
-					stickyRef.current?.classList.add("stuck");
-					careerCardsRef.current?.classList.add("spread");
-				}, 700);
-				//lockScroll();
-			} else {
-				stickyRef.current.classList.remove("stuck");
-			}
-
-			if (stickyRef.current.classList.contains("stuck")) {
-				handleStickyScroll(deltaY);
-			}
+			updatePositions(-deltaY);
 		};
 
 		window.addEventListener("scroll", handleScroll);
-		return () => window.removeEventListener("scroll", handleScroll);
+
+		return () => {
+			window.removeEventListener("scroll", handleScroll);
+		};
 	}, []);
+
+	// useEffect(() => {
+	// 	let ticking = false;
+
+	// 	const handleStickyScroll = (deltaY: number) => {
+	// 		if (!mainRef.current || !careerCardsRef.current) return;
+
+	// 		window.requestAnimationFrame(() => {
+	// 			const style = window.getComputedStyle(careerCardsRef.current as HTMLDivElement);
+	// 			const matrix = new DOMMatrixReadOnly(style.transform);
+	// 			let currentTranslateY = matrix.m42 || 0;
+	// 			const paddingTop = parseInt(style.paddingTop, 10);
+
+	// 			// Account for initial padding
+	// 			if (currentTranslateY === 0 && paddingTop > 0) {
+	// 				currentTranslateY = paddingTop;
+	// 			}
+
+	// 			const newTranslateY = currentTranslateY - deltaY;
+	// 			careerCardsRef.current!.style.transform = `translateY(${newTranslateY}px)`;
+
+	// 			// Update card visibility after transform change
+	// 			updateCardsVisibility();
+
+	// 			ticking = false;
+	// 		});
+	// 	};
+
+	// 	const handleScroll = (e: Event) => {
+	// 		if (!stickyRef.current || !mainRef.current || !careerCardsRef.current) return;
+
+	// 		const rect = stickyRef.current.getBoundingClientRect();
+	// 		const mainRect = mainRef.current.getBoundingClientRect();
+
+	// 		//메인 div의 py 값을 계산
+	// 		const mainStyles = window.getComputedStyle(mainRef.current);
+	// 		const paddingTop = parseInt(mainStyles.paddingTop, 10);
+	// 		const scrollTop = window.scrollY;
+
+	// 		// wheelevent의 deltaY를 흉내내기
+	// 		const deltaY = scrollTop - prevScrollTop.current;
+	// 		prevScrollTop.current = scrollTop;
+
+	// 		// sticky div이 상단 가장자리 + 패딩 위치에 도달했을 때 커리어 카드를 펼침
+	// 		if (rect.top <= paddingTop) {
+	// 			setTimeout(() => {
+	// 				//careerCardsRef.current?.classList.replace("fade-left", "spread");
+	// 				stickyRef.current?.classList.add("stuck");
+	// 				careerCardsRef.current?.classList.add("spread");
+	// 			}, 700);
+	// 			//lockScroll();
+	// 		} else {
+	// 			stickyRef.current.classList.remove("stuck");
+	// 		}
+
+	// 		if (stickyRef.current.classList.contains("stuck")) {
+	// 			handleStickyScroll(deltaY);
+	// 		}
+	// 	};
+
+	// 	window.addEventListener("scroll", handleScroll);
+	// 	return () => window.removeEventListener("scroll", handleScroll);
+	// }, []);
 
 	// const handleStickyScroll = useCallback(
 	// 	(e: Event, deltaY: number) => {
@@ -162,63 +239,63 @@ export default function Home() {
 	// 	[mainRef, careerCardsRef]
 	// );
 
-	const updateCardsVisibility = useCallback(() => {
-		if (!mainRef.current || !careerCardsRef.current) return;
+	// const updateCardsVisibility = useCallback(() => {
+	// 	if (!mainRef.current || !careerCardsRef.current) return;
 
-		const viewportCenterY = window.innerHeight / 2;
-		// 페이드아웃을 시작할 위치 (= 여유를 둔 화면 중앙)
-		const fadeDistance = window.innerHeight * 0.6;
+	// 	const viewportCenterY = window.innerHeight / 2;
+	// 	// 페이드아웃을 시작할 위치 (= 여유를 둔 화면 중앙)
+	// 	const fadeDistance = window.innerHeight * 0.6;
 
-		const cards = Array.from(careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card"));
+	// 	const cards = Array.from(careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card"));
 
-		let closestIndex: number | null = null;
-		let minDistance = Number.MAX_VALUE;
+	// 	let closestIndex: number | null = null;
+	// 	let minDistance = Number.MAX_VALUE;
 
-		cards.forEach((card, index) => {
-			const rect = card.getBoundingClientRect();
+	// 	cards.forEach((card, index) => {
+	// 		const rect = card.getBoundingClientRect();
 
-			const cardCenterY = rect.top + rect.height / 2;
-			const distanceFromCenter = Math.abs(cardCenterY - viewportCenterY);
+	// 		const cardCenterY = rect.top + rect.height / 2;
+	// 		const distanceFromCenter = Math.abs(cardCenterY - viewportCenterY);
 
-			let ratio = 1 - Math.pow(distanceFromCenter / fadeDistance, 2);
-			ratio = Math.max(0, Math.min(1, ratio));
+	// 		let ratio = 1 - Math.pow(distanceFromCenter / fadeDistance, 2);
+	// 		ratio = Math.max(0, Math.min(1, ratio));
 
-			card.style.opacity = String(ratio.toFixed(2));
+	// 		//card.style.opacity = String(ratio.toFixed(2));
 
-			if (ratio > 0 && distanceFromCenter < minDistance) {
-				minDistance = distanceFromCenter;
-				closestIndex = index;
-			}
+	// 		if (ratio > 0 && distanceFromCenter < minDistance) {
+	// 			minDistance = distanceFromCenter;
+	// 			closestIndex = index;
+	// 		}
 
-			//마지막 카드가 화면 가장자리까지 도착했다면 highlight 관련 설정을 모두 초기화
-			const style = window.getComputedStyle(careerCardsRef.current as HTMLDivElement);
-			const paddingTop = parseInt(style.paddingTop, 10);
-			if (index === cards.length - 1 && rect.top <= paddingTop) {
-				console.log("done!");
-				card.classList.remove("highlighted");
-				setHighlightedIndex(null);
-				card.style.opacity = "0";
-			}
-		});
+	// 		//마지막 카드가 화면 가장자리까지 도착했다면 highlight 관련 설정을 모두 초기화
+	// 		const style = window.getComputedStyle(careerCardsRef.current as HTMLDivElement);
+	// 		const paddingTop = parseInt(style.paddingTop, 10);
+	// 		// if (index === cards.length - 1 && rect.top <= paddingTop) {
+	// 		// 	console.log("done!");
+	// 		// 	card.classList.remove("highlighted");
+	// 		// 	setHighlightedIndex(null);
+	// 		// 	card.style.opacity = "0";
+	// 		// }
+	// 	});
 
-		if (closestIndex !== highlightedIndex) {
-			setHighlightedIndex(closestIndex);
-		}
-	}, [highlightedIndex]);
+	// 	if (closestIndex !== highlightedIndex) {
+	// 		setHighlightedIndex(closestIndex);
+	// 	}
+	// }, [highlightedIndex]);
 
-	useEffect(() => {
-		if (!careerCardsRef.current) return;
+	// useEffect(() => {
+	// 	if (!careerCardsRef.current) return;
 
-		const cards = careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card");
-		cards.forEach((card, index) => {
-			console.log(highlightedIndex);
-			if (index === highlightedIndex) {
-				card.classList.add("highlighted");
-			} else {
-				card.classList.remove("highlighted");
-			}
-		});
-	}, [highlightedIndex]);
+	// 	const cards = careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card");
+	// 	cards.forEach((card, index) => {
+	// 		console.log(highlightedIndex);
+	// 		if (index === highlightedIndex) {
+	// 			card.classList.add("highlighted");
+	// 		} else {
+	// 			card.classList.remove("highlighted");
+	// 		}
+	// 	});
+	// }, [highlightedIndex]);
 
 	useEffect(() => {
 		const handleMobileCardIntersection: IntersectionObserverCallback = (entries, observer) => {
@@ -497,13 +574,13 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section ref={stickyRef} className="pt-32 sticky flex-row !justify-between !items-end">
+			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end">
 				<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
 					<p className="subtitle">CAREER</p>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
-				<div ref={careerCardsRef} className="career-cards-container pt-32">
-					<div className="career-card w-full bg-red-500 p-10 rounded-xl">
+				<div ref={careerCardsRef} className="career-cards-container pt-32 spread">
+					<div className="career-card w-full bg-red-500 p-10">
 						<p className="text-lg text-white">Frontend Developer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>BATON</p>
@@ -524,7 +601,7 @@ export default function Home() {
 							</li>
 						</ul>
 					</div>
-					<div className="career-card w-full bg-yellow-500 p-10 rounded-xl">
+					<div className="career-card w-full bg-yellow-500 p-10">
 						<p className="text-lg text-white">Software Engineer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>Market Stadium</p>
@@ -539,7 +616,7 @@ export default function Home() {
 							<li>Mocha와 Chai를 이용해 데이터 유효성 검증 테스트를 추가하여 안정성을 높였습니다.</li>
 						</ul>
 					</div>
-					<div className="career-card w-full flex flex-col items-start justify-start bg-cyan-500 p-10 rounded-xl">
+					<div className="career-card w-full flex flex-col items-start justify-start bg-cyan-500 p-10">
 						<p className="text-lg text-white">Bachelor's Degree of Computer Science</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>The State University of New York, Stony Brook</p>
