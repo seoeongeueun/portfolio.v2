@@ -132,7 +132,6 @@ export default function Home() {
 						positions[index] -= (cardHeight + marginTop) * (totalCards * totalCards);
 					}
 					card.style.setProperty("--y-distance", positions[index] + "px");
-					//card.style.transform = `translateY(${positions[index]}px)`;
 				});
 			}
 			updateHighlight();
@@ -626,7 +625,7 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section className="flex-col mt-[80vh]">
+			<section className="flex-col mt-[80vh] full-section">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">

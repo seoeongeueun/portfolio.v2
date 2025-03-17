@@ -134,6 +134,27 @@ section {
 	align-items: center;
 	justify-content: start;
 	top: 0;
+	padding-left: 15rem;
+	padding-right: 15rem;
+}
+
+@media screen and (max-width: 640px) {
+	section {
+		padding-left: 4rem;
+		padding-right: 4rem;
+	}
+}
+
+@media screen and (max-width: 1024px) {
+	section {
+		padding-left: 6rem;
+		padding-right: 6rem;
+	}
+}
+
+section.full-section {
+	padding-left: 0;
+	padding-right: 0;
 }
 
 section:not(.sticky) {
