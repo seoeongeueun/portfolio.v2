@@ -86,17 +86,18 @@ export default function Home() {
 			//메인 div의 py 값을 계산
 			const mainStyles = window.getComputedStyle(mainRef.current);
 			const paddingTop = parseInt(mainStyles.paddingTop, 10);
-			const scrollTop = mainRef.current.scrollTop;
+			const scrollTop = window.scrollY;
 
 			// wheelevent의 deltaY를 흉내내기
 			const deltaY = scrollTop - prevScrollTop.current;
 			prevScrollTop.current = scrollTop;
 
-			if (rect.top <= mainRect.top + paddingTop) {
-				stickyRef.current.classList.add("stuck");
+			if (rect.top <= paddingTop) {
 				setTimeout(() => {
-					careerCardsRef.current?.classList.replace("fade-left", "spread");
-				}, 400);
+					//careerCardsRef.current?.classList.replace("fade-left", "spread");
+					stickyRef.current?.classList.add("stuck");
+					careerCardsRef.current?.classList.add("spread");
+				}, 700);
 				//lockScroll();
 			} else {
 				stickyRef.current.classList.remove("stuck");
@@ -107,8 +108,8 @@ export default function Home() {
 			}
 		};
 
-		mainRef.current?.addEventListener("scroll", handleScroll);
-		return () => mainRef.current?.removeEventListener("scroll", handleScroll);
+		window.addEventListener("scroll", handleScroll);
+		return () => window.removeEventListener("scroll", handleScroll);
 	}, []);
 
 	const handleStickyScroll = useCallback(
@@ -119,7 +120,13 @@ export default function Home() {
 
 			const style = window.getComputedStyle(careerCardsRef.current);
 			const matrix = new DOMMatrixReadOnly(style.transform);
-			const currentTranslateY = matrix.m42 || 0;
+			let currentTranslateY = matrix.m42 || 0;
+			const paddingTop = parseInt(style.paddingTop, 10);
+
+			// 커리어 카드 div에 적용된 패딩 값을 감안해서 적용
+			if (currentTranslateY === 0 && paddingTop > 0) {
+				currentTranslateY = paddingTop;
+			}
 
 			const newTranslateY = currentTranslateY - deltaY;
 			careerCardsRef.current.style.transform = `translateY(${newTranslateY}px)`;
@@ -162,7 +169,6 @@ export default function Home() {
 			if (index === cards.length - 1 && mainRef.current) {
 				const mainStyles = window.getComputedStyle(mainRef.current);
 				const paddingTop = parseInt(mainStyles.paddingTop, 10);
-				console.log(rect.top, paddingTop);
 
 				// if (rect.top <= paddingTop && stickyRef.current) {
 				// 	stickyRef.current.classList.remove("sticky", "stuck");
@@ -247,15 +253,7 @@ export default function Home() {
 				threshold: 0.5,
 			});
 
-			const stickyObserver = new IntersectionObserver(handleStickyIntersection, {
-				root: mainRef.current,
-				threshold: [0],
-				rootMargin: "130px 0px 0px 0px", //mainRef의 py-52만큼
-			});
-
 			mobileCardObserver.observe(cardContainer);
-			const stickyDiv = stickyRef.current;
-			//if (stickyDiv) stickyObserver.observe(stickyDiv);
 
 			//fade 애니메이션 효과가 필요한 div
 			const upElements = document.querySelectorAll<HTMLElement>(".fade-up-section");
@@ -265,16 +263,15 @@ export default function Home() {
 				element.dataset.side = "up";
 				titleObserver.observe(element);
 			});
-			leftElements.forEach(element => {
-				element.dataset.side = "left";
-				titleObserver.observe(element);
-			});
+			// leftElements.forEach(element => {
+			// 	element.dataset.side = "left";
+			// 	titleObserver.observe(element);
+			// });
 
 			return () => {
 				mobileCardObserver.disconnect();
-				stickyObserver.disconnect();
 				upElements.forEach(element => titleObserver.unobserve(element));
-				leftElements.forEach(element => titleObserver.unobserve(element));
+				//leftElements.forEach(element => titleObserver.unobserve(element));
 			};
 		};
 
@@ -476,12 +473,12 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section ref={stickyRef} className="sticky flex-row !items-start pt-32">
-				<div className="fade-up-section flex flex-col justify-start items-start mr-auto">
+			<section ref={stickyRef} className="pt-32 sticky flex-row !justify-between !items-end">
+				<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
 					<p className="subtitle">CAREER</p>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
-				<div ref={careerCardsRef} className="career-cards-container spread">
+				<div ref={careerCardsRef} className="career-cards-container pt-32">
 					<div className="career-card w-full bg-red-500 p-10 rounded-xl">
 						<p className="text-lg text-white">Frontend Developer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
