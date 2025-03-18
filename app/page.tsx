@@ -3,7 +3,7 @@ import Image from "next/image";
 import StackIcon from "tech-stack-icons";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
-import {useEffect, useState, useRef, useCallback} from "react";
+import {useEffect, useState, useRef, useCallback, act} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
@@ -411,33 +411,47 @@ export default function Home() {
 			cards.forEach(card => card.classList.remove("clicked"));
 
 			/* 
-					선택된 카드를 중앙으로 위치하게 스크롤 하는 로직 + 자동으로 필요한 만큼 여백 추가
-					어떤 디자인을 택할지에 따라 사용하지 않을 수도 있음
-				*/
+				선택된 카드를 중앙으로 위치하게 스크롤 하는 로직 + 자동으로 필요한 만큼 여백 추가
+				어떤 디자인을 택할지에 따라 사용하지 않을 수도 있음
+			*/
+			const parentRect = parentContainer.getBoundingClientRect();
+			const cardRect = clickedCard.getBoundingClientRect();
 
-			const cardWidth = clickedCard.clientWidth;
-			const absoluteCenter = window.innerWidth / 2 - cardWidth / 2;
-			const distanceNeeded = rect.left - absoluteCenter;
-			parentContainer.scrollTo({top: 0, left: parentContainer.scrollLeft + distanceNeeded, behavior: "smooth"});
+			const cardCenterInParentViewport = cardRect.left - parentRect.left + cardRect.width / 2;
+			const cardCenterInParentScrollCoords = parentContainer.scrollLeft + cardCenterInParentViewport;
+			const windowCenterX = window.innerWidth / 2;
+			const desiredDelta = cardCenterInParentScrollCoords - windowCenterX;
+			const maxScroll = parentContainer.scrollWidth - parentContainer.clientWidth;
+			const currentScroll = parentContainer.scrollLeft;
 
-			//스크롤이 이미 가장자리이기 때문에 추가 여백이 필요한 경우 로직
-			const remainingScroll = parentContainer.scrollWidth - parentContainer.clientWidth - parentContainer.scrollLeft;
-			const computedLeft = (getComputedStyle(cardsDiv).left || "0").replace("px", "");
-			const currentLeft = parseFloat(computedLeft);
+			let targetScroll = desiredDelta;
+			if (targetScroll < 0) targetScroll = 0;
+			if (targetScroll > maxScroll) targetScroll = maxScroll;
 
-			const firstCard = cardsDiv.querySelector<HTMLDivElement>(".card-1");
-			if (firstCard) {
-				//첫번째 카드의 시작 위치를 빼서 여백 없는 정확한 카드 뭉치의 너비를 계산
-				const leftMargin = Math.abs(firstCard.offsetLeft) - currentLeft;
-				if (remainingScroll - Math.abs(distanceNeeded) < 0) {
-					const margin = distanceNeeded - remainingScroll;
-					cardsDiv.style.left = `${margin < 0 ? currentLeft + leftMargin + Math.abs(distanceNeeded) - remainingScroll : margin * -1}px`;
+			//clickedCard.classList.add("clicked");
+
+			parentContainer.scrollTo({
+				top: 0,
+				left: targetScroll,
+				behavior: "smooth",
+			});
+
+			//스크롤을 최대한 이동해도 부족해서 채워야 하는 여백을 계산
+			const actualDelta = currentScroll + desiredDelta - targetScroll;
+			//Math.round(targetScroll) !== Math.round(desiredDelta)는 스크롤 없이 중앙으로 오는게 가능한 카드
+			setTimeout(() => {
+				if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
+					const computedLeft = getComputedStyle(cardsDiv).left || "0";
+					const currentLeft = parseFloat(computedLeft);
+
+					const newLeft = desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : currentLeft - actualDelta;
+					cardsDiv.style.transition = "left 0.7s ease-in-out";
+					cardsDiv.style.left = `${newLeft}px`;
 				} else {
 					cardsDiv.style.left = "";
+					cardsDiv.style.transition = "";
 				}
-			}
-
-			clickedCard.classList.add("clicked");
+			}, 400);
 
 			//게임기로 이동하기 위해 필요한 거리 계산
 			const gameboyHead = document.querySelector("#gameboy-head");
@@ -487,7 +501,6 @@ export default function Home() {
 			const startColor: [number, number, number] = [216, 221, 224];
 			const endColor: [number, number, number] = [0, 0, 46];
 
-			// const scrollFraction = main.scrollHeight > main.clientHeight ? main.scrollTop / (main.scrollHeight - main.clientHeight) : 0;
 			const scrollTop = window.scrollY;
 			const scrollHeight = document.body.scrollHeight;
 			const clientHeight = window.innerHeight;
@@ -497,7 +510,6 @@ export default function Home() {
 			const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * scrollFraction);
 			const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * scrollFraction);
 
-			//main.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
 			document.documentElement.style.setProperty("--main-bg", `rgb(${r}, ${g}, ${b})`);
 		}
 
