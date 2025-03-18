@@ -278,24 +278,6 @@
 				left: calc(-100% + calc(var(--card-width) / 1.5 + calc(var(--gap)) * 2.5));
 				top: -3rem;
 			}
-
-			// //기본 4장 정도는 다양성을 위해 직접 위치를 지정
-			// &.card-4 {
-			// 	/* 카드 너비 --card-lg에서 이동할 1rem을 더한 값 */
-			// 	left: calc(-100% + calc(var(--card-width) / 2 + var(--gap)));
-			// }
-
-			// &.card-3 {
-			// 	left: calc(-100% + calc((var(--card-width) * 2)) - calc(var(--gap) * 3));
-			// }
-
-			// &.card-2 {
-			// 	left: calc(-100% + calc((var(--card-width) * 3)) - calc(var(--gap) * 4));
-			// }
-
-			// &:nth-child(2n + 1) {
-			// 	top: 2rem;
-			// }
 		}
 	}
 
@@ -319,14 +301,12 @@
 			transform: rotate(1deg);
 			left: -2rem;
 			top: 1rem;
-			// border: 5px solid blue;
 		}
 
 		&.card-3 {
 			transform: rotate(2deg);
 			left: 2rem;
 			top: -1rem;
-			// border: 5px solid orange;
 		}
 
 		/* 킥을 위해 2번째 카드는 강한 회전값 */
@@ -334,7 +314,6 @@
 			transform: rotate(-4deg);
 			left: 3rem;
 			top: -2rem;
-			// border: 5px solid green;
 		}
 
 		/* 첫번째 카드는 음영 효과 x */
@@ -343,7 +322,6 @@
 			left: 1rem;
 			top: 0rem;
 			filter: brightness(100%);
-			// border: 5px solid red;
 		}
 
 		&:hover {
@@ -361,6 +339,10 @@
 				top 0.5s ease-in-out;
 			transform: scale(0.2);
 			top: -7rem !important;
+
+			&.moveY {
+				animation: insert 2s ease-in-out forwards;
+			}
 			//animation: insert 1.5s ease-in-out 0.2s forwards;
 			// transition:
 			// 	left 0.5s ease-in-out,
@@ -1393,5 +1375,16 @@ $transition: 0.5s ease-in-out;
 		margin-top: 0.4rem;
 		font-size: 0.9rem;
 		font-family: "GongGothicMedium";
+	}
+}
+
+.gameboy-section.power-on {
+	.power {
+		background-color: greenyellow;
+		box-shadow:
+			inset 0px 1px 2px 1px var(--body-dark),
+			inset 0px 0px 0px 1px rgba(var(--body-dark-rgb), 0.3),
+			0px 0px 2px 1px rgba(var(--body-light-rgb), 0.3),
+			1px 2px 2px -1px var(--body-light);
 	}
 }

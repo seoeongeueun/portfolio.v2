@@ -45,6 +45,7 @@ export default function Home() {
 	const [projects, setProjects] = useState<Projects>(ProjectsData);
 	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
+	const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
 
 	const mainRef = useRef<HTMLDivElement>(null);
 	const stickyRef = useRef<HTMLDivElement>(null);
@@ -402,6 +403,12 @@ export default function Home() {
 		// 	hoveredCard.classList.remove("selected");
 		// };
 
+		const handleMouseEnter = (event: MouseEvent) => {
+			// const hoveredCard = event.currentTarget as HTMLElement;
+			// setTimeout(() => {
+			// 	hoveredCard?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+			// }, 500);
+		};
 		function onCardClick(event: MouseEvent) {
 			const clickedCard = event.currentTarget as HTMLElement;
 			const rect = clickedCard.getBoundingClientRect();
@@ -444,11 +451,18 @@ export default function Home() {
 
 						const newLeft = desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : currentLeft - actualDelta;
 
-						cardsDiv.style.transition = "left 0.5s ease-in-out";
+						cardsDiv.style.transition = "left 1s ease-in-out 0.2s";
 						cardsDiv.style.left = `${newLeft}px`;
+
+						setTimeout(() => {
+							moveGameboyHead();
+						}, 1400);
 					} else {
 						cardsDiv.style.left = "";
 						cardsDiv.style.transition = "";
+						setTimeout(() => {
+							moveGameboyHead();
+						}, 800);
 					}
 				} else {
 					requestAnimationFrame(waitForScrollEnd);
@@ -458,23 +472,30 @@ export default function Home() {
 			requestAnimationFrame(waitForScrollEnd);
 
 			//게임기로 이동하기 위해 필요한 거리 계산
-			const gameboyHead = document.querySelector("#gameboy-head");
-			if (gameboyHead) {
-				const position = gameboyHead.getBoundingClientRect()?.top;
-				const current = rect?.top;
-				const currentScroll = mainRef.current?.scrollTop || 0;
+			const moveGameboyHead = () => {
+				const gameboyHead = document.querySelector("#gameboy-head");
+				if (gameboyHead) {
+					const referencePosition = gameboyHead.getBoundingClientRect().top;
+					const cardPosition = rect.top;
+					const distance = referencePosition - cardPosition - clickedCard.offsetHeight * 0.4;
 
-				// 게임기 위치 - 카드의 현재 y 위치 - 현재 스크롤 위치 / 2
-				const distance = position - current - currentScroll / 2;
-				clickedCard.style.setProperty("--y-distance", `${distance}px`);
-			}
+					//카트리지가 들어간 효과를 위해 추가 Y 값 (= 20)
+					clickedCard.style.setProperty("--y-distance", `${distance + 20}px`);
+					clickedCard.classList.add("moveY");
+				}
+			};
 
 			const handleAnimationEnd = () => {
 				//gameboyHead?.scrollIntoView({behavior: "smooth"});
+				if (gameboyHeadRef.current) {
+					gameboyHeadRef.current.classList.add("power-on");
+				}
 				setTimeout(() => {
-					clickedCard.classList.remove("clicked");
+					// clickedCard.classList.remove("clicked");
+					// cardsDiv.style.left = "";
+					// cardsDiv.style.transition = "";
+
 					clickedCard.removeEventListener("animationend", handleAnimationEnd);
-					cardsDiv.style.left = "";
 				}, 700);
 			};
 
@@ -482,14 +503,14 @@ export default function Home() {
 		}
 		const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
 		cards.forEach(card => {
-			// card.addEventListener("mouseenter", handleMouseEnter);
+			card.addEventListener("mouseenter", handleMouseEnter);
 			// card.addEventListener("mouseleave", handleMouseLeave);
 			card.addEventListener("click", onCardClick);
 		});
 
 		return () => {
 			cards.forEach(card => {
-				// card.removeEventListener("mouseenter", handleMouseEnter);
+				card.removeEventListener("mouseenter", handleMouseEnter);
 				// card.removeEventListener("mouseleave", handleMouseLeave);
 				card.removeEventListener("click", onCardClick);
 			});
@@ -665,7 +686,7 @@ export default function Home() {
 						))}
 					</div>
 				</div>
-				<div ref={gameboyHeadRef} className="relative">
+				<div ref={gameboyHeadRef} className="relative gameboy-section">
 					<Gameboy />
 				</div>
 			</section>

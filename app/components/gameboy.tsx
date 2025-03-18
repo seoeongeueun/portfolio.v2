@@ -60,7 +60,7 @@ export default function Gameboy() {
 							<div className="corner"></div>
 						</div>
 						<div className="power-button">
-							<div className="power"></div>
+							<div id="gameboy-power" className="power"></div>
 							<span>POWER</span>
 						</div>
 						<div className="ab-buttons">
