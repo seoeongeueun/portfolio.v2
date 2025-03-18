@@ -428,30 +428,34 @@ export default function Home() {
 			if (targetScroll < 0) targetScroll = 0;
 			if (targetScroll > maxScroll) targetScroll = maxScroll;
 
-			//clickedCard.classList.add("clicked");
-
 			parentContainer.scrollTo({
 				top: 0,
 				left: targetScroll,
 				behavior: "smooth",
 			});
 
-			//스크롤을 최대한 이동해도 부족해서 채워야 하는 여백을 계산
-			const actualDelta = currentScroll + desiredDelta - targetScroll;
-			//Math.round(targetScroll) !== Math.round(desiredDelta)는 스크롤 없이 중앙으로 오는게 가능한 카드
-			setTimeout(() => {
-				if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
-					const computedLeft = getComputedStyle(cardsDiv).left || "0";
-					const currentLeft = parseFloat(computedLeft);
+			const waitForScrollEnd = () => {
+				if (Math.abs(parentContainer.scrollLeft - targetScroll) < 1) {
+					const actualDelta = currentScroll + desiredDelta - targetScroll;
 
-					const newLeft = desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : currentLeft - actualDelta;
-					cardsDiv.style.transition = "left 0.7s ease-in-out";
-					cardsDiv.style.left = `${newLeft}px`;
+					if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
+						const computedLeft = getComputedStyle(cardsDiv).left || "0";
+						const currentLeft = parseFloat(computedLeft);
+
+						const newLeft = desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : currentLeft - actualDelta;
+
+						cardsDiv.style.transition = "left 0.5s ease-in-out";
+						cardsDiv.style.left = `${newLeft}px`;
+					} else {
+						cardsDiv.style.left = "";
+						cardsDiv.style.transition = "";
+					}
 				} else {
-					cardsDiv.style.left = "";
-					cardsDiv.style.transition = "";
+					requestAnimationFrame(waitForScrollEnd);
 				}
-			}, 400);
+			};
+			clickedCard.classList.add("clicked");
+			requestAnimationFrame(waitForScrollEnd);
 
 			//게임기로 이동하기 위해 필요한 거리 계산
 			const gameboyHead = document.querySelector("#gameboy-head");
