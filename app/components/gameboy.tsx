@@ -17,9 +17,8 @@ interface Project {
 }
 
 export default function Gameboy({project}: GameboyProps) {
-	console.log(project);
 	return (
-		<div className="w-full flex items-center justify-start md:justify-center overflow-auto z-[99]">
+		<div className="w-full flex items-center justify-start md:justify-center">
 			<div className="gameboy-body w-[77rem] h-[30rem] flex items-center justify-center">
 				<div id="gameboy-head" className="gameboy-frames flex flex-row items-center position-center">
 					<div className="body-left">

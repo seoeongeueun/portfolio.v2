@@ -29,6 +29,7 @@ export default function Home() {
 	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
 	const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
+	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
 
 	const mainRef = useRef<HTMLDivElement>(null);
 	const stickyRef = useRef<HTMLDivElement>(null);
@@ -135,6 +136,93 @@ export default function Home() {
 			window.removeEventListener("scroll", handleScroll);
 		};
 	}, []);
+
+	// useEffect(() => {
+	// 	const gameboyScreen = document.querySelector<HTMLDivElement>(".gameboy-screen");
+	// 	if (!gameboyHeadRef.current || !gameboyScreen || !isGameboyOn) return;
+
+	// 	const gameboyHead = gameboyHeadRef.current;
+
+	// 	// 1) 스크린 최대 확장 (50vw) 계산 대비용
+	// 	let maxScreenWidth = window.innerWidth * 0.5;
+	// 	let maxScale = maxScreenWidth / gameboyScreen.offsetWidth;
+
+	// 	// 2) 스크롤 핸들러
+	// 	const handleScroll = () => {
+	// 		// 2-1) gameboy-screen이 원위치로 돌아왔는지 검사
+	// 		const headRect = gameboyHead.getBoundingClientRect();
+	// 		const screenRect = gameboyScreen.getBoundingClientRect();
+
+	// 		// "gameboy-screen의 top >= head의 top" → sticky에서 풀려 원위치로 돌아온 상태
+
+	// 		console.log(headRect.top, screenRect.top);
+	// 		if (screenRect.top >= headRect.top) {
+	// 			// 원래 위치 → 스케일 1로 복귀
+	// 			gameboyHead.style.setProperty("--scale", "1");
+	// 			return;
+	// 		}
+
+	// 		// 2-2) 아직 sticky 상태로 “화면 아래로” 스크롤된 상태 → 스케일업 로직
+	// 		// 스크롤 양에 따라 scale값 계산 (예시로 scrollY 기반)
+	// 		const scrollDiff = window.scrollY - headRect.top;
+	// 		// 원하는 비율(0.002 등) 맞춰 조정
+	// 		let newScale = 1 + scrollDiff * 0.002;
+	// 		// 50vw 제한
+	// 		newScale = Math.min(newScale, maxScale);
+
+	// 		// 혹은 “스크롤을 올렸을 때(스크린이 아직 sticky 상태)” 줄어들게 할 거면
+	// 		// Math.max(1, newScale) 같은 로직 써도 됨
+	// 		if (newScale < 1) newScale = 1;
+
+	// 		//gameboyHead.style.setProperty("--scale", newScale.toString());
+	// 	};
+
+	// 	window.addEventListener("scroll", handleScroll);
+	// 	return () => {
+	// 		window.removeEventListener("scroll", handleScroll);
+	// 	};
+	// }, [isGameboyOn]);
+
+	useEffect(() => {
+		if (!gameboyHeadRef.current || !isGameboyOn) return;
+
+		const gameboyHead = gameboyHeadRef.current;
+		const gameboyScreen = gameboyHead.querySelector<HTMLDivElement>(".gameboy-screen");
+		if (!gameboyScreen) return;
+
+		const initialScrollY = window.scrollY;
+		let maxScreenWidth = window.innerWidth * 0.7; // 최대 70vw
+		let maxScale = maxScreenWidth / gameboyScreen.offsetWidth; // 최대 scale 값
+		let lastScrollY = window.scrollY; // 이전 스크롤 위치
+
+		const originalLeft = gameboyScreen.offsetLeft; //scale 적용 전에 screen의 왼쪽 거리를 계산
+
+		const handleScroll = () => {
+			const scrollY = window.scrollY;
+			let scrollDiff = scrollY - initialScrollY; // 기준점 대비 스크롤 이동량
+
+			// 스크롤 위 방향 감지
+			if (scrollY < lastScrollY) {
+				//스크롤을 올릴 때는 자연스럽게 작아지기 위해 기준점을 현재 위치에서 200px 정도 멀리 잡는다
+				scrollDiff -= 100;
+			} else {
+				scrollDiff += 300;
+			}
+			let newScale = 1 + scrollDiff * 0.002;
+			// 1보다는 크고 maxscale보다는 작게
+			newScale = Math.max(1, Math.min(newScale, maxScale));
+
+			//1 이하로는 작아지지 못하게 지정
+			gameboyHead.style.setProperty("--scale", newScale.toString());
+
+			lastScrollY = scrollY;
+		};
+
+		window.addEventListener("scroll", handleScroll);
+		return () => {
+			window.removeEventListener("scroll", handleScroll);
+		};
+	}, [isGameboyOn]);
 
 	// useEffect(() => {
 	// 	let ticking = false;
@@ -368,24 +456,6 @@ export default function Home() {
 		const cardsDiv = cartridgeCardsRef.current;
 		if (!cardsDiv || !parentContainer) return;
 
-		// const handleMouseEnter = (event: MouseEvent) => {
-		// 	const hoveredCard = event.currentTarget as HTMLElement;
-		// 	cardList.forEach(card => card.classList.remove("selected"));
-		// 	//hoveredCard.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
-
-		// 	const addSelectedClass = () => {
-		// 		const allCards = cartridgeCardsRef.current?.querySelectorAll("#card");
-		// 		allCards?.forEach(card => card.classList.remove("selected"));
-		// 		hoveredCard.classList.add("selected");
-		// 	};
-		// 	setTimeout(addSelectedClass, 100);
-		// };
-
-		// const handleMouseLeave = (event: MouseEvent) => {
-		// 	const hoveredCard = event.currentTarget as HTMLElement;
-		// 	hoveredCard.classList.remove("selected");
-		// };
-
 		const handleMouseEnter = (event: MouseEvent) => {
 			// const hoveredCard = event.currentTarget as HTMLElement;
 			// setTimeout(() => {
@@ -472,9 +542,8 @@ export default function Home() {
 			};
 
 			const handleAnimationEnd = () => {
-				if (gameboyHeadRef.current) {
-					gameboyHeadRef.current.classList.add("power-on");
-				}
+				setIsGameboyOn(true);
+
 				setTimeout(() => {
 					// clickedCard.classList.remove("clicked");
 					// cardsDiv.style.left = "";
@@ -489,14 +558,12 @@ export default function Home() {
 		const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
 		cards.forEach(card => {
 			card.addEventListener("mouseenter", handleMouseEnter);
-			// card.addEventListener("mouseleave", handleMouseLeave);
 			card.addEventListener("click", onCardClick);
 		});
 
 		return () => {
 			cards.forEach(card => {
 				card.removeEventListener("mouseenter", handleMouseEnter);
-				// card.removeEventListener("mouseleave", handleMouseLeave);
 				card.removeEventListener("click", onCardClick);
 			});
 		};
@@ -566,7 +633,7 @@ export default function Home() {
 	}, [tags]);
 
 	return (
-		<div ref={mainRef} className="py-52 text-gray-4 w-full h-[300vh] flex flex-col items-center justify-start gap-4">
+		<div ref={mainRef} className="py-52 text-gray-4 w-full h-[300vh] flex flex-col items-center justify-start gap-4 overflow-visible">
 			<div className="fixed top-0 p-4 pointer-events-none w-full">
 				<div className="w-full flex flex-row items-center justify-between mb-auto">
 					<span>ha</span>
@@ -652,7 +719,7 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section className="flex-col full-section">
+			<section className="flex-col full-section !h-fit">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
@@ -676,8 +743,14 @@ export default function Home() {
 						))}
 					</div>
 				</div>
-				<div ref={gameboyHeadRef} className="relative gameboy-section mt-60 fade-up-section">
+				<div ref={gameboyHeadRef} className={`relative gameboy-section mt-60 ${isGameboyOn && "power-on"}`}>
 					<Gameboy project={ProjectsData[selectedProjectTitle as keyof typeof ProjectsData]} />
+				</div>
+			</section>
+			<section className="flex-col bg-red-100 opacity-50 mt-[150vh] fade-up-section">
+				<div className="flex flex-col justify-start items-center mb-auto">
+					<p className="subtitle">CONTACTS</p>
+					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
 			</section>
 		</div>
