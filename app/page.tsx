@@ -482,11 +482,13 @@ export default function Home() {
 					//카트리지가 들어간 효과를 위해 추가 Y 값 (= 20)
 					clickedCard.style.setProperty("--y-distance", `${distance + 20}px`);
 					clickedCard.classList.add("moveY");
+					setTimeout(() => {
+						gameboyHeadRef.current?.scrollIntoView({behavior: "smooth", block: "center", inline: "center"});
+					}, 300);
 				}
 			};
 
 			const handleAnimationEnd = () => {
-				//gameboyHead?.scrollIntoView({behavior: "smooth"});
 				if (gameboyHeadRef.current) {
 					gameboyHeadRef.current.classList.add("power-on");
 				}
@@ -686,7 +688,7 @@ export default function Home() {
 						))}
 					</div>
 				</div>
-				<div ref={gameboyHeadRef} className="relative gameboy-section">
+				<div ref={gameboyHeadRef} className="relative gameboy-section mt-60">
 					<Gameboy />
 				</div>
 			</section>

@@ -25,27 +25,6 @@
 }
 
 @theme {
-	/* --spacing-2: 0.2rem;
-	--spacing-3: 0.3rem;
-	--spacing-4: 0.4rem;
-	--spacing-5: 0.5rem;
-	--spacing-6: 0.6rem;
-	--spacing-8: 0.8rem;
-	--spacing-10: 1rem;
-	--spacing-12: 1.2rem;
-	--spacing-13: 1.3rem;
-	--spacing-14: 1.4rem;
-	--spacing-16: 1.6rem;
-	--spacing-18: 1.8rem;
-	--spacing-20: 2rem;
-	--spacing-24: 2.4rem;
-	--spacing-28: 2.8rem;
-	--spacing-29: 2.9rem;
-	--spacing-32: 3.2rem;
-	--spacing-36: 3.6rem;
-	--spacing-40: 4rem;
-	--spacing-60: 6rem; */
-
 	--font-dunggeunmo: DungGeunMo, sans-serif;
 	--font-nanumbarunpen: NanumBarunpen, sans-serif;
 	--font-tenada: Tenada, sans-serif;
@@ -73,8 +52,8 @@
 	--text-xxxl: 2.8rem;
 	--text-xxxl-line: 3rem;
 
-	--color-gray-1: #b0acb4;
-	--color-gray-2: #757177;
+	--color-gray-1: var(--gray-1);
+	--color-gray-2: var(--gray-2);
 	--color-body: var(--body);
 	--color-gray-4: rgb(46, 46, 46);
 
@@ -107,6 +86,8 @@
 	--darkest-point-rgb: 3, 11, 8;
 
 	--main-bg: rgb(216, 221, 224);
+	--gray-1: #b0acb4;
+	--gray-2: #757177;
 }
 
 html {

@@ -95,7 +95,7 @@ export default function Gameboy() {
 					{/* 화면 영역 */}
 					<div className="pointer-events-auto bg-black border border-black px-[0.4rem] py-[0.8rem] w-fit z-30">
 						<div className="w-[32rem] h-[20rem] bg-off-screen">
-							<div className={`w-full h-full flex flex-col justify-center items-center bg-gray-1`}></div>
+							<div className="gameboy-screen w-full h-full flex flex-col justify-center items-center"></div>
 						</div>
 					</div>
 					<div className="frame-side left">

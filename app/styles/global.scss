@@ -341,7 +341,7 @@
 			top: -7rem !important;
 
 			&.moveY {
-				animation: insert 2s ease-in-out forwards;
+				animation: insert 1.5s ease-in-out forwards;
 			}
 			//animation: insert 1.5s ease-in-out 0.2s forwards;
 			// transition:
@@ -605,6 +605,10 @@
 
 .gameboy-body {
 	position: absolute;
+}
+
+.gameboy-screen {
+	background: linear-gradient(130deg, #858383, #3f3c3c);
 }
 
 .position-center {
@@ -1386,5 +1390,9 @@ $transition: 0.5s ease-in-out;
 			inset 0px 0px 0px 1px rgba(var(--body-dark-rgb), 0.3),
 			0px 0px 2px 1px rgba(var(--body-light-rgb), 0.3),
 			1px 2px 2px -1px var(--body-light);
+	}
+
+	.gameboy-screen {
+		animation: power-screen 0.7s ease-in-out 0.2s forwards;
 	}
 }
