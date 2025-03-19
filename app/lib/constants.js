@@ -1,0 +1,21 @@
+//stack icon library
+export const stacks = {
+	js: "java\nscript",
+	typescript: "type\nscript",
+	python: "python",
+	reactjs: "react.js",
+	nextjs2: "next.js",
+	electron: "electron",
+	nodejs: "node.js",
+	redux: "redux",
+	docker: "docker",
+	postgresql: "postgre\nsql",
+	mongodb: "mongo\ndb",
+	css3: "css",
+	html5: "html",
+	tailwindcss: "tailwind css",
+	ps: "photo\nshop",
+	cypress: "cypress",
+	playwright: "play\nwright",
+	mysql: "mysql",
+};

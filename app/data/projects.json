@@ -4,14 +4,16 @@
 		"subtitle": "ORGD 2024",
 		"thumbnail": "/images/orgd_main.JPG",
 		"tags": ["1 DEV", "PERSONAL", "EXHIBITION"],
-		"theme": "#2e2e2e"
+		"theme": "#2e2e2e",
+		"stacks": ["js", "nextjs2", "socket", "express", "mongodb", "tailwindcss"]
 	},
 	"2": {
 		"title": "HeyMap",
 		"subtitle": "Map for Popups",
 		"thumbnail": "/images/heymap_main.png",
 		"tags": ["WORK", "TEAM", "WEB"],
-		"theme": "#f9804c"
+		"theme": "#f9804c",
+		"stacks": ["js", "nextjs2", "express", "postgresql", "tailwindcss"]
 	},
 
 	"3": {
@@ -19,27 +21,31 @@
 		"subtitle": "Local Painting Storage for Artists",
 		"thumbnail": "/images/localstorage_main.png",
 		"tags": ["WORK", "TEAM", "WEB"],
-		"theme": "#8bf337"
+		"theme": "#8bf337",
+		"stacks": ["php", "wordpress", "jquery", "mysql", "css3"]
 	},
 	"4": {
 		"title": "Workmate",
 		"subtitle": "Retro Music Player",
 		"thumbnail": "/images/workmate_main.png",
 		"tags": ["1 DEV", "PERSONAL", "WEB", "STANDALONE"],
-		"theme": "#4f5293"
+		"theme": "#4f5293",
+		"stacks": ["typescript", "nextjs2", "electron", "mongodb", "tailwindcss"]
 	},
 	"5": {
 		"title": "Portfolio",
 		"subtitle": "Portfolio Renewal",
 		"thumbnail": "/images/portfolio_main.png",
 		"tags": ["1 DEV", "PERSONAL", "WEB"],
-		"theme": "#2febf1"
+		"theme": "#2febf1",
+		"stacks": ["typescript", "nextjs2", "tailwindcss"]
 	},
 	"6": {
 		"title": "...And More!",
 		"subtitle": "Other Projects",
 		"thumbnail": "/images/other_main.png",
 		"tags": ["1 DEV", "WORK", "WEB"],
-		"theme": "#2febf1"
+		"theme": "#2febf1",
+		"stacks": ["typescript", "js", "nextjs2", "reactjs", "playwright", "cypress", "css3", "html5", "mysql", "docker"]
 	}
 }

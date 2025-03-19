@@ -8,6 +8,7 @@ import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
 import "./styles/global.scss";
+import {stacks} from "./lib/constants";
 
 type TextFileType = Record<string, string>;
 interface Project {
@@ -21,24 +22,6 @@ interface Project {
 interface Projects {
 	[key: string]: Project;
 }
-
-const stacks = {
-	js: "java\nscript",
-	typescript: "type\nscript",
-	python: "python",
-	reactjs: "react.js",
-	nextjs2: "next.js",
-	electron: "electron",
-	nodejs: "node.js",
-	redux: "redux",
-	docker: "docker",
-	postgresql: "postgre\nsql",
-	mongodb: "mongo\ndb",
-	css3: "css",
-	html5: "html",
-	tailwindcss: "tailwind css",
-	ps: "photo\nshop",
-};
 
 export default function Home() {
 	const [textFile, setTextFile] = useState<TextFileType>(TextEn);
@@ -584,13 +567,18 @@ export default function Home() {
 
 	return (
 		<div ref={mainRef} className="py-52 text-gray-4 w-full h-[300vh] flex flex-col items-center justify-start gap-4">
+			<div className="fixed top-0 p-4 pointer-events-none w-full">
+				<div className="w-full flex flex-row items-center justify-between mb-auto">
+					<span>ha</span>
+				</div>
+			</div>
 			<section className="flex-col">
 				<div className="flex flex-col justify-center items-center">
 					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-gray-4 text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
 						FRONTEND DEVELOPER
 					</p>
 					<p ref={mainTitleRef} className="main-title md:whitespace-nowrap font-normal text-center text-[7rem] md:text-[10rem] lg:text-[12rem]">
-						SEONGEUN PARK
+						SEONGEUN
 					</p>
 				</div>
 
@@ -682,14 +670,14 @@ export default function Home() {
 				>
 					<div ref={cartridgeCardsRef} className="cartridge-cards relative">
 						{Object.entries(projects).map(([k, v]) => (
-							<div id="card" key={v.title} className={`card card-${k}`}>
+							<div id="card" key={v.title} className={`card card-${k}`} onClick={() => setSelectedProjectTitle(k)}>
 								<Cartridge project={v} />
 							</div>
 						))}
 					</div>
 				</div>
-				<div ref={gameboyHeadRef} className="relative gameboy-section mt-60">
-					<Gameboy />
+				<div ref={gameboyHeadRef} className="relative gameboy-section mt-60 fade-up-section">
+					<Gameboy project={ProjectsData[selectedProjectTitle as keyof typeof ProjectsData]} />
 				</div>
 			</section>
 		</div>

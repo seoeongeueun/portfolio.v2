@@ -1,5 +1,23 @@
 import Cartridge from "./cartridge";
-export default function Gameboy() {
+import StackIcon from "tech-stack-icons";
+import {stacks} from "../lib/constants";
+import Image from "next/image";
+
+type GameboyProps = {
+	project: Project;
+};
+
+interface Project {
+	title: string;
+	subtitle: string;
+	thumbnail: string;
+	tags: string[];
+	theme: string;
+	stacks: string[];
+}
+
+export default function Gameboy({project}: GameboyProps) {
+	console.log(project);
 	return (
 		<div className="w-full flex items-center justify-start md:justify-center overflow-auto z-[99]">
 			<div className="gameboy-body w-[77rem] h-[30rem] flex items-center justify-center">
@@ -95,7 +113,22 @@ export default function Gameboy() {
 					{/* 화면 영역 */}
 					<div className="pointer-events-auto bg-black border border-black px-[0.4rem] py-[0.8rem] w-fit z-30">
 						<div className="w-[32rem] h-[20rem] bg-off-screen">
-							<div className="gameboy-screen w-full h-full flex flex-col justify-center items-center"></div>
+							<div className="gameboy-screen w-full h-full">
+								<div className="contents w-full h-full flex flex-col justify-center items-center text-black font-dunggeunmo font-normal gap-2">
+									<p className="text-xl">{project?.title.toUpperCase()}</p>
+									<div className="flex flex-wrap-reverse justify-center w-full h-fit gap-2 px-4">
+										{project &&
+											project.stacks?.length > 0 &&
+											project.stacks.map((s: string) => {
+												if (Object.prototype.hasOwnProperty.call(stacks, s)) {
+													return <StackIcon key={s} name={s} className="w-8 h-8" />;
+												} else {
+													return <Image key={s} src={`/icons/${s}.svg`} width={20} height={20} alt={s} />;
+												}
+											})}
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div className="frame-side left">
@@ -104,7 +137,7 @@ export default function Gameboy() {
 					<div className="frame-bottom">
 						<div className="base">
 							<div></div>
-							<span className="playlist-title text-nowrap">WORKMATE</span>
+							<span className="playlist-title text-nowrap">PROJECTS</span>
 						</div>
 						<div className="top">
 							<div></div>
