@@ -37,10 +37,10 @@ export default function Home() {
 	const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
 	const positionsRef = useRef<{top: number; left: number}[]>([]);
-	const [charPositions, setCharPositions] = useState<Record<string, {top: number; left: number}>>({});
-	//const [chars, setChars] = useState<string[]>(["typescript", "javascript"]);
 
 	const bowlRef = useRef<HTMLDivElement | null>(null);
+	const charPositionsRef = useRef<Record<string, {x: number; y: number}>>({});
+
 	const mainRef = useRef<HTMLDivElement>(null);
 	const stickyRef = useRef<HTMLDivElement>(null);
 	const careerCardsRef = useRef<HTMLDivElement>(null);
@@ -73,37 +73,29 @@ export default function Home() {
 		window.removeEventListener("touchmove", preventScroll);
 	}
 
-	const generateNonOverlappingPosition = () => {
-		const maxAttempts = 10;
-		let attempts = 0;
-		let newPos;
-
-		do {
-			const top = getRandomInt(40);
-			const left = getRandomInt(40);
-			newPos = {top, left};
-
-			// Check if it's too close to any existing character
-			const tooClose = positionsRef.current.some(pos => Math.abs(pos.top - top) < 10 && Math.abs(pos.left - left) < 10);
-
-			if (!tooClose) {
-				positionsRef.current.push(newPos);
-				return newPos;
-			}
-
-			attempts++;
-		} while (attempts < maxAttempts);
-
-		// If no valid position found, return the last attempt
-		return newPos!;
+	//pseudo element의 너비를 계산하는 함수
+	const getPseudoBounds = (element: HTMLElement, pseudo: "::before" | "::after") => {
+		const style = window.getComputedStyle(element, pseudo);
+		const width = parseFloat(style.width);
+		const height = parseFloat(style.height);
+		const top = element.getBoundingClientRect().top + parseFloat(style.top);
+		const left = element.getBoundingClientRect().left + parseFloat(style.left);
+		return {top, left, right: left + width, bottom: top + height, width, height};
 	};
 
-	// Generate positions only once when stacks change
 	useEffect(() => {
 		if (!bowlRef.current) return;
+		Object.keys(stacks).forEach(key => {
+			if (!charPositionsRef.current[key]) {
+				charPositionsRef.current[key] = {
+					x: getRandomInt(40),
+					y: getRandomInt(40),
+				};
+			}
+		});
+
 		gsap.defaults({overwrite: true});
 
-		// Start character movement with GSAP
 		gsap.to(".char", {
 			x: () => getRandomInt(10),
 			y: () => getRandomInt(10),
@@ -126,6 +118,8 @@ export default function Home() {
 
 				const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
 				const charBounds = el.getBoundingClientRect();
+				const pseudoBounds = getPseudoBounds(bowlRef.current, "::before");
+				console.log(pseudoBounds);
 				const bowlBounds = bowlRef.current.getBoundingClientRect();
 				const t = 3;
 
@@ -133,11 +127,11 @@ export default function Home() {
 				let newY = charBounds.top + deltaY * t;
 
 				const vmin = Math.min(window.innerWidth, window.innerHeight);
-				const yMargin = (vmin * 5) / 100;
-				const xMargin = (vmin * 15) / 100;
+				const yMargin = (vmin * 4) / 100;
+				const xMargin = (vmin * 12) / 100;
 
-				if (newX < bowlBounds.left + xMargin) newX = bowlBounds.left + xMargin;
-				if (newX + charBounds.width > bowlBounds.right - xMargin) newX = bowlBounds.right - charBounds.width - xMargin;
+				if (newX < bowlBounds.left + xMargin) newX = pseudoBounds.left + xMargin;
+				if (newX + charBounds.width > pseudoBounds.right - xMargin + 10) newX = pseudoBounds.right - charBounds.width - xMargin + 10;
 				if (newY < bowlBounds.top + yMargin) newY = bowlBounds.top + yMargin;
 				if (newY + charBounds.height > bowlBounds.bottom - yMargin) newY = bowlBounds.bottom - charBounds.height - yMargin;
 
@@ -630,32 +624,33 @@ export default function Home() {
 								</filter>
 							</defs>
 						</svg>
-						{Object.keys(stacks).map(k => {
-							const position = charPositions[k] || {top: 0, left: 0};
+						{Object.keys(charPositionsRef.current).length > 0 &&
+							Object.keys(stacks).map(k => {
+								const {x, y} = charPositionsRef.current[k] || {x: 0, y: 0};
 
-							return (
-								<Fragment key={k}>
-									<Image
-										src={`/icons/${k}.png`}
-										alt={k}
-										className={`char char-${k}`}
-										width={70}
-										height={70}
-										style={{
-											top: `${position.top}%`,
-											left: `${position.left}%`,
-										}}
-									/>
-									<div
-										className={`shadow shadow-${k}`}
-										style={{
-											top: `calc(${position.top}% + 20%)`,
-											left: `calc(${position.left}% - 3%)`,
-										}}
-									></div>
-								</Fragment>
-							);
-						})}
+								return (
+									<Fragment key={k}>
+										<Image
+											src={`/icons/${k}.png`}
+											alt={k}
+											className={`char char-${k}`}
+											width={70}
+											height={70}
+											style={{
+												top: `${y}%`,
+												left: `${x}%`,
+											}}
+										/>
+										<div
+											className={`shadow shadow-${k}`}
+											style={{
+												top: `calc(${y}% + 20%)`,
+												left: `calc(${x}% - 3%)`,
+											}}
+										></div>
+									</Fragment>
+								);
+							})}
 					</div>
 				</div>
 				<div className="fixed bottom-0 p-20 pointer-events-none z-[99]">
