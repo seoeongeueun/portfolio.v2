@@ -1,5 +1,4 @@
 import Cartridge from "./cartridge";
-import StackIcon from "tech-stack-icons";
 import {stacks} from "../lib/constants";
 import Image from "next/image";
 
@@ -118,13 +117,7 @@ export default function Gameboy({project}: GameboyProps) {
 									<div className="flex flex-wrap-reverse justify-center w-full h-fit gap-2 px-4">
 										{project &&
 											project.stacks?.length > 0 &&
-											project.stacks.map((s: string) => {
-												if (Object.prototype.hasOwnProperty.call(stacks, s)) {
-													return <StackIcon key={s} name={s} className="w-8 h-8" />;
-												} else {
-													return <Image key={s} src={`/icons/${s}.svg`} width={20} height={20} alt={s} />;
-												}
-											})}
+											project.stacks.map((s: string) => <Image key={s} src={`/icons/${s}.svg`} width={20} height={20} alt={s} />)}
 									</div>
 								</div>
 							</div>

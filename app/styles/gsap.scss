@@ -1,0 +1,125 @@
+body {
+	--color-noodle: hsl(32 100% 75%);
+	--color-pool: #30d2f7;
+	--color-placemat: hsla(207, 96%, 34%, 0.5);
+	display: grid;
+	grid-template-areas: "body";
+	place-items: center;
+	background: hsl(186deg 67% 74%);
+}
+
+body > * {
+	grid-area: body;
+}
+
+.placemat {
+	width: 90vmin;
+	aspect-ratio: 5 / 4;
+}
+
+.bowl {
+	position: relative;
+	overflow: hidden;
+	display: grid;
+	place-items: center;
+	grid-template-areas: "bowl";
+	aspect-ratio: 1;
+	width: 75vmin;
+	text-transform: uppercase;
+	background: var(--color-pool);
+	color: var(--color-noodle);
+	border-radius: 50%;
+	border: 5vmin solid white;
+	//transform: perspective(500px) rotateX(30deg);
+	box-shadow:
+		hsla(0 0% 0% / 0.05) 2vmin 2vmin 2vmin -2vmin,
+		hsla(0 0% 0% / 0.05) -2vmin -2vmin 2vmin -2vmin,
+		hsla(0 0% 0% / 0.1) -5vmin -5vmin 10vmin 1vmin inset,
+		hsla(0 0% 0% / 0.1) 5vmin 5vmin 10vmin 1vmin inset,
+		hsl(0 0% 0% / 0.1) 0 0 1vmin 2vmin inset;
+
+	&::before {
+		content: "";
+		width: 100%;
+		height: 100%;
+		background-color: red;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		border-radius: 100%;
+		background: var(--color-pool);
+		background-image: linear-gradient(90deg, var(--color-placemat) 2%, transparent 0), linear-gradient(var(--color-placemat) 2%, transparent 0);
+		background-size: 20% 20%;
+		background-position: left top;
+		opacity: 0.6;
+		filter: blur(2px);
+	}
+}
+
+.bowl > * {
+	grid-area: bowl;
+}
+
+.text {
+	width: 100%;
+	text-align: center;
+}
+
+.char {
+	position: relative;
+	//transform: scaleX(0.8);
+	flex-shrink: 0;
+
+	z-index: 10;
+
+	> * {
+		pointer-events: none;
+	}
+}
+
+.shadow {
+	width: 6rem;
+	height: 6rem;
+	background-color: rgba(31, 89, 148, 0.1);
+	position: relative;
+	filter: blur(10px);
+	opacity: 0.4;
+}
+
+// .ladder {
+// 	display: flex;
+// 	flex-direction: column;
+// 	justify-content: space-evenly;
+// 	width: 7rem;
+// 	height: 25rem;
+// 	border-right: 1rem solid red;
+// 	border-left: 1rem solid red;
+// 	border-radius: 1rem;
+// 	//transform: rotate3d(1, 3, 1, 70deg);
+// 	transform: rotateX(80deg);
+// 	position: absolute;
+// 	top: -11rem;
+// 	left: calc(50% - 5rem);
+// 	filter: blur(1px) url("/assets/wavy.svg");
+// 	opacity: 0.7;
+// 	overflow: visible;
+// 	&:after {
+// 		content: "";
+// 		position: absolute;
+// 		top: -10rem;
+// 		width: 100%;
+// 		height: 50%;
+// 		border-radius: 100%;
+// 		background-color: black;
+// 		filter: blur(10px);
+// 		opacity: 0.2;
+// 	}
+
+// 	.step {
+// 		width: 100%;
+// 		height: 3rem;
+// 		background-color: red;
+// 		border-bottom: 0.5rem solid rgb(196, 0, 0);
+// 	}
+// }

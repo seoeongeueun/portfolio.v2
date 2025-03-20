@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import StackIcon from "tech-stack-icons";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
 import {useEffect, useState, useRef, useCallback, act} from "react";
@@ -8,7 +7,14 @@ import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
 import "./styles/global.scss";
+import "./styles/gsap.scss";
 import {stacks} from "./lib/constants";
+import gsap from "gsap";
+import {Observer} from "gsap/Observer";
+
+gsap.registerPlugin(Observer);
+
+const getRandomInt = (val: number): number => Math.ceil(Math.random() * val) * (Math.random() < 0.5 ? -1 : 1);
 
 type TextFileType = Record<string, string>;
 interface Project {
@@ -30,7 +36,9 @@ export default function Home() {
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
 	const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
+	//const [chars, setChars] = useState<string[]>(["typescript", "javascript"]);
 
+	const bowlRef = useRef<HTMLDivElement | null>(null);
 	const mainRef = useRef<HTMLDivElement>(null);
 	const stickyRef = useRef<HTMLDivElement>(null);
 	const careerCardsRef = useRef<HTMLDivElement>(null);
@@ -60,6 +68,67 @@ export default function Home() {
 		window.removeEventListener("wheel", preventScroll);
 		window.removeEventListener("touchmove", preventScroll);
 	}
+
+	useEffect(() => {
+		if (!bowlRef.current) return;
+
+		gsap.defaults({overwrite: true});
+
+		gsap.to(".char", {
+			xPercent: () => getRandomInt(10),
+			yPercent: () => getRandomInt(10),
+			rotation: () => getRandomInt(20),
+			duration: 5,
+		});
+
+		const moveChars = (obj: {event: MouseEvent; deltaX: number; deltaY: number}) => {
+			const {event, deltaX, deltaY} = obj;
+			const el = event.target as HTMLElement;
+			const id = el.classList.contains("char") ? el.className.match(/char-(\S+)/)?.[1] : null;
+
+			if (!id) return; // If no ID is found, exit function
+
+			const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
+			const r = el.getBoundingClientRect();
+			const y = event.clientY - (r.top + Math.floor(r.height / 2));
+			const t = 5;
+
+			// Move both char and shadow
+			gsap.to(el, {
+				xPercent: `+=${deltaX * t}`,
+				yPercent: `+=${deltaY * t}`,
+				rotation: `-=${deltaX * t * Math.sign(y)}`,
+				duration: 3,
+				ease: "expo.out",
+			});
+
+			if (shadow) {
+				gsap.to(shadow, {
+					xPercent: `+=${deltaX * t}`,
+					yPercent: `+=${deltaY * t}`,
+					duration: 3,
+					ease: "expo.out",
+				});
+			}
+		};
+
+		const observer = Observer.create({
+			target: bowlRef.current,
+			onMove: self => {
+				const mouseEvent = self.event as MouseEvent;
+				if (self.event instanceof MouseEvent && self.event.target instanceof HTMLElement && self.event.target.matches(".char")) {
+					moveChars({
+						event: mouseEvent,
+						deltaX: self.deltaX,
+						deltaY: self.deltaY,
+					});
+				}
+			},
+		});
+
+		return () => observer.kill();
+	}, [stacks]);
+
 	//sticky div가 맨 위에 붙은 상황 (지금 화면의 중심인 경우)
 	useEffect(() => {
 		if (!careerCardsRef.current || !stickyRef.current) return;
@@ -137,52 +206,6 @@ export default function Home() {
 		};
 	}, []);
 
-	// useEffect(() => {
-	// 	const gameboyScreen = document.querySelector<HTMLDivElement>(".gameboy-screen");
-	// 	if (!gameboyHeadRef.current || !gameboyScreen || !isGameboyOn) return;
-
-	// 	const gameboyHead = gameboyHeadRef.current;
-
-	// 	// 1) 스크린 최대 확장 (50vw) 계산 대비용
-	// 	let maxScreenWidth = window.innerWidth * 0.5;
-	// 	let maxScale = maxScreenWidth / gameboyScreen.offsetWidth;
-
-	// 	// 2) 스크롤 핸들러
-	// 	const handleScroll = () => {
-	// 		// 2-1) gameboy-screen이 원위치로 돌아왔는지 검사
-	// 		const headRect = gameboyHead.getBoundingClientRect();
-	// 		const screenRect = gameboyScreen.getBoundingClientRect();
-
-	// 		// "gameboy-screen의 top >= head의 top" → sticky에서 풀려 원위치로 돌아온 상태
-
-	// 		console.log(headRect.top, screenRect.top);
-	// 		if (screenRect.top >= headRect.top) {
-	// 			// 원래 위치 → 스케일 1로 복귀
-	// 			gameboyHead.style.setProperty("--scale", "1");
-	// 			return;
-	// 		}
-
-	// 		// 2-2) 아직 sticky 상태로 “화면 아래로” 스크롤된 상태 → 스케일업 로직
-	// 		// 스크롤 양에 따라 scale값 계산 (예시로 scrollY 기반)
-	// 		const scrollDiff = window.scrollY - headRect.top;
-	// 		// 원하는 비율(0.002 등) 맞춰 조정
-	// 		let newScale = 1 + scrollDiff * 0.002;
-	// 		// 50vw 제한
-	// 		newScale = Math.min(newScale, maxScale);
-
-	// 		// 혹은 “스크롤을 올렸을 때(스크린이 아직 sticky 상태)” 줄어들게 할 거면
-	// 		// Math.max(1, newScale) 같은 로직 써도 됨
-	// 		if (newScale < 1) newScale = 1;
-
-	// 		//gameboyHead.style.setProperty("--scale", newScale.toString());
-	// 	};
-
-	// 	window.addEventListener("scroll", handleScroll);
-	// 	return () => {
-	// 		window.removeEventListener("scroll", handleScroll);
-	// 	};
-	// }, [isGameboyOn]);
-
 	useEffect(() => {
 		if (!gameboyHeadRef.current || !isGameboyOn) return;
 
@@ -223,150 +246,6 @@ export default function Home() {
 			window.removeEventListener("scroll", handleScroll);
 		};
 	}, [isGameboyOn]);
-
-	// useEffect(() => {
-	// 	let ticking = false;
-
-	// 	const handleStickyScroll = (deltaY: number) => {
-	// 		if (!mainRef.current || !careerCardsRef.current) return;
-
-	// 		window.requestAnimationFrame(() => {
-	// 			const style = window.getComputedStyle(careerCardsRef.current as HTMLDivElement);
-	// 			const matrix = new DOMMatrixReadOnly(style.transform);
-	// 			let currentTranslateY = matrix.m42 || 0;
-	// 			const paddingTop = parseInt(style.paddingTop, 10);
-
-	// 			// Account for initial padding
-	// 			if (currentTranslateY === 0 && paddingTop > 0) {
-	// 				currentTranslateY = paddingTop;
-	// 			}
-
-	// 			const newTranslateY = currentTranslateY - deltaY;
-	// 			careerCardsRef.current!.style.transform = `translateY(${newTranslateY}px)`;
-
-	// 			// Update card visibility after transform change
-	// 			updateCardsVisibility();
-
-	// 			ticking = false;
-	// 		});
-	// 	};
-
-	// 	const handleScroll = (e: Event) => {
-	// 		if (!stickyRef.current || !mainRef.current || !careerCardsRef.current) return;
-
-	// 		const rect = stickyRef.current.getBoundingClientRect();
-	// 		const mainRect = mainRef.current.getBoundingClientRect();
-
-	// 		//메인 div의 py 값을 계산
-	// 		const mainStyles = window.getComputedStyle(mainRef.current);
-	// 		const paddingTop = parseInt(mainStyles.paddingTop, 10);
-	// 		const scrollTop = window.scrollY;
-
-	// 		// wheelevent의 deltaY를 흉내내기
-	// 		const deltaY = scrollTop - prevScrollTop.current;
-	// 		prevScrollTop.current = scrollTop;
-
-	// 		// sticky div이 상단 가장자리 + 패딩 위치에 도달했을 때 커리어 카드를 펼침
-	// 		if (rect.top <= paddingTop) {
-	// 			setTimeout(() => {
-	// 				//careerCardsRef.current?.classList.replace("fade-left", "spread");
-	// 				stickyRef.current?.classList.add("stuck");
-	// 				careerCardsRef.current?.classList.add("spread");
-	// 			}, 700);
-	// 			//lockScroll();
-	// 		} else {
-	// 			stickyRef.current.classList.remove("stuck");
-	// 		}
-
-	// 		if (stickyRef.current.classList.contains("stuck")) {
-	// 			handleStickyScroll(deltaY);
-	// 		}
-	// 	};
-
-	// 	window.addEventListener("scroll", handleScroll);
-	// 	return () => window.removeEventListener("scroll", handleScroll);
-	// }, []);
-
-	// const handleStickyScroll = useCallback(
-	// 	(e: Event, deltaY: number) => {
-	// 		if (!mainRef.current || !careerCardsRef.current) return;
-
-	// 		//sticky가 발동된 이후 메인에서 발생하는 y 스크롤을 납치해 커리어 카드에 적용
-
-	// 		const style = window.getComputedStyle(careerCardsRef.current);
-	// 		const matrix = new DOMMatrixReadOnly(style.transform);
-	// 		let currentTranslateY = matrix.m42 || 0;
-	// 		const paddingTop = parseInt(style.paddingTop, 10);
-
-	// 		// 커리어 카드 div에 적용된 패딩 값을 감안해서 적용
-	// 		if (currentTranslateY === 0 && paddingTop > 0) {
-	// 			currentTranslateY = paddingTop;
-	// 		}
-
-	// 		const newTranslateY = currentTranslateY - deltaY;
-	// 		careerCardsRef.current.style.transform = `translateY(${newTranslateY}px)`;
-	// 		updateCardsVisibility();
-	// 	},
-	// 	[mainRef, careerCardsRef]
-	// );
-
-	// const updateCardsVisibility = useCallback(() => {
-	// 	if (!mainRef.current || !careerCardsRef.current) return;
-
-	// 	const viewportCenterY = window.innerHeight / 2;
-	// 	// 페이드아웃을 시작할 위치 (= 여유를 둔 화면 중앙)
-	// 	const fadeDistance = window.innerHeight * 0.6;
-
-	// 	const cards = Array.from(careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card"));
-
-	// 	let closestIndex: number | null = null;
-	// 	let minDistance = Number.MAX_VALUE;
-
-	// 	cards.forEach((card, index) => {
-	// 		const rect = card.getBoundingClientRect();
-
-	// 		const cardCenterY = rect.top + rect.height / 2;
-	// 		const distanceFromCenter = Math.abs(cardCenterY - viewportCenterY);
-
-	// 		let ratio = 1 - Math.pow(distanceFromCenter / fadeDistance, 2);
-	// 		ratio = Math.max(0, Math.min(1, ratio));
-
-	// 		//card.style.opacity = String(ratio.toFixed(2));
-
-	// 		if (ratio > 0 && distanceFromCenter < minDistance) {
-	// 			minDistance = distanceFromCenter;
-	// 			closestIndex = index;
-	// 		}
-
-	// 		//마지막 카드가 화면 가장자리까지 도착했다면 highlight 관련 설정을 모두 초기화
-	// 		const style = window.getComputedStyle(careerCardsRef.current as HTMLDivElement);
-	// 		const paddingTop = parseInt(style.paddingTop, 10);
-	// 		// if (index === cards.length - 1 && rect.top <= paddingTop) {
-	// 		// 	console.log("done!");
-	// 		// 	card.classList.remove("highlighted");
-	// 		// 	setHighlightedIndex(null);
-	// 		// 	card.style.opacity = "0";
-	// 		// }
-	// 	});
-
-	// 	if (closestIndex !== highlightedIndex) {
-	// 		setHighlightedIndex(closestIndex);
-	// 	}
-	// }, [highlightedIndex]);
-
-	// useEffect(() => {
-	// 	if (!careerCardsRef.current) return;
-
-	// 	const cards = careerCardsRef.current.querySelectorAll<HTMLDivElement>(".career-card");
-	// 	cards.forEach((card, index) => {
-	// 		console.log(highlightedIndex);
-	// 		if (index === highlightedIndex) {
-	// 			card.classList.add("highlighted");
-	// 		} else {
-	// 			card.classList.remove("highlighted");
-	// 		}
-	// 	});
-	// }, [highlightedIndex]);
 
 	useEffect(() => {
 		const handleMobileCardIntersection: IntersectionObserverCallback = (entries, observer) => {
@@ -639,6 +518,46 @@ export default function Home() {
 					<span>ha</span>
 				</div>
 			</div>
+
+			<div className="container">
+				<div className="placemat" />
+
+				<div ref={bowlRef} className="bowl">
+					<div className="ladder">
+						<div className="step"></div>
+						<div className="step"></div>
+						<div className="step"></div>
+						<div className="step"></div>
+					</div>
+					{Object.keys(stacks).flatMap(k => {
+						const top = getRandomInt(40);
+						const left = getRandomInt(40);
+
+						return [
+							<Image
+								key={k + "-icon"}
+								src={`/icons/${k}.png`}
+								alt="typescript"
+								className={`char char-${k}`}
+								width={70}
+								height={70}
+								style={{
+									top: `${top}%`,
+									left: `${left}%`,
+								}}
+							/>,
+							<div
+								key={k + "-shadow"}
+								className={`shadow shadow-${k}`}
+								style={{
+									top: `calc(${top}% + 10%)`,
+									left: `calc(${left}% + 1%)`,
+								}}
+							></div>,
+						];
+					})}
+				</div>
+			</div>
 			<section className="flex-col">
 				<div className="flex flex-col justify-center items-center">
 					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-gray-4 text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
@@ -652,7 +571,7 @@ export default function Home() {
 				<div className="flex flex-wrap items-center justify-center w-full gap-1 md:gap-8 shrink-0">
 					{Object.entries(stacks).map(([k, v]) => (
 						<div key={k} className="p-2 group relative w-12 h-12 md:w-20 md:h-20 shrink-0">
-							<StackIcon name={k} className="w-full h-full" />
+							<Image alt={k + "-icon"} src={`/icons/${k}.svg`} width={50} height={50} />
 							<div className="group-hover:opacity-100 opacity-0 transition-opacity duration-300 overflow-hidden absolute text-center w-full h-full top-0 left-0 flex items-center justify-center bg-black/50 rounded-sm">
 								<span className=" font-nanumbarunpen text-white !font-extralight text-xxs whitespace-pre-line">{v.toUpperCase()}</span>
 							</div>
