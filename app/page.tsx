@@ -111,47 +111,58 @@ export default function Home() {
 			duration: 5,
 		});
 
+		let moveCharsFrameId: number | null = null;
+		let rippleFrameId: number | null = null;
+
 		const moveChars = (obj: {event: MouseEvent; deltaX: number; deltaY: number}) => {
-			const {event, deltaX, deltaY} = obj;
-			const el = event.target as HTMLElement;
-			const id = el.classList.contains("char") ? el.className.match(/char-(\S+)/)?.[1] : null;
+			if (moveCharsFrameId) return;
 
-			if (!id || !bowlRef.current) return;
+			moveCharsFrameId = requestAnimationFrame(() => {
+				const {event, deltaX, deltaY} = obj;
+				const el = event.target as HTMLElement;
+				const id = el.classList.contains("char") ? el.className.match(/char-(\S+)/)?.[1] : null;
 
-			const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
-			const charBounds = el.getBoundingClientRect();
-			const bowlBounds = bowlRef.current.getBoundingClientRect();
-			const t = 5;
+				if (!id || !bowlRef.current) return;
 
-			let newX = charBounds.left + deltaX * t;
-			let newY = charBounds.top + deltaY * t;
+				const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
+				const charBounds = el.getBoundingClientRect();
+				const bowlBounds = bowlRef.current.getBoundingClientRect();
+				const t = 3;
 
-			const margin = charBounds.width;
+				let newX = charBounds.left + deltaX * t;
+				let newY = charBounds.top + deltaY * t;
 
-			if (newX < bowlBounds.left + margin) newX = bowlBounds.left + margin;
-			if (newX + charBounds.width > bowlBounds.right - margin) newX = bowlBounds.right - charBounds.width - margin;
-			if (newY < bowlBounds.top + margin) newY = bowlBounds.top + margin;
-			if (newY + charBounds.height > bowlBounds.bottom - margin) newY = bowlBounds.bottom - charBounds.height - margin;
+				const vmin = Math.min(window.innerWidth, window.innerHeight);
+				const yMargin = (vmin * 5) / 100;
+				const xMargin = (vmin * 15) / 100;
 
-			const xMovement = newX - charBounds.left;
-			const yMovement = newY - charBounds.top;
+				if (newX < bowlBounds.left + xMargin) newX = bowlBounds.left + xMargin;
+				if (newX + charBounds.width > bowlBounds.right - xMargin) newX = bowlBounds.right - charBounds.width - xMargin;
+				if (newY < bowlBounds.top + yMargin) newY = bowlBounds.top + yMargin;
+				if (newY + charBounds.height > bowlBounds.bottom - yMargin) newY = bowlBounds.bottom - charBounds.height - yMargin;
 
-			gsap.to(el, {
-				x: `+=${xMovement}`,
-				y: `+=${yMovement}`,
-				rotation: `-=${deltaX * t * Math.sign(event.clientY - (charBounds.top + charBounds.height / 2))}`,
-				duration: 3,
-				ease: "expo.out",
-			});
+				const xMovement = newX - charBounds.left;
+				const yMovement = newY - charBounds.top;
 
-			if (shadow) {
-				gsap.to(shadow, {
+				gsap.to(el, {
 					x: `+=${xMovement}`,
 					y: `+=${yMovement}`,
+					rotation: `-=${deltaX * t * Math.sign(event.clientY - (charBounds.top + charBounds.height / 2))}`,
 					duration: 3,
 					ease: "expo.out",
 				});
-			}
+
+				if (shadow) {
+					gsap.to(shadow, {
+						x: `+=${xMovement}`,
+						y: `+=${yMovement}`,
+						duration: 3,
+						ease: "expo.out",
+					});
+				}
+
+				moveCharsFrameId = null;
+			});
 		};
 
 		const observer = Observer.create({
@@ -167,25 +178,31 @@ export default function Home() {
 				}
 			},
 		});
-		const bowl = document.querySelector("#bowl");
+
 		const turbWave = document.querySelector("#turbwave");
 		const dispMap = document.querySelector("#dispMap");
+
 		const handleMouseMove = (e: MouseEvent) => {
-			if (!bowlRef.current) return;
-			const rect = bowlRef.current.getBoundingClientRect();
-			const x = (e.clientX - rect.left) / rect.width; // Normalize between 0 - 1
-			const y = (e.clientY - rect.top) / rect.height;
+			if (rippleFrameId) return;
 
-			gsap.to(turbWave, {
-				attr: {baseFrequency: `${0.01 + y * 0.02} ${0.03 + x * 0.04}`},
-				duration: 0.3,
-				ease: "power2.out",
-			});
+			rippleFrameId = requestAnimationFrame(() => {
+				const rect = bowlRef.current?.getBoundingClientRect();
+				if (!rect) return;
+				const x = (e.clientX - rect.left) / rect.width;
+				const y = (e.clientY - rect.top) / rect.height;
 
-			gsap.to(dispMap, {
-				attr: {scale: 5 + y * 15},
-				duration: 0.3,
-				ease: "power2.out",
+				gsap.to(turbWave, {
+					attr: {baseFrequency: `${0.01 + y * 0.02} ${0.04 + x * 0.04}`},
+					duration: 0.3,
+					ease: "power2.out",
+				});
+
+				gsap.to(dispMap, {
+					attr: {scale: 3 + y * 15},
+					duration: 0.3,
+					ease: "power2.out",
+				});
+				rippleFrameId = null;
 			});
 		};
 
@@ -196,7 +213,12 @@ export default function Home() {
 
 		bowlRef.current?.addEventListener("mousemove", handleMouseMove);
 		bowlRef.current?.addEventListener("mouseleave", handleMouseLeave);
-		return () => observer.kill();
+
+		return () => {
+			observer.kill();
+			if (moveCharsFrameId) cancelAnimationFrame(moveCharsFrameId);
+			if (rippleFrameId) cancelAnimationFrame(rippleFrameId);
+		};
 	}, [stacks]);
 
 	//sticky div가 맨 위에 붙은 상황 (지금 화면의 중심인 경우)
@@ -524,7 +546,7 @@ export default function Home() {
 		const main = mainRef.current;
 
 		function handleBackgroundColorChange() {
-			const startColor: [number, number, number] = [216, 221, 224];
+			const startColor: [number, number, number] = [148, 216, 255];
 			const endColor: [number, number, number] = [0, 0, 46];
 
 			const scrollTop = window.scrollY;
@@ -588,68 +610,54 @@ export default function Home() {
 					<span>ha</span>
 				</div>
 			</div>
-
-			<div className="w-full">
-				<div className="placemat" />
-
-				<div ref={bowlRef} className="bowl">
-					<svg width="0" height="0">
-						<defs>
-							<filter id="turb">
-								<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.02 0.04" numOctaves="3" result="turbulence" />
-								<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale="2" />
-							</filter>
-						</defs>
-					</svg>
-					{Object.keys(stacks).map(k => {
-						const position = charPositions[k] || {top: 0, left: 0};
-
-						return (
-							<Fragment key={k}>
-								<Image
-									src={`/icons/${k}.png`}
-									alt={k}
-									className={`char char-${k}`}
-									width={70}
-									height={70}
-									style={{
-										top: `${position.top}%`,
-										left: `${position.left}%`,
-									}}
-								/>
-								<div
-									className={`shadow shadow-${k}`}
-									style={{
-										top: `calc(${position.top}% + 20%)`,
-										left: `calc(${position.left}% - 3%)`,
-									}}
-								></div>
-							</Fragment>
-						);
-					})}
-				</div>
-			</div>
 			<section className="flex-col">
 				<div className="flex flex-col justify-center items-center">
 					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-gray-4 text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
 						FRONTEND DEVELOPER
 					</p>
 					<p ref={mainTitleRef} className="main-title md:whitespace-nowrap font-normal text-center text-[7rem] md:text-[10rem] lg:text-[12rem]">
-						SEONGEUN
+						SEONGEUN's
 					</p>
 				</div>
 
-				<div className="flex flex-wrap items-center justify-center w-full gap-1 md:gap-8 shrink-0">
-					{Object.entries(stacks).map(([k, v]) => (
-						<div key={k} className="p-2 group relative w-12 h-12 md:w-20 md:h-20 shrink-0">
-							<Image alt={k + "-icon"} src={`/icons/${k}.svg`} width={50} height={50} />
-							<div className="group-hover:opacity-100 opacity-0 transition-opacity duration-300 overflow-hidden absolute text-center w-full h-full top-0 left-0 flex items-center justify-center bg-black/50 rounded-sm">
-								<span className=" font-nanumbarunpen text-white !font-extralight text-xxs whitespace-pre-line">{v.toUpperCase()}</span>
-							</div>
-						</div>
-					))}
+				<div className="w-full flex justify-center h-fit">
+					<div ref={bowlRef} className="bowl">
+						<svg width="0" height="0">
+							<defs>
+								<filter id="turb">
+									<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.02 0.04" numOctaves="3" result="turbulence" />
+									<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale="5" />
+								</filter>
+							</defs>
+						</svg>
+						{Object.keys(stacks).map(k => {
+							const position = charPositions[k] || {top: 0, left: 0};
+
+							return (
+								<Fragment key={k}>
+									<Image
+										src={`/icons/${k}.png`}
+										alt={k}
+										className={`char char-${k}`}
+										width={70}
+										height={70}
+										style={{
+											top: `${position.top}%`,
+											left: `${position.left}%`,
+										}}
+									/>
+									<div
+										className={`shadow shadow-${k}`}
+										style={{
+											top: `calc(${position.top}% + 20%)`,
+											left: `calc(${position.left}% - 3%)`,
+										}}
+									></div>
+								</Fragment>
+							);
+						})}
+					</div>
 				</div>
-				<img src="/assets/thekid.gif" alt="kid" className="mt-[10rem]" />
 				<div className="fixed bottom-0 p-20 pointer-events-none z-[99]">
 					<div className="flex flex-col items-center justify-center text-white text-xl">
 						<span className="drop-shadow-md">{textFile["000"]}</span>

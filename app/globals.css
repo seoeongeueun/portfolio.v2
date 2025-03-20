@@ -85,10 +85,13 @@
 	--darkest-point: rgb(3, 11, 8);
 	--darkest-point-rgb: 3, 11, 8;
 
-	--main-bg: rgb(216, 221, 224);
+	--main-bg: rgb(148, 216, 255);
 	--gray-1: #b0acb4;
 	--gray-2: #757177;
 	--dark-red: rgb(92, 23, 23);
+
+	--color-pool: rgb(62, 210, 255);
+	--color-tiles: hsla(207, 96%, 34%, 0.5);
 }
 
 html {

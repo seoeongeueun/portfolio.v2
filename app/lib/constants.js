@@ -28,4 +28,9 @@ export const stacks = {
 	php: "php",
 	mysql: "mysql",
 	react: "react",
+	html: "html",
+	mongodb: "mongo\ndb",
+	nodejs: "node.js",
+	jquery: "jquery",
+	tailwind: "tailwind\ncss",
 };
