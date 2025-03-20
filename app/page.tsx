@@ -598,7 +598,7 @@ export default function Home() {
 	}, [tags]);
 
 	return (
-		<div ref={mainRef} className="py-52 text-gray-4 w-full h-[300vh] flex flex-col items-center justify-start gap-4 overflow-visible">
+		<div ref={mainRef} className="py-52 text-white w-full h-[300vh] flex flex-col items-center justify-start gap-4 overflow-visible">
 			<div className="fixed top-0 p-4 pointer-events-none w-full">
 				<div className="w-full flex flex-row items-center justify-between mb-auto">
 					<span>ha</span>
@@ -606,12 +606,15 @@ export default function Home() {
 			</div>
 			<section className="flex-col">
 				<div className="flex flex-col justify-center items-center">
-					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-gray-4 text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
-						FRONTEND DEVELOPER
+					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-white text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
+						BY SEOEONGEUEUN
 					</p>
 					<p ref={mainTitleRef} className="main-title md:whitespace-nowrap font-normal text-center text-[7rem] md:text-[10rem] lg:text-[12rem]">
-						SEONGEUN's
+						The Pool
 					</p>
+					<div className="w-full text-xxxl text-white flex flex-row items-center justify-center gap-2">
+						of all my floating ideas <Image src="/assets/flippers.png" width={50} height={50} alt="flippers" />
+					</div>
 				</div>
 
 				<div className="w-full flex justify-center h-fit">
