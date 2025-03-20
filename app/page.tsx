@@ -86,26 +86,41 @@ export default function Home() {
 			const el = event.target as HTMLElement;
 			const id = el.classList.contains("char") ? el.className.match(/char-(\S+)/)?.[1] : null;
 
-			if (!id) return; // If no ID is found, exit function
+			if (!id || !bowlRef.current) return;
 
 			const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
-			const r = el.getBoundingClientRect();
-			const y = event.clientY - (r.top + Math.floor(r.height / 2));
+			const charBounds = el.getBoundingClientRect();
+			const bowlBounds = bowlRef.current.getBoundingClientRect();
 			const t = 5;
 
-			// Move both char and shadow
+			let newX = charBounds.left + deltaX * t;
+			let newY = charBounds.top + deltaY * t;
+
+			const buffer = charBounds.width;
+
+			console.log(bowlBounds.right, newX + charBounds.width);
+			// 풀 밖으로 나가지 못하게 영역을 제한
+			if (newY < bowlBounds.top + buffer / 2) newY = bowlBounds.top + buffer / 2;
+			if (newY + charBounds.height > bowlBounds.bottom - buffer) newY = bowlBounds.bottom - charBounds.height - buffer;
+			//transform 수치를 감안해서 너비는 버퍼 * 3;
+			if (newX + charBounds.width > bowlBounds.right - buffer) newX = bowlBounds.right - charBounds.width - buffer;
+			if (newX < bowlBounds.left + buffer) newX = bowlBounds.left + buffer;
+
+			const xMovement = newX - charBounds.left;
+			const yMovement = newY - charBounds.top;
+
 			gsap.to(el, {
-				xPercent: `+=${deltaX * t}`,
-				yPercent: `+=${deltaY * t}`,
-				rotation: `-=${deltaX * t * Math.sign(y)}`,
+				xPercent: `+=${xMovement}`,
+				yPercent: `+=${yMovement}`,
+				rotation: `-=${deltaX * t * Math.sign(event.clientY - (charBounds.top + charBounds.height / 2))}`,
 				duration: 3,
 				ease: "expo.out",
 			});
 
 			if (shadow) {
 				gsap.to(shadow, {
-					xPercent: `+=${deltaX * t}`,
-					yPercent: `+=${deltaY * t}`,
+					xPercent: `+=${xMovement}`,
+					yPercent: `+=${yMovement}`,
 					duration: 3,
 					ease: "expo.out",
 				});
@@ -519,7 +534,7 @@ export default function Home() {
 				</div>
 			</div>
 
-			<div className="container">
+			<div className="w-full">
 				<div className="placemat" />
 
 				<div ref={bowlRef} className="bowl">
@@ -550,8 +565,8 @@ export default function Home() {
 								key={k + "-shadow"}
 								className={`shadow shadow-${k}`}
 								style={{
-									top: `calc(${top}% + 10%)`,
-									left: `calc(${left}% + 1%)`,
+									top: `calc(${top}% + 20%)`,
+									left: `calc(${left}% + 3%)`,
 								}}
 							></div>,
 						];

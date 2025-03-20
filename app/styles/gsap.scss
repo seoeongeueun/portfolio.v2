@@ -23,20 +23,20 @@ body > * {
 	display: grid;
 	place-items: center;
 	grid-template-areas: "bowl";
-	aspect-ratio: 1;
 	width: 75vmin;
+	height: 60vmin;
 	text-transform: uppercase;
 	background: var(--color-pool);
 	color: var(--color-noodle);
 	border-radius: 50%;
 	border: 5vmin solid white;
-	//transform: perspective(500px) rotateX(30deg);
+	transform: perspective(500px) rotateX(30deg);
 	box-shadow:
 		hsla(0 0% 0% / 0.05) 2vmin 2vmin 2vmin -2vmin,
 		hsla(0 0% 0% / 0.05) -2vmin -2vmin 2vmin -2vmin,
 		hsla(0 0% 0% / 0.1) -5vmin -5vmin 10vmin 1vmin inset,
 		hsla(0 0% 0% / 0.1) 5vmin 5vmin 10vmin 1vmin inset,
-		hsl(0 0% 0% / 0.1) 0 0 1vmin 2vmin inset;
+		hsl(0 0% 0% / 0.1) 0 3vmin 1vmin 1vmin inset;
 
 	&::before {
 		content: "";
@@ -54,6 +54,13 @@ body > * {
 		background-position: left top;
 		opacity: 0.6;
 		filter: blur(2px);
+		transition: transform 1s ease-in-out;
+	}
+
+	&:hover {
+		&::before {
+			animation: wobble 20s ease-in-out infinite;
+		}
 	}
 }
 
@@ -84,7 +91,9 @@ body > * {
 	background-color: rgba(31, 89, 148, 0.1);
 	position: relative;
 	filter: blur(10px);
-	opacity: 0.4;
+	opacity: 0.5;
+	z-index: 1;
+	mix-blend-mode: darken;
 }
 
 // .ladder {

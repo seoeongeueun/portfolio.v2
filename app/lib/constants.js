@@ -25,5 +25,7 @@ export const stacks = {
 	javascript: "java\nscript",
 	typescript: "type\nscript",
 	python: "python",
+	php: "php",
 	mysql: "mysql",
+	react: "react",
 };
