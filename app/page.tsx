@@ -2,7 +2,7 @@
 import Image from "next/image";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
-import {useEffect, useState, useRef, useCallback, act} from "react";
+import {Fragment, useEffect, useState, useRef, useCallback, act} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
@@ -36,6 +36,8 @@ export default function Home() {
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
 	const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
+	const positionsRef = useRef<{top: number; left: number}[]>([]);
+	const [charPositions, setCharPositions] = useState<Record<string, {top: number; left: number}>>({});
 	//const [chars, setChars] = useState<string[]>(["typescript", "javascript"]);
 
 	const bowlRef = useRef<HTMLDivElement | null>(null);
@@ -47,6 +49,8 @@ export default function Home() {
 	const mainTitleRef = useRef<HTMLParagraphElement>(null);
 	const miniTitleRef = useRef<HTMLParagraphElement>(null);
 	const gameboyHeadRef = useRef<HTMLDivElement>(null);
+	const charRefs = useRef<Record<string, HTMLElement>>({});
+	const shadowRefs = useRef<Record<string, HTMLElement>>({});
 
 	const prevScrollTop = useRef(0);
 
@@ -69,14 +73,40 @@ export default function Home() {
 		window.removeEventListener("touchmove", preventScroll);
 	}
 
+	const generateNonOverlappingPosition = () => {
+		const maxAttempts = 10;
+		let attempts = 0;
+		let newPos;
+
+		do {
+			const top = getRandomInt(40);
+			const left = getRandomInt(40);
+			newPos = {top, left};
+
+			// Check if it's too close to any existing character
+			const tooClose = positionsRef.current.some(pos => Math.abs(pos.top - top) < 10 && Math.abs(pos.left - left) < 10);
+
+			if (!tooClose) {
+				positionsRef.current.push(newPos);
+				return newPos;
+			}
+
+			attempts++;
+		} while (attempts < maxAttempts);
+
+		// If no valid position found, return the last attempt
+		return newPos!;
+	};
+
+	// Generate positions only once when stacks change
 	useEffect(() => {
 		if (!bowlRef.current) return;
-
 		gsap.defaults({overwrite: true});
 
+		// Start character movement with GSAP
 		gsap.to(".char", {
-			xPercent: () => getRandomInt(10),
-			yPercent: () => getRandomInt(10),
+			x: () => getRandomInt(10),
+			y: () => getRandomInt(10),
 			rotation: () => getRandomInt(20),
 			duration: 5,
 		});
@@ -96,22 +126,19 @@ export default function Home() {
 			let newX = charBounds.left + deltaX * t;
 			let newY = charBounds.top + deltaY * t;
 
-			const buffer = charBounds.width;
+			const margin = charBounds.width;
 
-			console.log(bowlBounds.right, newX + charBounds.width);
-			// 풀 밖으로 나가지 못하게 영역을 제한
-			if (newY < bowlBounds.top + buffer / 2) newY = bowlBounds.top + buffer / 2;
-			if (newY + charBounds.height > bowlBounds.bottom - buffer) newY = bowlBounds.bottom - charBounds.height - buffer;
-			//transform 수치를 감안해서 너비는 버퍼 * 3;
-			if (newX + charBounds.width > bowlBounds.right - buffer) newX = bowlBounds.right - charBounds.width - buffer;
-			if (newX < bowlBounds.left + buffer) newX = bowlBounds.left + buffer;
+			if (newX < bowlBounds.left + margin) newX = bowlBounds.left + margin;
+			if (newX + charBounds.width > bowlBounds.right - margin) newX = bowlBounds.right - charBounds.width - margin;
+			if (newY < bowlBounds.top + margin) newY = bowlBounds.top + margin;
+			if (newY + charBounds.height > bowlBounds.bottom - margin) newY = bowlBounds.bottom - charBounds.height - margin;
 
 			const xMovement = newX - charBounds.left;
 			const yMovement = newY - charBounds.top;
 
 			gsap.to(el, {
-				xPercent: `+=${xMovement}`,
-				yPercent: `+=${yMovement}`,
+				x: `+=${xMovement}`,
+				y: `+=${yMovement}`,
 				rotation: `-=${deltaX * t * Math.sign(event.clientY - (charBounds.top + charBounds.height / 2))}`,
 				duration: 3,
 				ease: "expo.out",
@@ -119,8 +146,8 @@ export default function Home() {
 
 			if (shadow) {
 				gsap.to(shadow, {
-					xPercent: `+=${xMovement}`,
-					yPercent: `+=${yMovement}`,
+					x: `+=${xMovement}`,
+					y: `+=${yMovement}`,
 					duration: 3,
 					ease: "expo.out",
 				});
@@ -140,7 +167,35 @@ export default function Home() {
 				}
 			},
 		});
+		const bowl = document.querySelector("#bowl");
+		const turbWave = document.querySelector("#turbwave");
+		const dispMap = document.querySelector("#dispMap");
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!bowlRef.current) return;
+			const rect = bowlRef.current.getBoundingClientRect();
+			const x = (e.clientX - rect.left) / rect.width; // Normalize between 0 - 1
+			const y = (e.clientY - rect.top) / rect.height;
 
+			gsap.to(turbWave, {
+				attr: {baseFrequency: `${0.01 + y * 0.02} ${0.03 + x * 0.04}`},
+				duration: 0.3,
+				ease: "power2.out",
+			});
+
+			gsap.to(dispMap, {
+				attr: {scale: 5 + y * 15},
+				duration: 0.3,
+				ease: "power2.out",
+			});
+		};
+
+		const handleMouseLeave = () => {
+			turbWave?.setAttribute("baseFrequency", "0.01 0.03");
+			dispMap?.setAttribute("scale", "2");
+		};
+
+		bowlRef.current?.addEventListener("mousemove", handleMouseMove);
+		bowlRef.current?.addEventListener("mouseleave", handleMouseLeave);
 		return () => observer.kill();
 	}, [stacks]);
 
@@ -538,38 +593,39 @@ export default function Home() {
 				<div className="placemat" />
 
 				<div ref={bowlRef} className="bowl">
-					<div className="ladder">
-						<div className="step"></div>
-						<div className="step"></div>
-						<div className="step"></div>
-						<div className="step"></div>
-					</div>
-					{Object.keys(stacks).flatMap(k => {
-						const top = getRandomInt(40);
-						const left = getRandomInt(40);
+					<svg width="0" height="0">
+						<defs>
+							<filter id="turb">
+								<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.02 0.04" numOctaves="3" result="turbulence" />
+								<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale="2" />
+							</filter>
+						</defs>
+					</svg>
+					{Object.keys(stacks).map(k => {
+						const position = charPositions[k] || {top: 0, left: 0};
 
-						return [
-							<Image
-								key={k + "-icon"}
-								src={`/icons/${k}.png`}
-								alt="typescript"
-								className={`char char-${k}`}
-								width={70}
-								height={70}
-								style={{
-									top: `${top}%`,
-									left: `${left}%`,
-								}}
-							/>,
-							<div
-								key={k + "-shadow"}
-								className={`shadow shadow-${k}`}
-								style={{
-									top: `calc(${top}% + 20%)`,
-									left: `calc(${left}% + 3%)`,
-								}}
-							></div>,
-						];
+						return (
+							<Fragment key={k}>
+								<Image
+									src={`/icons/${k}.png`}
+									alt={k}
+									className={`char char-${k}`}
+									width={70}
+									height={70}
+									style={{
+										top: `${position.top}%`,
+										left: `${position.left}%`,
+									}}
+								/>
+								<div
+									className={`shadow shadow-${k}`}
+									style={{
+										top: `calc(${position.top}% + 20%)`,
+										left: `calc(${position.left}% - 3%)`,
+									}}
+								></div>
+							</Fragment>
+						);
 					})}
 				</div>
 			</div>
