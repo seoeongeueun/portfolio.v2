@@ -45,7 +45,7 @@ export default function Home() {
 
 	const mainRef = useRef<HTMLDivElement>(null);
 	const stickyRef = useRef<HTMLDivElement>(null);
-	const careerCardsRef = useRef<HTMLDivElement>(null);
+	const towelsRef = useRef<HTMLDivElement>(null);
 	const cartridgeCardsContainerRef = useRef<HTMLDivElement>(null);
 	const cartridgeCardsRef = useRef<HTMLDivElement>(null);
 	const mainTitleRef = useRef<HTMLParagraphElement>(null);
@@ -347,82 +347,121 @@ export default function Home() {
 		};
 	}, [stacks]);
 
-	//sticky div가 맨 위에 붙은 상황 (지금 화면의 중심인 경우)
-	// useEffect(() => {
-	// 	if (!careerCardsRef.current || !stickyRef.current) return;
+	//비치타월 스크롤 루프
+	useEffect(() => {
+		if (!towelsRef.current || !stickyRef.current) return;
 
-	// 	const container = careerCardsRef.current;
-	// 	const cards = Array.from(container.querySelectorAll<HTMLDivElement>(".career-card"));
-	// 	const cardHeight = cards[0]?.offsetHeight || 0;
-	// 	const totalCards = cards.length;
-	// 	const totalScrollHeight = cardHeight * totalCards;
-	// 	const marginTop = cardHeight / -2; //카드 사이 간격을 줄이기 위해 카드 높이 반을 뺌
+		const container = towelsRef.current;
+		const towels = Array.from(container.querySelectorAll<HTMLDivElement>(".towel-wrapper"));
+		const towelHeight = towels[0]?.offsetHeight || 0;
+		const totalTowels = towels.length;
+		const totalScrollHeight = towelHeight * totalTowels;
+		const marginTop = towelHeight / -2;
 
-	// 	let currentOffset = 0;
-	// 	let prevScrollTop = window.scrollY;
-	// 	let positions = cards.map((_, i) => i * cardHeight);
+		let currentOffset = 0;
+		let prevScrollTop = window.scrollY;
+		let positions = towels.map((_, i) => i * towelHeight);
 
-	// 	const isStickyVisible = () => {
-	// 		//무한 카드 스위칭을 막기 위해 하단에 카드 세개가 남았을 때 루프를 종료
-	// 		const rect = stickyRef.current!.getBoundingClientRect();
-	// 		return rect.bottom > cardHeight * 3 && rect.top < window.innerHeight;
-	// 	};
+		const isStickyVisible = () => {
+			//무한 카드 스위칭을 막기 위해 하단에 카드 세개가 남았을 때 루프를 종료
+			const rect = stickyRef.current!.getBoundingClientRect();
+			return rect.bottom > towelHeight * 3 && rect.top < window.innerHeight;
+		};
 
-	// 	const updateHighlight = () => {
-	// 		let closestCard = null;
-	// 		let closestDistance = Infinity;
+		const updateHighlight = () => {
+			let closestCard = null;
+			let closestDistance = Infinity;
 
-	// 		cards.forEach(card => {
-	// 			const rect = card.getBoundingClientRect();
-	// 			const distanceToTop = Math.abs(rect.top);
+			towels.forEach(towel => {
+				const rect = towel.getBoundingClientRect();
+				const distanceToTop = Math.abs(rect.top);
 
-	// 			if (distanceToTop < closestDistance) {
-	// 				closestDistance = distanceToTop;
-	// 				closestCard = card;
-	// 			}
+				if (distanceToTop < closestDistance) {
+					closestDistance = distanceToTop;
+					closestCard = towel;
+				}
 
-	// 			card.classList.remove("highlighted");
-	// 		});
+				towel.classList.remove("highlighted");
+			});
 
-	// 		if (closestCard) {
-	// 			(closestCard as HTMLDivElement).classList.add("highlighted");
-	// 		}
-	// 	};
+			if (closestCard) {
+				(closestCard as HTMLDivElement).classList.add("highlighted");
+			}
+		};
 
-	// 	const updatePositions = (deltaY: number) => {
-	// 		currentOffset += deltaY;
-	// 		if (isStickyVisible()) {
-	// 			cards.forEach((card, index) => {
-	// 				positions[index] += deltaY;
+		const updatePositions = (deltaY: number) => {
+			currentOffset += deltaY;
+			if (isStickyVisible()) {
+				towels.forEach((towel, index) => {
+					positions[index] += deltaY;
 
-	// 				// Loop card positions when they exit the viewport
-	// 				if (positions[index] <= -cardHeight) {
-	// 					positions[index] += (cardHeight + marginTop) * (totalCards * totalCards);
-	// 				}
+					if (positions[index] <= -towelHeight) {
+						positions[index] += (towelHeight + marginTop) * (totalTowels * totalTowels);
+					}
 
-	// 				if (positions[index] >= totalScrollHeight) {
-	// 					positions[index] -= (cardHeight + marginTop) * (totalCards * totalCards);
-	// 				}
-	// 				card.style.setProperty("--y-distance", positions[index] + "px");
-	// 			});
-	// 		}
-	// 		updateHighlight();
-	// 	};
+					if (positions[index] >= totalScrollHeight) {
+						positions[index] -= (towelHeight + marginTop) * (totalTowels * totalTowels);
+					}
+					towel.style.setProperty("--y-distance", positions[index] + "px");
+				});
+			}
+			updateHighlight();
+		};
 
-	// 	const handleScroll = () => {
-	// 		const scrollTop = window.scrollY;
-	// 		const deltaY = scrollTop - prevScrollTop;
-	// 		prevScrollTop = scrollTop;
+		const handleScroll = () => {
+			const scrollTop = window.scrollY;
+			const deltaY = scrollTop - prevScrollTop;
+			prevScrollTop = scrollTop;
 
-	// 		updatePositions(-deltaY);
-	// 	};
+			updatePositions(-deltaY);
+		};
 
-	// 	window.addEventListener("scroll", handleScroll);
+		window.addEventListener("scroll", handleScroll);
 
-	// 	return () => {
-	// 		window.removeEventListener("scroll", handleScroll);
-	// 	};
-	// }, []);
+		return () => {
+			window.removeEventListener("scroll", handleScroll);
+		};
+	}, []);
+
+	//호버 중인 비치타올에 turbulence 지정
+	useEffect(() => {
+		const allTowels = document.querySelectorAll<HTMLDivElement>(".towel");
+
+		allTowels.forEach(towel => {
+			const i = towel.getAttribute("data-towel-index");
+			if (!i) return;
+
+			const turb = document.querySelector<SVGElement>(`#turbTowel-${i}`);
+			if (!turb) return;
+
+			let frame = 0;
+			let animating = false;
+
+			function animateWiggle() {
+				if (!animating) return;
+				frame += 0.03;
+
+				const x = 0.002 + Math.sin(frame) * 0.001;
+				const y = 0.003 + Math.cos(frame) * 0.001;
+
+				turb?.setAttribute("baseFrequency", `${x} ${y}`);
+				requestAnimationFrame(animateWiggle);
+			}
+
+			towel.addEventListener("mouseenter", () => {
+				animating = true;
+				animateWiggle();
+
+				document.querySelector(`#wibble-${i} feDisplacementMap`)?.setAttribute("scale", "50");
+			});
+
+			towel.addEventListener("mouseleave", () => {
+				animating = false;
+				turb.setAttribute("baseFrequency", `0.002 0.003`);
+				document.querySelector(`#wibble-${i} feDisplacementMap`)?.setAttribute("scale", "0");
+			});
+		});
+	}, []);
 
 	useEffect(() => {
 		if (!gameboyHeadRef.current || !isGameboyOn) return;
@@ -667,59 +706,31 @@ export default function Home() {
 	}, []);
 
 	/* 스크롤 위치에 따라 배경색을 변경하는 로직*/
-	useEffect(() => {
-		if (!mainRef.current) return;
-		const main = mainRef.current;
+	// useEffect(() => {
+	// 	if (!mainRef.current) return;
+	// 	const main = mainRef.current;
 
-		function handleBackgroundColorChange() {
-			const startColor: [number, number, number] = [134, 211, 255];
-			const endColor: [number, number, number] = [255, 215, 151];
+	// 	function handleBackgroundColorChange() {
+	// 		const startColor: [number, number, number] = [134, 211, 255];
+	// 		const endColor: [number, number, number] = [255, 215, 151];
 
-			const scrollTop = window.scrollY;
-			const scrollHeight = document.body.scrollHeight;
-			const clientHeight = window.innerHeight;
-			const scrollFraction = scrollTop / (scrollHeight - clientHeight);
+	// 		const scrollTop = window.scrollY;
+	// 		const scrollHeight = document.body.scrollHeight;
+	// 		const clientHeight = window.innerHeight;
+	// 		const scrollFraction = scrollTop / (scrollHeight - clientHeight);
 
-			const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * scrollFraction);
-			const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * scrollFraction);
-			const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * scrollFraction);
+	// 		const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * scrollFraction);
+	// 		const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * scrollFraction);
+	// 		const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * scrollFraction);
 
-			document.documentElement.style.setProperty("--main-bg", `rgb(${r}, ${g}, ${b})`);
-		}
+	// 		document.documentElement.style.setProperty("--main-bg", `rgb(${r}, ${g}, ${b})`);
+	// 	}
 
-		window.addEventListener("scroll", handleBackgroundColorChange);
-		return () => {
-			window.removeEventListener("scroll", handleBackgroundColorChange);
-		};
-	}, []);
-
-	useEffect(() => {
-		const turb = document.querySelector<HTMLElement>("#turbTowel");
-		if (!turb) return;
-
-		let frame = 0;
-		let animating = false;
-
-		function animateWiggle() {
-			if (!animating) return;
-			frame += 0.01;
-			const x = 0.002 + Math.sin(frame) * 0.001;
-			const y = 0.003 + Math.cos(frame) * 0.001;
-			turb?.setAttribute("baseFrequency", `${x} ${y}`);
-			requestAnimationFrame(animateWiggle);
-		}
-		const towel = document.querySelector(".towel");
-
-		towel?.addEventListener("mouseenter", () => {
-			animating = true;
-			animateWiggle();
-		});
-
-		towel?.addEventListener("mouseleave", () => {
-			animating = false;
-			turb.setAttribute("baseFrequency", `0.002 0.003`);
-		});
-	}, []);
+	// 	window.addEventListener("scroll", handleBackgroundColorChange);
+	// 	return () => {
+	// 		window.removeEventListener("scroll", handleBackgroundColorChange);
+	// 	};
+	// }, []);
 
 	/* 메인 페이지 타이틀에 애니메이션 추가 */
 	useEffect(() => {
@@ -758,7 +769,7 @@ export default function Home() {
 	}, [tags]);
 
 	return (
-		<div ref={mainRef} className="py-52 text-white w-full h-full flex flex-col items-center justify-start gap-4 overflow-hidden">
+		<div ref={mainRef} className="py-52 text-white w-full h-full flex flex-col items-center justify-start gap-4 overflow-x-hidden">
 			<div className="fixed top-0 p-4 pointer-events-none w-full">
 				<div className="w-full flex flex-row items-center justify-between mb-auto">
 					<span>ha</span>
@@ -836,7 +847,7 @@ export default function Home() {
 			</svg>
 
 			<div className="gooey-overlay z-20"></div>
-			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem] shore">
+			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem] shore sticky">
 				<div className="grain-overlay" />
 				<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
 					<div className="flex flex-row items-center justify-start">
@@ -876,60 +887,71 @@ export default function Home() {
 							</div>
 						</div>
 					</div>
-					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
+					<p className="description text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
 
-				<div ref={careerCardsRef} className="career-cards-container pt-32 spread">
-					<svg>
-						<filter id="wibble">
-							<feTurbulence id="turbTowel" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
-							<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="50" xChannelSelector="R" yChannelSelector="G" />
-						</filter>
-					</svg>
-
-					<div className="career-card towel w-full p-10">
-						<p className="text-xl">Frontend Developer</p>
-						<div className="mb-2 flex flex-row items-center justify-between w-full">
+				<div ref={towelsRef} className="towels-container pt-32 spread">
+					<div className="towel-wrapper">
+						<svg>
+							<filter id="wibble-1">
+								<feTurbulence id="turbTowel-1" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
+								<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
+							</filter>
+						</svg>
+						<div data-towel-index="1" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-1)"}}>
+							<p className="text-xl">Frontend Developer</p>
 							<p>BATON</p>
-							<p>2023년 8월 - 2024년 11월</p>
+							<ul>
+								<li>
+									React.js, Next.js, Typescript, jQuery 등을 사용하여 다양한 클라이언트의 웹 애플리케이션과 관리자 페이지를 개발하고, 반응형
+									디자인과 최적화된 애니메이션을 구현했습니다.
+								</li>
+								<li>
+									필요에 따라 API 설계와 MySQL과 PostgreSQL 데이터베이스 설계 및 쿼리 작성 등 백엔드 작업을 포함한 통합 개발을 수행하여
+									프론트-백 간의 원활한 데이터 연동을 구현했습니다.
+								</li>
+								<li>
+									팀의 개발 효율성을 위해 적극적으로 새로운 스택을 테스트하고 도입하여 팀의 개발 시스템을 현대화하고 작업 생산성 향상에
+									기여했습니다.
+								</li>
+							</ul>
+							<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
 						</div>
-						<ul>
-							<li>
-								React.js, Next.js, Typescript, jQuery 등을 사용하여 다양한 클라이언트의 웹 애플리케이션과 관리자 페이지를 개발하고, 반응형
-								디자인과 최적화된 애니메이션을 구현했습니다.
-							</li>
-							<li>
-								필요에 따라 API 설계와 MySQL과 PostgreSQL 데이터베이스 설계 및 쿼리 작성 등 백엔드 작업을 포함한 통합 개발을 수행하여 프론트-백
-								간의 원활한 데이터 연동을 구현했습니다.
-							</li>
-							<li>
-								팀의 개발 효율성을 위해 적극적으로 새로운 스택을 테스트하고 도입하여 팀의 개발 시스템을 현대화하고 작업 생산성 향상에
-								기여했습니다.
-							</li>
-						</ul>
 					</div>
-					<div className="career-card w-full p-10 towel">
-						<p className="text-xl">Software Engineer</p>
-						<div className="mb-2 flex flex-row items-center justify-between w-full">
+					<div className="towel-wrapper">
+						<svg>
+							<filter id="wibble-2">
+								<feTurbulence id="turbTowel-2" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
+								<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
+							</filter>
+						</svg>
+						<div data-towel-index="2" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-2)"}}>
+							<p className="text-xl">Software Engineer</p>
 							<p>Market Stadium</p>
-							<p>2023년 8월 - 2024년 11월</p>
+							<ul>
+								<li>
+									풀스택 개발자 인턴으로 React.js, Semantic UI, Chart.js를 사용하여 macroeconomics 지표 데이터를 그래프로 시각화하는 대시보드
+									기능을 구현했습니다.
+								</li>
+								<li>DynamoDB 와 연동된 RESTful API를 개발하여 관련 데이터를 관리하고 조회하는 기능을 만들었습니다.</li>
+								<li>Mocha와 Chai를 이용해 데이터 유효성 검증 테스트를 추가하여 안정성을 높였습니다.</li>
+							</ul>
+							<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
 						</div>
-						<ul>
-							<li>
-								풀스택 개발자 인턴으로 React.js, Semantic UI, Chart.js를 사용하여 macroeconomics 지표 데이터를 그래프로 시각화하는 대시보드
-								기능을 구현했습니다.
-							</li>
-							<li>DynamoDB 와 연동된 RESTful API를 개발하여 관련 데이터를 관리하고 조회하는 기능을 만들었습니다.</li>
-							<li>Mocha와 Chai를 이용해 데이터 유효성 검증 테스트를 추가하여 안정성을 높였습니다.</li>
-						</ul>
 					</div>
-					<div className="career-card w-full flex flex-col items-start justify-start p-10">
-						<p className="text-xl">Bachelor's Degree of Computer Science</p>
-						<div className="mb-2 flex flex-row items-center justify-between w-full">
+					<div className="towel-wrapper">
+						<svg>
+							<filter id="wibble-3">
+								<feTurbulence id="turbTowel-3" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
+								<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
+							</filter>
+						</svg>
+						<div data-towel-index="3" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-3)"}}>
+							<p className="text-xl">Bachelor's Degree of Computer Science</p>
 							<p>The State University of New York, Stony Brook</p>
-							<p>2023년 8월 - 2024년 11월</p>
+							<p>Stony Brook University에서 Computer Science를 전공했습니다.</p>
+							<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
 						</div>
-						<p>Stony Brook University에서 Computer Science를 전공했습니다.</p>
 					</div>
 				</div>
 			</section>
