@@ -203,6 +203,9 @@
 }
 
 .career-card {
+	--towel-color: var(--theme-orange);
+	--towel-sub: rgb(255, 178, 77);
+	--towel-shadow: var(--theme-orange);
 	transition:
 		transform 0.5s ease-out,
 		right 0.3s ease-in-out 0.2s;
@@ -212,11 +215,51 @@
 	transform: translateY(var(--y-distance));
 	position: relative;
 	right: 0;
-	box-shadow: 20px 20px 0px -10px #ff0;
+	box-shadow: 0px 3px 10px 0px rgba(43, 43, 43, 0.2);
+	overflow: hidden;
+	background-color: rgb(192, 192, 192);
+
+	transition:
+		filter 0.3s ease-in-out,
+		opacity 0.3s ease-in-out,
+		transform 0.4s ease-in-out;
+	transform-origin: top;
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: repeating-linear-gradient(to bottom, var(--towel-color) 0 20px, var(--towel-sub) 20px 40px);
+		opacity: 0.7;
+		z-index: -1;
+	}
+
+	p {
+		color: var(--gray-0);
+		text-shadow: 1px 1px 0px var(--theme-shadow);
+	}
+
+	li,
+	span {
+		color: var(--gray-0);
+		text-shadow: 1px 1px 1px var(--theme-shadow);
+		font-size: 1.3rem;
+	}
+
+	&:nth-child(2n + 1) {
+		--towel-color: rgb(76, 195, 250);
+		--towel-sub: rgb(148, 239, 255);
+		--theme-shadow: var(--theme-blue);
+	}
 
 	&.highlighted {
 		transform-origin: top;
 		right: 4rem;
+	}
+
+	&:hover {
+		filter: url(#wibble);
+		transform: scaleX(0.97) rotate(1deg);
 	}
 }
 

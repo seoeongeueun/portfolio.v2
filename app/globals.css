@@ -55,7 +55,7 @@
 	--color-gray-1: var(--gray-1);
 	--color-gray-2: var(--gray-2);
 	--color-body: var(--body);
-	--color-gray-4: rgb(46, 46, 46);
+	--color-gray-4: var(--gray-4);
 
 	--breakpoint-md: 641px;
 	--breakpoint-lg: 1025px;
@@ -88,6 +88,7 @@
 	--main-bg: rgb(134, 211, 255);
 	--gray-1: #b0acb4;
 	--gray-2: #757177;
+	--gray-4: rgb(46, 46, 46);
 	--dark-red: rgb(92, 23, 23);
 
 	--color-pool: rgb(62, 210, 255);

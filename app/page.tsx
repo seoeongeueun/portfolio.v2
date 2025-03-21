@@ -693,6 +693,34 @@ export default function Home() {
 		};
 	}, []);
 
+	useEffect(() => {
+		const turb = document.querySelector<HTMLElement>("#turbTowel");
+		if (!turb) return;
+
+		let frame = 0;
+		let animating = false;
+
+		function animateWiggle() {
+			if (!animating) return;
+			frame += 0.01;
+			const x = 0.002 + Math.sin(frame) * 0.001;
+			const y = 0.003 + Math.cos(frame) * 0.001;
+			turb?.setAttribute("baseFrequency", `${x} ${y}`);
+			requestAnimationFrame(animateWiggle);
+		}
+		const towel = document.querySelector(".towel");
+
+		towel?.addEventListener("mouseenter", () => {
+			animating = true;
+			animateWiggle();
+		});
+
+		towel?.addEventListener("mouseleave", () => {
+			animating = false;
+			turb.setAttribute("baseFrequency", `0.002 0.003`);
+		});
+	}, []);
+
 	/* 메인 페이지 타이틀에 애니메이션 추가 */
 	useEffect(() => {
 		if (!mainTitleRef.current || !miniTitleRef.current) return;
@@ -811,9 +839,9 @@ export default function Home() {
 			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem] shore">
 				<div className="grain-overlay" />
 				<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
-					<div className="flex flex-row items-center">
+					<div className="flex flex-row items-center justify-start">
 						<p className="subtitle">CAREER</p>
-						<div className="foot-pair flex flex-row items-center justify-start">
+						<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
 							<div className="footprint">
 								<div className="toes">
 									<div />
@@ -852,8 +880,15 @@ export default function Home() {
 				</div>
 
 				<div ref={careerCardsRef} className="career-cards-container pt-32 spread">
-					<div className="career-card w-full p-10">
-						<p className="text-lg text-white">Frontend Developer</p>
+					<svg>
+						<filter id="wibble">
+							<feTurbulence id="turbTowel" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
+							<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="50" xChannelSelector="R" yChannelSelector="G" />
+						</filter>
+					</svg>
+
+					<div className="career-card towel w-full p-10">
+						<p className="text-xl">Frontend Developer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>BATON</p>
 							<p>2023년 8월 - 2024년 11월</p>
@@ -873,8 +908,8 @@ export default function Home() {
 							</li>
 						</ul>
 					</div>
-					<div className="career-card w-full p-10">
-						<p className="text-lg text-white">Software Engineer</p>
+					<div className="career-card w-full p-10 towel">
+						<p className="text-xl">Software Engineer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>Market Stadium</p>
 							<p>2023년 8월 - 2024년 11월</p>
@@ -889,7 +924,7 @@ export default function Home() {
 						</ul>
 					</div>
 					<div className="career-card w-full flex flex-col items-start justify-start p-10">
-						<p className="text-lg text-white">Bachelor's Degree of Computer Science</p>
+						<p className="text-xl">Bachelor's Degree of Computer Science</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>The State University of New York, Stony Brook</p>
 							<p>2023년 8월 - 2024년 11월</p>
