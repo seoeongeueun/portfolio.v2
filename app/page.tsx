@@ -811,24 +811,44 @@ export default function Home() {
 			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem] shore">
 				<div className="grain-overlay" />
 				<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
-					<p className="subtitle">CAREER</p>
+					<div className="flex flex-row items-center">
+						<p className="subtitle">CAREER</p>
+						<div className="foot-pair flex flex-row items-center justify-start">
+							<div className="footprint">
+								<div className="toes">
+									<div />
+									<div />
+									<div />
+									<div />
+									<div />
+								</div>
+								<div className="bridge">
+									<div />
+									<div />
+								</div>
+								<div className="mid-top"></div>
+								<div className="mid-bottom" />
+								<div className="heel"></div>
+							</div>
+							<div className="footprint right">
+								<div className="toes">
+									<div />
+									<div />
+									<div />
+									<div />
+									<div />
+								</div>
+								<div className="bridge">
+									<div />
+									<div />
+								</div>
+								<div className="mid-top"></div>
+								<div className="mid-bottom" />
+								<div className="heel"></div>
+							</div>
+						</div>
+					</div>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
-				</div>
-				<div className="footprint">
-					<div className="toes">
-						<div />
-						<div />
-						<div />
-						<div />
-						<div />
-					</div>
-					<div className="bridge">
-						<div />
-						<div />
-					</div>
-					<div className="mid-top"></div>
-					<div className="mid-bottom" />
-					<div className="heel"></div>
 				</div>
 
 				<div ref={careerCardsRef} className="career-cards-container pt-32 spread">
