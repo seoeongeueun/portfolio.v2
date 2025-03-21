@@ -133,8 +133,8 @@ section {
 	position: relative;
 }
 
-section:first-of-type {
-	background-color: rgb(134, 211, 255);
+section:first-child {
+	background-color: var(--main-bg);
 }
 
 @media screen and (max-width: 640px) {

@@ -363,9 +363,9 @@ export default function Home() {
 		let positions = towels.map((_, i) => i * towelHeight);
 
 		const isStickyVisible = () => {
-			//무한 카드 스위칭을 막기 위해 하단에 카드 세개가 남았을 때 루프를 종료
+			//무한 카드 스위칭을 막기 위해 하단에 카드 3개가 남았을 때 루프를 종료
 			const rect = stickyRef.current!.getBoundingClientRect();
-			return rect.bottom > towelHeight * 3 && rect.top < window.innerHeight;
+			return rect.bottom > towelHeight * 2 && rect.top < window.innerHeight;
 		};
 
 		const updateHighlight = () => {
@@ -432,7 +432,8 @@ export default function Home() {
 			if (!i) return;
 
 			const turb = document.querySelector<SVGElement>(`#turbTowel-${i}`);
-			if (!turb) return;
+			const disp = document.querySelector<SVGElement>(`#wibble-${i} feDisplacementMap`);
+			if (!turb || !disp) return;
 
 			let frame = 0;
 			let animating = false;
@@ -448,18 +449,39 @@ export default function Home() {
 				requestAnimationFrame(animateWiggle);
 			}
 
-			towel.addEventListener("mouseenter", () => {
+			function startWibble() {
+				if (animating) return;
 				animating = true;
 				animateWiggle();
+				disp?.setAttribute("scale", "50");
+			}
 
-				document.querySelector(`#wibble-${i} feDisplacementMap`)?.setAttribute("scale", "50");
+			function stopWibble() {
+				animating = false;
+				turb?.setAttribute("baseFrequency", `0.002 0.003`);
+				disp?.setAttribute("scale", "0");
+			}
+
+			towel.addEventListener("mouseenter", () => {
+				startWibble();
 			});
 
 			towel.addEventListener("mouseleave", () => {
-				animating = false;
-				turb.setAttribute("baseFrequency", `0.002 0.003`);
-				document.querySelector(`#wibble-${i} feDisplacementMap`)?.setAttribute("scale", "0");
+				//highlighted가 들어간 경우는 마우스와 상관 없이 wibble
+				if (!towel.classList.contains("highlighted")) {
+					stopWibble();
+				}
 			});
+
+			//hightlihgted 클래스가 들어갔는지 감지
+			const observer = new MutationObserver(() => {
+				if (towel.parentElement?.classList.contains("highlighted")) {
+					startWibble();
+				} else if (!towel.matches(":hover")) {
+					stopWibble();
+				}
+			});
+			if (towel.parentElement) observer.observe(towel.parentElement, {attributes: true, attributeFilter: ["class"]});
 		});
 	}, []);
 
@@ -836,125 +858,126 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<svg width="0" height="0">
-				<defs>
-					<filter id="gooey">
-						<feTurbulence id="turbGooey" type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="1" result="turbulence" />
+			<div className="w-full h-fit beach-container">
+				<svg width="0" height="0">
+					<defs>
+						<filter id="gooey">
+							<feTurbulence id="turbGooey" type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="1" result="turbulence" />
+							<feDisplacementMap id="dispGooey" in="SourceGraphic" in2="turbulence" scale="70" />
+						</filter>
+					</defs>
+				</svg>
 
-						<feDisplacementMap id="dispGooey" in="SourceGraphic" in2="turbulence" scale="70" />
-					</filter>
-				</defs>
-			</svg>
-
-			<div className="gooey-overlay z-20"></div>
-			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem] shore sticky">
+				<div className="gooey-overlay z-20"></div>
 				<div className="grain-overlay" />
-				<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
-					<div className="flex flex-row items-center justify-start">
-						<p className="subtitle">CAREER</p>
-						<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
-							<div className="footprint">
-								<div className="toes">
-									<div />
-									<div />
-									<div />
-									<div />
-									<div />
+				<section ref={stickyRef} className="pt-24 flex-row !justify-between !items-end mb-[10rem] shore sticky">
+					<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
+						<div className="flex flex-row items-center justify-start">
+							<p className="subtitle">CAREER</p>
+							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
+								<div className="footprint">
+									<div className="toes">
+										<div />
+										<div />
+										<div />
+										<div />
+										<div />
+									</div>
+									<div className="bridge">
+										<div />
+										<div />
+									</div>
+									<div className="mid-top"></div>
+									<div className="mid-bottom" />
+									<div className="heel"></div>
 								</div>
-								<div className="bridge">
-									<div />
-									<div />
+								<div className="footprint right">
+									<div className="toes">
+										<div />
+										<div />
+										<div />
+										<div />
+										<div />
+									</div>
+									<div className="bridge">
+										<div />
+										<div />
+									</div>
+									<div className="mid-top"></div>
+									<div className="mid-bottom" />
+									<div className="heel"></div>
 								</div>
-								<div className="mid-top"></div>
-								<div className="mid-bottom" />
-								<div className="heel"></div>
-							</div>
-							<div className="footprint right">
-								<div className="toes">
-									<div />
-									<div />
-									<div />
-									<div />
-									<div />
-								</div>
-								<div className="bridge">
-									<div />
-									<div />
-								</div>
-								<div className="mid-top"></div>
-								<div className="mid-bottom" />
-								<div className="heel"></div>
 							</div>
 						</div>
+						<p className="description text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 					</div>
-					<p className="description text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
-				</div>
 
-				<div ref={towelsRef} className="towels-container pt-32 spread">
-					<div className="towel-wrapper">
-						<svg>
-							<filter id="wibble-1">
-								<feTurbulence id="turbTowel-1" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
-								<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
-							</filter>
-						</svg>
-						<div data-towel-index="1" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-1)"}}>
-							<p className="text-xl">Frontend Developer</p>
-							<p>BATON</p>
-							<ul>
-								<li>
-									React.js, Next.js, Typescript, jQuery 등을 사용하여 다양한 클라이언트의 웹 애플리케이션과 관리자 페이지를 개발하고, 반응형
-									디자인과 최적화된 애니메이션을 구현했습니다.
-								</li>
-								<li>
-									필요에 따라 API 설계와 MySQL과 PostgreSQL 데이터베이스 설계 및 쿼리 작성 등 백엔드 작업을 포함한 통합 개발을 수행하여
-									프론트-백 간의 원활한 데이터 연동을 구현했습니다.
-								</li>
-								<li>
-									팀의 개발 효율성을 위해 적극적으로 새로운 스택을 테스트하고 도입하여 팀의 개발 시스템을 현대화하고 작업 생산성 향상에
-									기여했습니다.
-								</li>
-							</ul>
-							<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
+					<div ref={towelsRef} className="towels-container pt-32 spread">
+						<div className="towel-wrapper">
+							<svg>
+								<filter id="wibble-1">
+									<feTurbulence id="turbTowel-1" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
+									<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
+								</filter>
+							</svg>
+							<div data-towel-index="1" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-1)"}}>
+								<p className="text-xl">Frontend Developer</p>
+								<p>BATON</p>
+								<ul>
+									<li>
+										React.js, Next.js, Typescript, jQuery 등을 사용하여 다양한 클라이언트의 웹 애플리케이션과 관리자 페이지를 개발하고,
+										반응형 디자인과 최적화된 애니메이션을 구현했습니다.
+									</li>
+									<li>
+										필요에 따라 API 설계와 MySQL과 PostgreSQL 데이터베이스 설계 및 쿼리 작성 등 백엔드 작업을 포함한 통합 개발을 수행하여
+										프론트-백 간의 원활한 데이터 연동을 구현했습니다.
+									</li>
+									<li>
+										팀의 개발 효율성을 위해 적극적으로 새로운 스택을 테스트하고 도입하여 팀의 개발 시스템을 현대화하고 작업 생산성 향상에
+										기여했습니다.
+									</li>
+								</ul>
+								<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
+							</div>
+						</div>
+						<div className="towel-wrapper">
+							<svg>
+								<filter id="wibble-2">
+									<feTurbulence id="turbTowel-2" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
+									<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
+								</filter>
+							</svg>
+							<div data-towel-index="2" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-2)"}}>
+								<p className="text-xl">Software Engineer</p>
+								<p>Market Stadium</p>
+								<ul>
+									<li>
+										풀스택 개발자 인턴으로 React.js, Semantic UI, Chart.js를 사용하여 macroeconomics 지표 데이터를 그래프로 시각화하는
+										대시보드 기능을 구현했습니다.
+									</li>
+									<li>DynamoDB 와 연동된 RESTful API를 개발하여 관련 데이터를 관리하고 조회하는 기능을 만들었습니다.</li>
+									<li>Mocha와 Chai를 이용해 데이터 유효성 검증 테스트를 추가하여 안정성을 높였습니다.</li>
+								</ul>
+								<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
+							</div>
+						</div>
+						<div className="towel-wrapper">
+							<svg>
+								<filter id="wibble-3">
+									<feTurbulence id="turbTowel-3" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
+									<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
+								</filter>
+							</svg>
+							<div data-towel-index="3" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-3)"}}>
+								<p className="text-xl">Bachelor's Degree of Computer Science</p>
+								<p>The State University of New York, Stony Brook</p>
+								<p>Stony Brook University에서 Computer Science를 전공했습니다.</p>
+								<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
+							</div>
 						</div>
 					</div>
-					<div className="towel-wrapper">
-						<svg>
-							<filter id="wibble-2">
-								<feTurbulence id="turbTowel-2" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
-								<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
-							</filter>
-						</svg>
-						<div data-towel-index="2" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-2)"}}>
-							<p className="text-xl">Software Engineer</p>
-							<p>Market Stadium</p>
-							<ul>
-								<li>
-									풀스택 개발자 인턴으로 React.js, Semantic UI, Chart.js를 사용하여 macroeconomics 지표 데이터를 그래프로 시각화하는 대시보드
-									기능을 구현했습니다.
-								</li>
-								<li>DynamoDB 와 연동된 RESTful API를 개발하여 관련 데이터를 관리하고 조회하는 기능을 만들었습니다.</li>
-								<li>Mocha와 Chai를 이용해 데이터 유효성 검증 테스트를 추가하여 안정성을 높였습니다.</li>
-							</ul>
-							<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
-						</div>
-					</div>
-					<div className="towel-wrapper">
-						<svg>
-							<filter id="wibble-3">
-								<feTurbulence id="turbTowel-3" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
-								<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
-							</filter>
-						</svg>
-						<div data-towel-index="3" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-3)"}}>
-							<p className="text-xl">Bachelor's Degree of Computer Science</p>
-							<p>The State University of New York, Stony Brook</p>
-							<p>Stony Brook University에서 Computer Science를 전공했습니다.</p>
-							<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
-						</div>
-					</div>
-				</div>
-			</section>
+				</section>
+			</div>
 			<section className="flex-col full-section !h-fit">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">

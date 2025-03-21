@@ -121,9 +121,13 @@
 // }
 
 .gooey-overlay {
+	border-bottom: 5px solid white;
 	width: 120vw;
-	height: 35vh;
+	height: 45vh;
 	border-radius: 40%;
+	position: relative;
+	top: -10vh;
+	right: 5vw;
 	// background: linear-gradient(
 	// 	180deg,
 	// 	var(--main-bg) 0%,

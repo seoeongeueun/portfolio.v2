@@ -658,23 +658,27 @@
 		}
 	}
 }
+.beach-container {
+	//background-color: var(--theme-sand);
+	background: linear-gradient(179deg, var(--theme-sand-dark) 0%, var(--theme-sand) 20%, var(--theme-sand) 100%);
+	position: relative;
+}
+//그레인 base 64
+.grain-overlay {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj48ZmlsdGVyIGlkPSJncmFpbiIgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjIiIG51bU9jdGF2ZXM9IjUiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48ZmVDb21wb25lbnRUcmFuc2Zlcj48ZmVGdW5jQSB0eXBlPSJkaXNjcmV0ZSIgdGFibGVWYWx1ZXM9IjAgMC4yIi8+PC9mZUNvbXBvbmVudFRyYW5zZmVyPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNncmFpbikiIGZpbGw9InJnYigxMzksIDY5LCAxOSkiLz48L3N2Zz4=")
+		center center / 500px 500px repeat;
+	pointer-events: none;
+	opacity: 1;
+	mix-blend-mode: multiply;
+	z-index: 10;
+}
 
 .shore {
-	background: linear-gradient(180deg, var(--main-bg) 0%, var(--theme-sand) 5%, var(--theme-sand) 100%) !important;
-	height: 80vh;
-
-	//그레인 base 64
-	.grain-overlay {
-		content: "";
-		position: absolute;
-		inset: 0;
-		background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj48ZmlsdGVyIGlkPSJncmFpbiIgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjIiIG51bU9jdGF2ZXM9IjUiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48ZmVDb21wb25lbnRUcmFuc2Zlcj48ZmVGdW5jQSB0eXBlPSJkaXNjcmV0ZSIgdGFibGVWYWx1ZXM9IjAgMC4yIi8+PC9mZUNvbXBvbmVudFRyYW5zZmVyPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNncmFpbikiIGZpbGw9InJnYigxMzksIDY5LCAxOSkiLz48L3N2Zz4=")
-			center center / 500px 500px repeat;
-		pointer-events: none;
-		opacity: 1;
-		mix-blend-mode: multiply;
-		z-index: 10;
-	}
+	//background: linear-gradient(180deg, var(--main-bg) 0%, var(--theme-sand) 5%, var(--theme-sand) 100%) !important;
+	//background-color: var(--theme-sand);
 
 	.subtitle {
 		// color: transparent;
