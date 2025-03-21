@@ -11,6 +11,7 @@ import "./styles/gsap.scss";
 import {stacks} from "./lib/constants";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
+import {ScrollTrigger} from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(Observer);
 
@@ -84,6 +85,28 @@ export default function Home() {
 	};
 
 	useEffect(() => {
+		gsap.registerPlugin(ScrollTrigger);
+
+		gsap.to("#turbGooey", {
+			attr: {baseFrequency: "0.02 0.08"},
+			scrollTrigger: {
+				trigger: ".wrapper",
+				start: "top top",
+				end: "bottom bottom",
+				scrub: 1,
+			},
+		});
+
+		gsap.to("#dispGooey", {
+			attr: {scale: 50},
+			scrollTrigger: {
+				trigger: ".wrapper",
+				start: "top top",
+				end: "bottom bottom",
+				scrub: 1,
+			},
+		});
+
 		if (!bowlRef.current) return;
 		Object.keys(stacks).forEach(key => {
 			if (!charPositionsRef.current[key]) {
@@ -192,7 +215,7 @@ export default function Home() {
 				});
 
 				gsap.to(dispMap, {
-					attr: {scale: 3 + y * 15},
+					attr: {scale: 5 + y * 15},
 					duration: 0.3,
 					ease: "power2.out",
 				});
@@ -604,10 +627,11 @@ export default function Home() {
 					<span>ha</span>
 				</div>
 			</div>
-			<section className="flex-col">
+
+			<section className="flex-col z-30">
 				<div className="flex flex-col justify-center items-center">
 					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-white text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
-						BY SEOEONGEUEUN
+						SEOEONGEUEUN's
 					</p>
 					<p ref={mainTitleRef} className="main-title md:whitespace-nowrap font-normal text-center text-[7rem] md:text-[10rem] lg:text-[12rem]">
 						The Pool
@@ -656,6 +680,7 @@ export default function Home() {
 							})}
 					</div>
 				</div>
+
 				<div className="fixed bottom-0 p-20 pointer-events-none z-[99]">
 					<div className="flex flex-col items-center justify-center text-white text-xl">
 						<span className="drop-shadow-md">{textFile["000"]}</span>
@@ -663,7 +688,18 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem]">
+			<svg width="0" height="0">
+				<defs>
+					<filter id="gooey">
+						<feTurbulence id="turbGooey" type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="1" result="turbulence" />
+
+						<feDisplacementMap id="dispGooey" in="SourceGraphic" in2="turbulence" scale="70" />
+					</filter>
+				</defs>
+			</svg>
+
+			<div className="gooey-overlay z-20"></div>
+			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem] bg-[#ffd797]">
 				<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
 					<p className="subtitle">CAREER</p>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>

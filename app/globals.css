@@ -89,11 +89,13 @@
 	--gray-1: #b0acb4;
 	--gray-2: #757177;
 	--dark-red: rgb(92, 23, 23);
-	--theme-orange: #ff7300;
-	--theme-yellow: rgb(255, 231, 10);
 
 	--color-pool: rgb(62, 210, 255);
 	--color-tiles: hsla(207, 96%, 34%, 0.5);
+
+	--theme-orange: #ff7300;
+	--theme-yellow: rgb(255, 231, 10);
+	--theme-blue: var(--color-pool);
 }
 
 html {
