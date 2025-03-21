@@ -12,6 +12,7 @@ import {stacks} from "./lib/constants";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
+import html2canvas from "html2canvas";
 
 gsap.registerPlugin(Observer);
 
@@ -53,6 +54,10 @@ export default function Home() {
 	const charRefs = useRef<Record<string, HTMLElement>>({});
 	const shadowRefs = useRef<Record<string, HTMLElement>>({});
 
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
+	const hasExplodedRef = useRef(false);
+	const particleSize = 30;
+
 	const prevScrollTop = useRef(0);
 
 	function preventScroll(e: Event) {
@@ -73,6 +78,111 @@ export default function Home() {
 		window.removeEventListener("wheel", preventScroll);
 		window.removeEventListener("touchmove", preventScroll);
 	}
+
+	useEffect(() => {
+		const explode = async () => {
+			if (!stickyRef.current) return;
+
+			//선택한 div를 베이스로 canvas를 생성
+			const canvas = await html2canvas(stickyRef.current, {
+				backgroundColor: null,
+				scale: 1,
+			});
+
+			const ctx = canvas.getContext("2d");
+			if (!ctx) return;
+
+			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+			const container = stickyRef.current.parentElement;
+			if (!container) return;
+
+			//원래 div는 투명도로 숨김 처리
+			stickyRef.current.style.opacity = "0";
+
+			const dustCanvas = document.createElement("canvas");
+			dustCanvas.width = canvas.width;
+			dustCanvas.height = canvas.height;
+			dustCanvas.style.position = "absolute";
+			dustCanvas.style.top = stickyRef.current.offsetTop + "px";
+			dustCanvas.style.left = stickyRef.current.offsetLeft + "px";
+			//dustCanvas.style.zIndex = "9999";
+
+			canvasRef.current = dustCanvas;
+			container.appendChild(dustCanvas);
+
+			const dustCtx = dustCanvas.getContext("2d");
+			if (!dustCtx) return;
+
+			const particles: any[] = [];
+
+			for (let y = 0; y < canvas.height; y += particleSize) {
+				for (let x = 0; x < canvas.width; x += particleSize) {
+					const i = (y * canvas.width + x) * 4;
+					const [r, g, b, a] = imageData.data.slice(i, i + 4);
+					if (a > 0) {
+						particles.push({
+							x,
+							y,
+							dx: (Math.random() - 0.5) * 10,
+							dy: (Math.random() - 1) * 10,
+							r,
+							g,
+							b,
+							a,
+						});
+					}
+				}
+			}
+
+			const animate = () => {
+				dustCtx.clearRect(0, 0, canvas.width, canvas.height);
+				particles.forEach(p => {
+					p.x += p.dx;
+					p.y += p.dy;
+					p.dy += 0.5;
+
+					dustCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.a / 255})`;
+					dustCtx.fillRect(p.x, p.y, particleSize, particleSize);
+				});
+
+				if (particles.some(p => p.y < canvas.height + 100)) {
+					requestAnimationFrame(animate);
+				}
+			};
+
+			animate();
+		};
+
+		const restore = () => {
+			if (canvasRef.current) {
+				canvasRef.current.remove();
+				canvasRef.current = null;
+			}
+			if (stickyRef.current) {
+				stickyRef.current.style.opacity = "1";
+			}
+		};
+
+		// const handleScroll = async () => {
+		// 	const rect = stickyRef.current?.getBoundingClientRect();
+		// 	if (!rect) return;
+
+		// 	const triggerPoint = window.innerHeight * 0.7;
+
+		// 	if (!hasExplodedRef.current && rect.top < triggerPoint) {
+		// 		hasExplodedRef.current = true;
+		// 		await explode();
+		// 	}
+
+		// 	if (hasExplodedRef.current && rect.top > triggerPoint + 50) {
+		// 		hasExplodedRef.current = false;
+		// 		restore();
+		// 	}
+		// };
+
+		// window.addEventListener("scroll", handleScroll, {passive: true});
+		// return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
 
 	//pseudo element의 너비를 계산하는 함수
 	const getPseudoBounds = (element: HTMLElement, pseudo: "::before" | "::after") => {
@@ -142,7 +252,6 @@ export default function Home() {
 				const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
 				const charBounds = el.getBoundingClientRect();
 				const pseudoBounds = getPseudoBounds(bowlRef.current, "::before");
-				console.log(pseudoBounds);
 				const bowlBounds = bowlRef.current.getBoundingClientRect();
 				const t = 3;
 
@@ -239,81 +348,81 @@ export default function Home() {
 	}, [stacks]);
 
 	//sticky div가 맨 위에 붙은 상황 (지금 화면의 중심인 경우)
-	useEffect(() => {
-		if (!careerCardsRef.current || !stickyRef.current) return;
+	// useEffect(() => {
+	// 	if (!careerCardsRef.current || !stickyRef.current) return;
 
-		const container = careerCardsRef.current;
-		const cards = Array.from(container.querySelectorAll<HTMLDivElement>(".career-card"));
-		const cardHeight = cards[0]?.offsetHeight || 0;
-		const totalCards = cards.length;
-		const totalScrollHeight = cardHeight * totalCards;
-		const marginTop = cardHeight / -2; //카드 사이 간격을 줄이기 위해 카드 높이 반을 뺌
+	// 	const container = careerCardsRef.current;
+	// 	const cards = Array.from(container.querySelectorAll<HTMLDivElement>(".career-card"));
+	// 	const cardHeight = cards[0]?.offsetHeight || 0;
+	// 	const totalCards = cards.length;
+	// 	const totalScrollHeight = cardHeight * totalCards;
+	// 	const marginTop = cardHeight / -2; //카드 사이 간격을 줄이기 위해 카드 높이 반을 뺌
 
-		let currentOffset = 0;
-		let prevScrollTop = window.scrollY;
-		let positions = cards.map((_, i) => i * cardHeight);
+	// 	let currentOffset = 0;
+	// 	let prevScrollTop = window.scrollY;
+	// 	let positions = cards.map((_, i) => i * cardHeight);
 
-		const isStickyVisible = () => {
-			//무한 카드 스위칭을 막기 위해 하단에 카드 세개가 남았을 때 루프를 종료
-			const rect = stickyRef.current!.getBoundingClientRect();
-			return rect.bottom > cardHeight * 3 && rect.top < window.innerHeight;
-		};
+	// 	const isStickyVisible = () => {
+	// 		//무한 카드 스위칭을 막기 위해 하단에 카드 세개가 남았을 때 루프를 종료
+	// 		const rect = stickyRef.current!.getBoundingClientRect();
+	// 		return rect.bottom > cardHeight * 3 && rect.top < window.innerHeight;
+	// 	};
 
-		const updateHighlight = () => {
-			let closestCard = null;
-			let closestDistance = Infinity;
+	// 	const updateHighlight = () => {
+	// 		let closestCard = null;
+	// 		let closestDistance = Infinity;
 
-			cards.forEach(card => {
-				const rect = card.getBoundingClientRect();
-				const distanceToTop = Math.abs(rect.top);
+	// 		cards.forEach(card => {
+	// 			const rect = card.getBoundingClientRect();
+	// 			const distanceToTop = Math.abs(rect.top);
 
-				if (distanceToTop < closestDistance) {
-					closestDistance = distanceToTop;
-					closestCard = card;
-				}
+	// 			if (distanceToTop < closestDistance) {
+	// 				closestDistance = distanceToTop;
+	// 				closestCard = card;
+	// 			}
 
-				card.classList.remove("highlighted");
-			});
+	// 			card.classList.remove("highlighted");
+	// 		});
 
-			if (closestCard) {
-				(closestCard as HTMLDivElement).classList.add("highlighted");
-			}
-		};
+	// 		if (closestCard) {
+	// 			(closestCard as HTMLDivElement).classList.add("highlighted");
+	// 		}
+	// 	};
 
-		const updatePositions = deltaY => {
-			currentOffset += deltaY;
-			if (isStickyVisible()) {
-				cards.forEach((card, index) => {
-					positions[index] += deltaY;
+	// 	const updatePositions = (deltaY: number) => {
+	// 		currentOffset += deltaY;
+	// 		if (isStickyVisible()) {
+	// 			cards.forEach((card, index) => {
+	// 				positions[index] += deltaY;
 
-					// Loop card positions when they exit the viewport
-					if (positions[index] <= -cardHeight) {
-						positions[index] += (cardHeight + marginTop) * (totalCards * totalCards);
-					}
+	// 				// Loop card positions when they exit the viewport
+	// 				if (positions[index] <= -cardHeight) {
+	// 					positions[index] += (cardHeight + marginTop) * (totalCards * totalCards);
+	// 				}
 
-					if (positions[index] >= totalScrollHeight) {
-						positions[index] -= (cardHeight + marginTop) * (totalCards * totalCards);
-					}
-					card.style.setProperty("--y-distance", positions[index] + "px");
-				});
-			}
-			updateHighlight();
-		};
+	// 				if (positions[index] >= totalScrollHeight) {
+	// 					positions[index] -= (cardHeight + marginTop) * (totalCards * totalCards);
+	// 				}
+	// 				card.style.setProperty("--y-distance", positions[index] + "px");
+	// 			});
+	// 		}
+	// 		updateHighlight();
+	// 	};
 
-		const handleScroll = () => {
-			const scrollTop = window.scrollY;
-			const deltaY = scrollTop - prevScrollTop;
-			prevScrollTop = scrollTop;
+	// 	const handleScroll = () => {
+	// 		const scrollTop = window.scrollY;
+	// 		const deltaY = scrollTop - prevScrollTop;
+	// 		prevScrollTop = scrollTop;
 
-			updatePositions(-deltaY);
-		};
+	// 		updatePositions(-deltaY);
+	// 	};
 
-		window.addEventListener("scroll", handleScroll);
+	// 	window.addEventListener("scroll", handleScroll);
 
-		return () => {
-			window.removeEventListener("scroll", handleScroll);
-		};
-	}, []);
+	// 	return () => {
+	// 		window.removeEventListener("scroll", handleScroll);
+	// 	};
+	// }, []);
 
 	useEffect(() => {
 		if (!gameboyHeadRef.current || !isGameboyOn) return;
@@ -563,8 +672,8 @@ export default function Home() {
 		const main = mainRef.current;
 
 		function handleBackgroundColorChange() {
-			const startColor: [number, number, number] = [148, 216, 255];
-			const endColor: [number, number, number] = [0, 0, 46];
+			const startColor: [number, number, number] = [134, 211, 255];
+			const endColor: [number, number, number] = [255, 215, 151];
 
 			const scrollTop = window.scrollY;
 			const scrollHeight = document.body.scrollHeight;
@@ -621,7 +730,7 @@ export default function Home() {
 	}, [tags]);
 
 	return (
-		<div ref={mainRef} className="py-52 text-white w-full h-[300vh] flex flex-col items-center justify-start gap-4 overflow-visible">
+		<div ref={mainRef} className="py-52 text-white w-full h-full flex flex-col items-center justify-start gap-4 overflow-hidden">
 			<div className="fixed top-0 p-4 pointer-events-none w-full">
 				<div className="w-full flex flex-row items-center justify-between mb-auto">
 					<span>ha</span>
@@ -699,13 +808,31 @@ export default function Home() {
 			</svg>
 
 			<div className="gooey-overlay z-20"></div>
-			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem] bg-[#ffd797]">
+			<section ref={stickyRef} className="pt-32 flex-row !justify-between !items-end mb-[10rem] shore">
+				<div className="grain-overlay" />
 				<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
 					<p className="subtitle">CAREER</p>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
+				<div className="footprint">
+					<div className="toes">
+						<div />
+						<div />
+						<div />
+						<div />
+						<div />
+					</div>
+					<div className="bridge">
+						<div />
+						<div />
+					</div>
+					<div className="mid-top"></div>
+					<div className="mid-bottom" />
+					<div className="heel"></div>
+				</div>
+
 				<div ref={careerCardsRef} className="career-cards-container pt-32 spread">
-					<div className="career-card w-full bg-red-500 p-10">
+					<div className="career-card w-full p-10">
 						<p className="text-lg text-white">Frontend Developer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>BATON</p>
@@ -726,7 +853,7 @@ export default function Home() {
 							</li>
 						</ul>
 					</div>
-					<div className="career-card w-full bg-yellow-500 p-10">
+					<div className="career-card w-full p-10">
 						<p className="text-lg text-white">Software Engineer</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>Market Stadium</p>
@@ -741,7 +868,7 @@ export default function Home() {
 							<li>Mocha와 Chai를 이용해 데이터 유효성 검증 테스트를 추가하여 안정성을 높였습니다.</li>
 						</ul>
 					</div>
-					<div className="career-card w-full flex flex-col items-start justify-start bg-cyan-500 p-10">
+					<div className="career-card w-full flex flex-col items-start justify-start p-10">
 						<p className="text-lg text-white">Bachelor's Degree of Computer Science</p>
 						<div className="mb-2 flex flex-row items-center justify-between w-full">
 							<p>The State University of New York, Stony Brook</p>

@@ -85,7 +85,7 @@
 	--darkest-point: rgb(3, 11, 8);
 	--darkest-point-rgb: 3, 11, 8;
 
-	--main-bg: rgb(148, 216, 255);
+	--main-bg: rgb(134, 211, 255);
 	--gray-1: #b0acb4;
 	--gray-2: #757177;
 	--dark-red: rgb(92, 23, 23);
@@ -96,6 +96,9 @@
 	--theme-orange: #ff7300;
 	--theme-yellow: rgb(255, 231, 10);
 	--theme-blue: var(--color-pool);
+	--theme-sand: rgb(255, 215, 151);
+	--theme-sand-dark: rgb(163, 94, 30);
+	--theme-sand-shadow: rgb(134, 52, 14);
 }
 
 html {
@@ -118,13 +121,18 @@ html {
 
 section {
 	width: 100%;
-	min-height: 100vh;
+	/* min-height: 100vh; */
+	height: fit-content;
 	display: flex;
 	align-items: center;
 	justify-content: start;
 	top: 0;
 	padding-left: 15rem;
 	padding-right: 15rem;
+}
+
+section:first-of-type {
+	background-color: rgb(134, 211, 255);
 }
 
 @media screen and (max-width: 640px) {
