@@ -83,7 +83,7 @@
 }
 
 .subtitle {
-	font-size: 4rem;
+	font-size: 7rem;
 	color: var(--theme-yellow);
 	text-shadow: 2px 2px var(--theme-orange);
 	padding: 3rem 2rem;
@@ -619,14 +619,11 @@
 }
 
 .filter-type {
-	--text: #ff0;
-	--shadow: red;
-
 	> input[type="checkbox"] {
 		appearance: none;
 		width: 4rem;
 		height: 4rem;
-		border: 0.5rem solid #ff0;
+		border: 0.5rem solid var(--theme-yellow);
 		border-radius: 0.3rem;
 		background-color: transparent;
 		position: relative;
@@ -646,14 +643,14 @@
 			transform: translate(-45%, -110%) rotate(-45deg);
 			opacity: 0;
 			transition: opacity 0.3s ease;
-			box-shadow: -0.1rem 0.3rem 0 0 var(--dark-red);
+			box-shadow: -0.1rem 0.3rem 0 0 var(--theme-yellow);
 		}
 
 		&:checked {
 			background-color: transparent;
 			&::after {
 				opacity: 1;
-				border-color: red;
+				border-color: var(--theme-orange);
 			}
 		}
 	}

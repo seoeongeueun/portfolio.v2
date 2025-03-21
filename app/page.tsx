@@ -38,7 +38,7 @@ export default function Home() {
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
 	const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
-	const positionsRef = useRef<{top: number; left: number}[]>([]);
+	const [isReadyToExplode, setIsReadyToExplode] = useState<boolean>(false);
 
 	const bowlRef = useRef<HTMLDivElement | null>(null);
 	const charPositionsRef = useRef<Record<string, {x: number; y: number}>>({});
@@ -53,6 +53,7 @@ export default function Home() {
 	const gameboyHeadRef = useRef<HTMLDivElement>(null);
 	const charRefs = useRef<Record<string, HTMLElement>>({});
 	const shadowRefs = useRef<Record<string, HTMLElement>>({});
+	const beachRef = useRef<HTMLDivElement>(null);
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const hasExplodedRef = useRef(false);
@@ -79,32 +80,33 @@ export default function Home() {
 		window.removeEventListener("touchmove", preventScroll);
 	}
 
+	//해변 div를 canvas로 전환해 pixel 폭발 효과를 적용
 	useEffect(() => {
 		const explode = async () => {
-			if (!stickyRef.current) return;
+			if (!beachRef.current) return;
 
 			//선택한 div를 베이스로 canvas를 생성
-			const canvas = await html2canvas(stickyRef.current, {
+			const canvas = await html2canvas(beachRef.current, {
 				backgroundColor: null,
-				scale: 1,
+				scale: 2,
 			});
 
 			const ctx = canvas.getContext("2d");
 			if (!ctx) return;
 
 			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-			const container = stickyRef.current.parentElement;
+			const container = beachRef.current.parentElement;
 			if (!container) return;
 
 			//원래 div는 투명도로 숨김 처리
-			stickyRef.current.style.opacity = "0";
+			beachRef.current.style.opacity = "0";
 
 			const dustCanvas = document.createElement("canvas");
 			dustCanvas.width = canvas.width;
 			dustCanvas.height = canvas.height;
 			dustCanvas.style.position = "absolute";
-			dustCanvas.style.top = stickyRef.current.offsetTop + "px";
-			dustCanvas.style.left = stickyRef.current.offsetLeft + "px";
+			dustCanvas.style.top = beachRef.current.offsetTop + "px";
+			dustCanvas.style.left = beachRef.current.offsetLeft + "px";
 			//dustCanvas.style.zIndex = "9999";
 
 			canvasRef.current = dustCanvas;
@@ -123,8 +125,10 @@ export default function Home() {
 						particles.push({
 							x,
 							y,
-							dx: (Math.random() - 0.5) * 10,
-							dy: (Math.random() - 1) * 10,
+							dx: (Math.random() - 0.5) * 2,
+							dy: (Math.random() - 1) * 2,
+							ttl: 100 + Math.random() * 60,
+							life: 0,
 							r,
 							g,
 							b,
@@ -139,13 +143,22 @@ export default function Home() {
 				particles.forEach(p => {
 					p.x += p.dx;
 					p.y += p.dy;
-					p.dy += 0.5;
+					p.dy += 0.1;
 
-					dustCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.a / 255})`;
-					dustCtx.fillRect(p.x, p.y, particleSize, particleSize);
+					const fade = 1 - p.life / p.ttl;
+					if (fade > 0) {
+						const alpha = (p.a / 255) * fade;
+						dustCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${alpha})`;
+						dustCtx.fillRect(p.x, p.y, particleSize, particleSize);
+
+						//픽셀 효과를 위해 테두리 추가
+						dustCtx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
+						dustCtx.lineWidth = 0.2;
+						dustCtx.strokeRect(p.x, p.y, particleSize, particleSize);
+					}
 				});
 
-				if (particles.some(p => p.y < canvas.height + 100)) {
+				if (particles.some(p => p.life < p.ttl)) {
 					requestAnimationFrame(animate);
 				}
 			};
@@ -158,31 +171,31 @@ export default function Home() {
 				canvasRef.current.remove();
 				canvasRef.current = null;
 			}
-			if (stickyRef.current) {
-				stickyRef.current.style.opacity = "1";
+			if (beachRef.current) {
+				beachRef.current.style.opacity = "1";
 			}
 		};
 
-		// const handleScroll = async () => {
-		// 	const rect = stickyRef.current?.getBoundingClientRect();
-		// 	if (!rect) return;
+		const handleScroll = async () => {
+			const rect = beachRef.current?.getBoundingClientRect();
+			if (!rect) return;
 
-		// 	const triggerPoint = window.innerHeight * 0.7;
+			const triggerPoint = window.innerHeight * 0.7;
 
-		// 	if (!hasExplodedRef.current && rect.top < triggerPoint) {
-		// 		hasExplodedRef.current = true;
-		// 		await explode();
-		// 	}
+			if (!hasExplodedRef.current && rect.top < triggerPoint && isReadyToExplode) {
+				hasExplodedRef.current = true;
+				await explode();
+			}
 
-		// 	if (hasExplodedRef.current && rect.top > triggerPoint + 50) {
-		// 		hasExplodedRef.current = false;
-		// 		restore();
-		// 	}
-		// };
+			if (hasExplodedRef.current && rect.top > triggerPoint + 50) {
+				hasExplodedRef.current = false;
+				restore();
+			}
+		};
 
-		// window.addEventListener("scroll", handleScroll, {passive: true});
-		// return () => window.removeEventListener("scroll", handleScroll);
-	}, []);
+		window.addEventListener("scroll", handleScroll, {passive: true});
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, [isReadyToExplode]);
 
 	//pseudo element의 너비를 계산하는 함수
 	const getPseudoBounds = (element: HTMLElement, pseudo: "::before" | "::after") => {
@@ -365,7 +378,9 @@ export default function Home() {
 		const isStickyVisible = () => {
 			//무한 카드 스위칭을 막기 위해 하단에 카드 3개가 남았을 때 루프를 종료
 			const rect = stickyRef.current!.getBoundingClientRect();
-			return rect.bottom > towelHeight * 2 && rect.top < window.innerHeight;
+			const shouldContinue = rect.bottom > towelHeight * 2 && rect.top < window.innerHeight;
+			setIsReadyToExplode(!shouldContinue);
+			return shouldContinue;
 		};
 
 		const updateHighlight = () => {
@@ -807,7 +822,7 @@ export default function Home() {
 						The Pool
 					</p>
 					<div className="w-full text-xxxl text-white flex flex-row items-center justify-center gap-2">
-						of all my floating ideas <Image src="/assets/flippers.png" width={50} height={50} alt="flippers" />
+						of my floating ideas <Image src="/assets/flippers.png" width={50} height={50} alt="flippers" />
 					</div>
 				</div>
 
@@ -858,7 +873,7 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<div className="w-full h-fit beach-container">
+			<div ref={beachRef} className="w-full h-fit beach-container">
 				<svg width="0" height="0">
 					<defs>
 						<filter id="gooey">
@@ -978,9 +993,9 @@ export default function Home() {
 					</div>
 				</section>
 			</div>
-			<section className="flex-col full-section !h-fit">
+			<section className="flex-col full-section !h-fit font-dunggeunmo">
 				<p className="subtitle">PROJECTS</p>
-				<div className="w-full text-gray-4 h-fit flex flex-row items-center justify-center gap-[5rem] tracking-tighter text-lg md:text-xl ">
+				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
 						<input type="checkbox" id="filter-personal" name="personal" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
 						<label>{textFile["002"]}</label>
