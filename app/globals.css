@@ -109,6 +109,9 @@ html {
 body,
 html {
 	background-color: var(--main-bg);
+	width: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
 	/* width: 100%;
 	height: 100%;
 	overflow: hidden; */
@@ -121,16 +124,8 @@ html {
 } */
 
 section {
-	width: 100%;
-	min-height: 80vh;
-	height: fit-content;
-	display: flex;
-	align-items: center;
-	justify-content: start;
-	top: 0;
 	padding-left: 15rem;
 	padding-right: 15rem;
-	position: relative;
 }
 
 section:first-child {
@@ -154,10 +149,6 @@ section:first-child {
 section.full-section {
 	padding-left: 0;
 	padding-right: 0;
-}
-
-section:not(.sticky) {
-	position: relative;
 }
 
 .fade-up {

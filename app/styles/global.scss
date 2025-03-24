@@ -89,112 +89,6 @@
 	padding: 3rem 2rem;
 }
 
-// .career-cards-container {
-// 	position: relative;
-// 	width: 100%;
-// 	max-width: 50%;
-// 	height: fit-content;
-// 	will-change: transform;
-
-// 	> .career-card {
-// 		transition: transform 0.5s ease-in-out;
-// 		position: absolute;
-// 		right: 0;
-// 		margin-top: 10rem;
-// 		transform-origin: top;
-
-// 		&:first-child {
-// 			z-index: 20;
-// 			margin-top: 0rem;
-// 		}
-
-// 		&.highlighted,
-// 		&:hover {
-// 			transform: scale(1.2);
-// 			opacity: 1 !important;
-// 		}
-// 	}
-
-// 	&.spread {
-// 		height: fit-content;
-// 		opacity: 1;
-// 		transform: translateY(0);
-
-// 		> .career-card {
-// 			position: relative;
-// 			transition: all 0.5s ease-in-out 0.1s;
-
-// 			&:not(:first-child) {
-// 				margin-top: 15rem;
-// 			}
-// 		}
-// 	}
-// }
-
-// .career-cards-container {
-// 	position: relative;
-// 	width: 100%;
-// 	max-width: 50%;
-// 	height: fit-content;
-// 	will-change: transform;
-// 	opacity: 0;
-// 	transition: opacity 1s ease-in-out;
-// 	overflow: hidden;
-
-// 	> .career-card {
-// 		// position: absolute;
-// 		// right: 0;
-// 		// top: 0;
-// 		// margin-top: 0;
-// 		transform-origin: top;
-// 		transition:
-// 			transform 0.3s ease,
-// 			opacity 0.3s ease;
-// 		will-change: transform, opacity;
-// 		transform: translateY(50px);
-
-// 		&:first-child {
-// 			z-index: 20;
-// 			transform: translateY(0);
-// 			opacity: 1;
-// 		}
-// 	}
-
-// 	&.spread {
-// 		opacity: 1;
-
-// 		> .career-card {
-// 			position: relative;
-// 			opacity: 1;
-// 			//transform: translateY(0);
-// 			//transition: all 0.3s ease-in-out;
-
-// 			// &:not(:last-child) {
-// 			// 	margin-bottom: 15rem;
-// 			// }
-
-// 			// &:nth-child(1) {
-// 			// 	transition-delay: 0s;
-// 			// }
-// 			// &:nth-child(2) {
-// 			// 	transition-delay: 0.1s;
-// 			// }
-// 			// &:nth-child(3) {
-// 			// 	transition-delay: 0.2s;
-// 			// }
-// 			// &:nth-child(4) {
-// 			// 	transition-delay: 0.3s;
-// 			// }
-
-// 			&.highlighted {
-// 				transform: scale(1.2);
-// 				opacity: 1 !important;
-// 				right: 10rem;
-// 			}
-// 		}
-// 	}
-// }
-
 .towels-container {
 	position: relative;
 	overflow: visible;
@@ -278,140 +172,143 @@
 	}
 }
 
-.cartridge-cards {
-	--stack-width: 30rem;
-	--card-width: 50rem;
-	--gap: 10rem;
+// .cartridge-cards {
+// 	--stack-width: 30rem;
+// 	--card-width: 50rem;
+// 	--gap: 10rem;
 
-	height: 30rem;
-	gap: 3rem;
+// 	height: 30rem;
+// 	gap: 3rem;
+// 	display: flex;
+// 	flex-direction: row;
+// 	justify-content: center;
+// 	align-items: center;
+// 	position: relative;
+// 	transform-origin: center;
+// 	box-sizing: border-box;
+// 	overflow: visible;
+// 	top: var(--gap);
+// 	width: var(--stack-width);
+
+// 	//클릭 이벤트 진행 중에는 모든 카드의 마우스 이벤트를 차단
+// 	&:has(.clicked) {
+// 		.card:not(.clicked) {
+// 			pointer-events: none !important;
+// 		}
+
+// 		&.spread {
+// 			transition: left 0.3s ease-out 0.1s;
+// 		}
+// 	}
+
+// 	&.spread {
+// 		// width: calc(var(--stack-width) * 2);
+// 		// left: calc(var(--stack-width) + var(--gap));
+// 		width: 100%;
+
+// 		justify-content: center;
+
+// 		> .card {
+// 			filter: brightness(100%);
+
+// 			$card-width: var(--card-width);
+// 			$gap: var(--gap);
+// 			//프로젝트 개수가 바뀌면 바꿔주기
+// 			$total-cards: 7;
+
+// 			@for $i from 1 through $total-cards {
+// 				&:nth-child(#{$i}) {
+// 					@if $i % 2 == 1 {
+// 						$random-offset: if($i % 3 == 0, 0rem, if($i % 3 == 1, 1rem, 2rem));
+// 						left: calc(-100% + (#{$card-width} * 2) - ((#{$card-width} / 2) * #{$i}) + #{$random-offset});
+// 					} @else {
+// 						$random-offset: if($i % 3 == 0, 0rem, if($i % 3 == 1, 1rem, 4rem));
+// 						left: calc(-100% + (#{$card-width} / 2) + ((#{$card-width} / 2) * (#{$i} + 1)) + #{$random-offset});
+// 					}
+// 				}
+// 			}
+
+// 			&:first-child {
+// 				left: calc(-100% + calc(var(--card-width) / 1.5 + calc(var(--gap)) * 2.5));
+// 				top: -3rem;
+// 			}
+// 		}
+// 	}
+
+// 	> .card {
+// 		cursor: pointer;
+// 		transition:
+// 			left 0.5s ease-in-out,
+// 			filter 0.3s ease 0.1s;
+// 		position: absolute;
+// 		filter: brightness(80%);
+
+// 		&:nth-child(2n) {
+// 			transform: rotate(-1deg);
+// 		}
+// 		&:nth-child(2n + 1) {
+// 			transform: rotate(1deg);
+// 			top: 1rem;
+// 		}
+
+// 		&.card-4 {
+// 			transform: rotate(1deg);
+// 			left: -2rem;
+// 			top: 1rem;
+// 		}
+
+// 		&.card-3 {
+// 			transform: rotate(2deg);
+// 			left: 2rem;
+// 			top: -1rem;
+// 		}
+
+// 		/* 킥을 위해 2번째 카드는 강한 회전값 */
+// 		&.card-2 {
+// 			transform: rotate(-4deg);
+// 			left: 3rem;
+// 			top: -2rem;
+// 		}
+
+// 		/* 첫번째 카드는 음영 효과 x */
+// 		&.card-1 {
+// 			transform: rotate(-1deg);
+// 			left: 1rem;
+// 			top: 0rem;
+// 			filter: brightness(100%);
+// 		}
+
+// 		&:hover {
+// 			transition:
+// 				top 0.5s ease-in-out,
+// 				transform 0.3s ease-in-out 0.1s;
+// 			top: -7rem !important;
+// 			transform: rotate(0deg);
+// 		}
+
+// 		&.clicked {
+// 			filter: brightness(100%);
+// 			transition:
+// 				transform 0.8s ease-in-out 0.5s,
+// 				top 0.5s ease-in-out;
+// 			transform: scale(0.2);
+// 			top: -7rem !important;
+
+// 			&.moveY {
+// 				animation: insert 1.5s ease-in-out forwards;
+// 			}
+// 		}
+// 	}
+// }
+
+.cartridge-loop {
 	display: flex;
 	flex-direction: row;
-	justify-content: center;
-	align-items: center;
-	position: relative;
-	transform-origin: center;
-	box-sizing: border-box;
-	overflow: visible;
-	top: var(--gap);
-	width: var(--stack-width);
+	justify-content: start;
+	will-change: transform;
 
-	//클릭 이벤트 진행 중에는 모든 카드의 마우스 이벤트를 차단
-	&:has(.clicked) {
-		.card:not(.clicked) {
-			pointer-events: none !important;
-		}
-
-		&.spread {
-			transition: left 0.3s ease-out 0.1s;
-		}
-	}
-
-	&.spread {
-		width: calc(var(--stack-width) * 2);
-		left: calc(var(--stack-width) + var(--gap));
-		justify-content: start;
-
-		> .card {
-			filter: brightness(100%);
-
-			$card-width: var(--card-width);
-			$gap: var(--gap);
-			//프로젝트 개수가 바뀌면 바꿔주기
-			$total-cards: 7;
-
-			@for $i from 1 through $total-cards {
-				&:nth-child(#{$i}) {
-					@if $i % 2 == 1 {
-						$random-offset: if($i % 3 == 0, 0rem, if($i % 3 == 1, 1rem, 2rem));
-						left: calc(-100% + (#{$card-width} * 2) - ((#{$card-width} / 2) * #{$i}) + #{$random-offset});
-					} @else {
-						$random-offset: if($i % 3 == 0, 0rem, if($i % 3 == 1, 1rem, 4rem));
-						left: calc(-100% + (#{$card-width} / 2) + ((#{$card-width} / 2) * (#{$i} + 1)) + #{$random-offset});
-					}
-				}
-			}
-
-			&:first-child {
-				left: calc(-100% + calc(var(--card-width) / 1.5 + calc(var(--gap)) * 2.5));
-				top: -3rem;
-			}
-		}
-	}
-
-	> .card {
-		cursor: pointer;
-		transition:
-			left 0.5s ease-in-out,
-			filter 0.3s ease 0.1s;
-		position: absolute;
-		filter: brightness(80%);
-
-		&:nth-child(2n) {
-			transform: rotate(-1deg);
-		}
-		&:nth-child(2n + 1) {
-			transform: rotate(1deg);
-			top: 1rem;
-		}
-
-		&.card-4 {
-			transform: rotate(1deg);
-			left: -2rem;
-			top: 1rem;
-		}
-
-		&.card-3 {
-			transform: rotate(2deg);
-			left: 2rem;
-			top: -1rem;
-		}
-
-		/* 킥을 위해 2번째 카드는 강한 회전값 */
-		&.card-2 {
-			transform: rotate(-4deg);
-			left: 3rem;
-			top: -2rem;
-		}
-
-		/* 첫번째 카드는 음영 효과 x */
-		&.card-1 {
-			transform: rotate(-1deg);
-			left: 1rem;
-			top: 0rem;
-			filter: brightness(100%);
-		}
-
-		&:hover {
-			transition:
-				top 0.5s ease-in-out,
-				transform 0.3s ease-in-out 0.1s;
-			top: -7rem !important;
-			transform: rotate(0deg);
-		}
-
-		&.clicked {
-			filter: brightness(100%);
-			transition:
-				transform 0.8s ease-in-out 0.5s,
-				top 0.5s ease-in-out;
-			transform: scale(0.2);
-			top: -7rem !important;
-
-			&.moveY {
-				animation: insert 1.5s ease-in-out forwards;
-			}
-			//animation: insert 1.5s ease-in-out 0.2s forwards;
-			// transition:
-			// 	left 0.5s ease-in-out,
-			// 	top 0.5s ease-in-out,
-			// 	transform 0.3s ease-in-out 0.1s;
-			// //left: calc((var(--stack-width) * -1)) !important;
-			// z-index: 99;
-			// filter: brightness(100%);
-			// transform: scale(0.2);
-			// //animation: insert 1.5s ease-in-out 0.2s forwards;
-		}
+	> div {
+		flex-shrink: 0;
 	}
 }
 
@@ -852,20 +749,20 @@
 		transition: opacity 1s ease-in-out 0.5s;
 	}
 
-	.playlist-title {
-		position: absolute;
-		transform: scaleY(-1) translateX(-50%);
-		font-style: italic;
-		color: var(--button-light);
-		bottom: 2rem;
-		left: 50%;
-		z-index: 30;
-		font-size: 1.7rem;
-		font-weight: 300;
-		text-shadow:
-			0px 1px 0px black,
-			1px -1px 0px black;
-	}
+	// .playlist-title {
+	// 	position: absolute;
+	// 	transform: scaleY(-1) translateX(-50%);
+	// 	font-style: italic;
+	// 	color: var(--button-light);
+	// 	bottom: 2rem;
+	// 	left: 50%;
+	// 	z-index: 30;
+	// 	font-size: 1.7rem;
+	// 	font-weight: 300;
+	// 	text-shadow:
+	// 		0px 1px 0px black,
+	// 		1px -1px 0px black;
+	// }
 }
 
 .position-center {

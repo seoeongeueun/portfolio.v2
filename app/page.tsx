@@ -15,6 +15,7 @@ import {ScrollTrigger} from "gsap/ScrollTrigger";
 import html2canvas from "html2canvas";
 
 gsap.registerPlugin(Observer);
+gsap.registerPlugin(ScrollTrigger);
 
 const getRandomInt = (val: number): number => Math.ceil(Math.random() * val) * (Math.random() < 0.5 ? -1 : 1);
 
@@ -57,28 +58,9 @@ export default function Home() {
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const hasExplodedRef = useRef(false);
-	const particleSize = 30;
+	const particleSize = 50;
 
 	const prevScrollTop = useRef(0);
-
-	function preventScroll(e: Event) {
-		e.preventDefault();
-		e.stopPropagation();
-	}
-
-	function lockScroll() {
-		window.addEventListener("wheel", preventScroll, {
-			passive: false,
-		});
-		window.addEventListener("touchmove", preventScroll, {
-			passive: false,
-		});
-	}
-
-	function unlockScroll() {
-		window.removeEventListener("wheel", preventScroll);
-		window.removeEventListener("touchmove", preventScroll);
-	}
 
 	//해변 div를 canvas로 전환해 pixel 폭발 효과를 적용
 	useEffect(() => {
@@ -193,8 +175,8 @@ export default function Home() {
 			}
 		};
 
-		window.addEventListener("scroll", handleScroll, {passive: true});
-		return () => window.removeEventListener("scroll", handleScroll);
+		// window.addEventListener("scroll", handleScroll, {passive: true});
+		// return () => window.removeEventListener("scroll", handleScroll);
 	}, [isReadyToExplode]);
 
 	//pseudo element의 너비를 계산하는 함수
@@ -208,8 +190,6 @@ export default function Home() {
 	};
 
 	useEffect(() => {
-		gsap.registerPlugin(ScrollTrigger);
-
 		gsap.to("#turbGooey", {
 			attr: {baseFrequency: "0.02 0.08"},
 			scrollTrigger: {
@@ -378,7 +358,7 @@ export default function Home() {
 		const isStickyVisible = () => {
 			//무한 카드 스위칭을 막기 위해 하단에 카드 3개가 남았을 때 루프를 종료
 			const rect = stickyRef.current!.getBoundingClientRect();
-			const shouldContinue = rect.bottom > towelHeight * 2 && rect.top < window.innerHeight;
+			const shouldContinue = rect.bottom > towelHeight * 3 && rect.top < window.innerHeight;
 			setIsReadyToExplode(!shouldContinue);
 			return shouldContinue;
 		};
@@ -500,46 +480,46 @@ export default function Home() {
 		});
 	}, []);
 
-	useEffect(() => {
-		if (!gameboyHeadRef.current || !isGameboyOn) return;
+	// useEffect(() => {
+	// 	if (!gameboyHeadRef.current || !isGameboyOn) return;
 
-		const gameboyHead = gameboyHeadRef.current;
-		const gameboyScreen = gameboyHead.querySelector<HTMLDivElement>(".gameboy-screen");
-		if (!gameboyScreen) return;
+	// 	const gameboyHead = gameboyHeadRef.current;
+	// 	const gameboyScreen = gameboyHead.querySelector<HTMLDivElement>(".gameboy-screen");
+	// 	if (!gameboyScreen) return;
 
-		const initialScrollY = window.scrollY;
-		let maxScreenWidth = window.innerWidth * 0.7; // 최대 70vw
-		let maxScale = maxScreenWidth / gameboyScreen.offsetWidth; // 최대 scale 값
-		let lastScrollY = window.scrollY; // 이전 스크롤 위치
+	// 	const initialScrollY = window.scrollY;
+	// 	let maxScreenWidth = window.innerWidth * 0.7; // 최대 70vw
+	// 	let maxScale = maxScreenWidth / gameboyScreen.offsetWidth; // 최대 scale 값
+	// 	let lastScrollY = window.scrollY; // 이전 스크롤 위치
 
-		const originalLeft = gameboyScreen.offsetLeft; //scale 적용 전에 screen의 왼쪽 거리를 계산
+	// 	const originalLeft = gameboyScreen.offsetLeft; //scale 적용 전에 screen의 왼쪽 거리를 계산
 
-		const handleScroll = () => {
-			const scrollY = window.scrollY;
-			let scrollDiff = scrollY - initialScrollY; // 기준점 대비 스크롤 이동량
+	// 	const handleScroll = () => {
+	// 		const scrollY = window.scrollY;
+	// 		let scrollDiff = scrollY - initialScrollY; // 기준점 대비 스크롤 이동량
 
-			// 스크롤 위 방향 감지
-			if (scrollY < lastScrollY) {
-				//스크롤을 올릴 때는 자연스럽게 작아지기 위해 기준점을 현재 위치에서 200px 정도 멀리 잡는다
-				scrollDiff -= 100;
-			} else {
-				scrollDiff += 300;
-			}
-			let newScale = 1 + scrollDiff * 0.002;
-			// 1보다는 크고 maxscale보다는 작게
-			newScale = Math.max(1, Math.min(newScale, maxScale));
+	// 		// 스크롤 위 방향 감지
+	// 		if (scrollY < lastScrollY) {
+	// 			//스크롤을 올릴 때는 자연스럽게 작아지기 위해 기준점을 현재 위치에서 200px 정도 멀리 잡는다
+	// 			scrollDiff -= 100;
+	// 		} else {
+	// 			scrollDiff += 300;
+	// 		}
+	// 		let newScale = 1 + scrollDiff * 0.002;
+	// 		// 1보다는 크고 maxscale보다는 작게
+	// 		newScale = Math.max(1, Math.min(newScale, maxScale));
 
-			//1 이하로는 작아지지 못하게 지정
-			gameboyHead.style.setProperty("--scale", newScale.toString());
+	// 		//1 이하로는 작아지지 못하게 지정
+	// 		gameboyHead.style.setProperty("--scale", newScale.toString());
 
-			lastScrollY = scrollY;
-		};
+	// 		lastScrollY = scrollY;
+	// 	};
 
-		window.addEventListener("scroll", handleScroll);
-		return () => {
-			window.removeEventListener("scroll", handleScroll);
-		};
-	}, [isGameboyOn]);
+	// 	window.addEventListener("scroll", handleScroll);
+	// 	return () => {
+	// 		window.removeEventListener("scroll", handleScroll);
+	// 	};
+	// }, [isGameboyOn]);
 
 	useEffect(() => {
 		const handleMobileCardIntersection: IntersectionObserverCallback = (entries, observer) => {
@@ -565,19 +545,6 @@ export default function Home() {
 					const side = (entry.target as HTMLElement).dataset.side;
 					entry.target.classList.add(`fade-${side}`);
 					observer.unobserve(entry.target);
-				}
-			});
-		};
-
-		const handleStickyIntersection: IntersectionObserverCallback = (entries, observer) => {
-			entries.forEach(entry => {
-				console.log(entry.boundingClientRect.top);
-				if (entry.boundingClientRect.top <= 0) {
-					entry.target.classList.add("stuck");
-					console.log("styck");
-					lockScroll();
-				} else {
-					entry.target.classList.remove("stuck");
 				}
 			});
 		};
@@ -624,123 +591,123 @@ export default function Home() {
 	}, []);
 
 	/* 카트리지 (=통칭 카드) 호버 & 펼침 이벤트 관리 */
-	useEffect(() => {
-		const parentContainer = cartridgeCardsContainerRef.current;
-		const cardsDiv = cartridgeCardsRef.current;
-		if (!cardsDiv || !parentContainer) return;
+	// useEffect(() => {
+	// 	const parentContainer = cartridgeCardsContainerRef.current;
+	// 	const cardsDiv = cartridgeCardsRef.current;
+	// 	if (!cardsDiv || !parentContainer) return;
 
-		const handleMouseEnter = (event: MouseEvent) => {
-			// const hoveredCard = event.currentTarget as HTMLElement;
-			// setTimeout(() => {
-			// 	hoveredCard?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
-			// }, 500);
-		};
-		function onCardClick(event: MouseEvent) {
-			const clickedCard = event.currentTarget as HTMLElement;
-			const rect = clickedCard.getBoundingClientRect();
-			if (!rect || !cardsDiv || !parentContainer) return;
+	// 	const handleMouseEnter = (event: MouseEvent) => {
+	// 		// const hoveredCard = event.currentTarget as HTMLElement;
+	// 		// setTimeout(() => {
+	// 		// 	hoveredCard?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+	// 		// }, 500);
+	// 	};
+	// 	function onCardClick(event: MouseEvent) {
+	// 		const clickedCard = event.currentTarget as HTMLElement;
+	// 		const rect = clickedCard.getBoundingClientRect();
+	// 		if (!rect || !cardsDiv || !parentContainer) return;
 
-			const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
-			cards.forEach(card => card.classList.remove("clicked"));
+	// 		const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
+	// 		cards.forEach(card => card.classList.remove("clicked"));
 
-			/* 
-				선택된 카드를 중앙으로 위치하게 스크롤 하는 로직 + 자동으로 필요한 만큼 여백 추가
-				어떤 디자인을 택할지에 따라 사용하지 않을 수도 있음
-			*/
-			const parentRect = parentContainer.getBoundingClientRect();
-			const cardRect = clickedCard.getBoundingClientRect();
+	// 		/*
+	// 			선택된 카드를 중앙으로 위치하게 스크롤 하는 로직 + 자동으로 필요한 만큼 여백 추가
+	// 			어떤 디자인을 택할지에 따라 사용하지 않을 수도 있음
+	// 		*/
+	// 		const parentRect = parentContainer.getBoundingClientRect();
+	// 		const cardRect = clickedCard.getBoundingClientRect();
 
-			const cardCenterInParentViewport = cardRect.left - parentRect.left + cardRect.width / 2;
-			const cardCenterInParentScrollCoords = parentContainer.scrollLeft + cardCenterInParentViewport;
-			const windowCenterX = window.innerWidth / 2;
-			const desiredDelta = cardCenterInParentScrollCoords - windowCenterX;
-			const maxScroll = parentContainer.scrollWidth - parentContainer.clientWidth;
-			const currentScroll = parentContainer.scrollLeft;
+	// 		const cardCenterInParentViewport = cardRect.left - parentRect.left + cardRect.width / 2;
+	// 		const cardCenterInParentScrollCoords = parentContainer.scrollLeft + cardCenterInParentViewport;
+	// 		const windowCenterX = window.innerWidth / 2;
+	// 		const desiredDelta = cardCenterInParentScrollCoords - windowCenterX;
+	// 		const maxScroll = parentContainer.scrollWidth - parentContainer.clientWidth;
+	// 		const currentScroll = parentContainer.scrollLeft;
 
-			let targetScroll = desiredDelta;
-			if (targetScroll < 0) targetScroll = 0;
-			if (targetScroll > maxScroll) targetScroll = maxScroll;
+	// 		let targetScroll = desiredDelta;
+	// 		if (targetScroll < 0) targetScroll = 0;
+	// 		if (targetScroll > maxScroll) targetScroll = maxScroll;
 
-			parentContainer.scrollTo({
-				top: 0,
-				left: targetScroll,
-				behavior: "smooth",
-			});
+	// 		parentContainer.scrollTo({
+	// 			top: 0,
+	// 			left: targetScroll,
+	// 			behavior: "smooth",
+	// 		});
 
-			const waitForScrollEnd = () => {
-				if (Math.abs(parentContainer.scrollLeft - targetScroll) < 1) {
-					const actualDelta = currentScroll + desiredDelta - targetScroll;
+	// 		const waitForScrollEnd = () => {
+	// 			if (Math.abs(parentContainer.scrollLeft - targetScroll) < 1) {
+	// 				const actualDelta = currentScroll + desiredDelta - targetScroll;
 
-					if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
-						const computedLeft = getComputedStyle(cardsDiv).left || "0";
-						const currentLeft = parseFloat(computedLeft);
+	// 				if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
+	// 					const computedLeft = getComputedStyle(cardsDiv).left || "0";
+	// 					const currentLeft = parseFloat(computedLeft);
 
-						const newLeft = desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : currentLeft - actualDelta;
+	// 					const newLeft = desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : currentLeft - actualDelta;
 
-						cardsDiv.style.transition = "left 1s ease-in-out 0.2s";
-						cardsDiv.style.left = `${newLeft}px`;
+	// 					cardsDiv.style.transition = "left 1s ease-in-out 0.2s";
+	// 					cardsDiv.style.left = `${newLeft}px`;
 
-						setTimeout(() => {
-							moveGameboyHead();
-						}, 1400);
-					} else {
-						cardsDiv.style.left = "";
-						cardsDiv.style.transition = "";
-						setTimeout(() => {
-							moveGameboyHead();
-						}, 800);
-					}
-				} else {
-					requestAnimationFrame(waitForScrollEnd);
-				}
-			};
-			clickedCard.classList.add("clicked");
-			requestAnimationFrame(waitForScrollEnd);
+	// 					setTimeout(() => {
+	// 						moveGameboyHead();
+	// 					}, 1400);
+	// 				} else {
+	// 					cardsDiv.style.left = "";
+	// 					cardsDiv.style.transition = "";
+	// 					setTimeout(() => {
+	// 						moveGameboyHead();
+	// 					}, 800);
+	// 				}
+	// 			} else {
+	// 				requestAnimationFrame(waitForScrollEnd);
+	// 			}
+	// 		};
+	// 		clickedCard.classList.add("clicked");
+	// 		requestAnimationFrame(waitForScrollEnd);
 
-			//게임기로 이동하기 위해 필요한 거리 계산
-			const moveGameboyHead = () => {
-				const gameboyHead = document.querySelector("#gameboy-head");
-				if (gameboyHead) {
-					const referencePosition = gameboyHead.getBoundingClientRect().top;
-					const cardPosition = rect.top;
-					const distance = referencePosition - cardPosition - clickedCard.offsetHeight * 0.4;
+	// 		//게임기로 이동하기 위해 필요한 거리 계산
+	// 		const moveGameboyHead = () => {
+	// 			const gameboyHead = document.querySelector("#gameboy-head");
+	// 			if (gameboyHead) {
+	// 				const referencePosition = gameboyHead.getBoundingClientRect().top;
+	// 				const cardPosition = rect.top;
+	// 				const distance = referencePosition - cardPosition - clickedCard.offsetHeight * 0.4;
 
-					//카트리지가 들어간 효과를 위해 추가 Y 값 (= 20)
-					clickedCard.style.setProperty("--y-distance", `${distance + 20}px`);
-					clickedCard.classList.add("moveY");
-					setTimeout(() => {
-						gameboyHeadRef.current?.scrollIntoView({behavior: "smooth", block: "center", inline: "center"});
-					}, 300);
-				}
-			};
+	// 				//카트리지가 들어간 효과를 위해 추가 Y 값 (= 20)
+	// 				clickedCard.style.setProperty("--y-distance", `${distance + 20}px`);
+	// 				clickedCard.classList.add("moveY");
+	// 				setTimeout(() => {
+	// 					gameboyHeadRef.current?.scrollIntoView({behavior: "smooth", block: "center", inline: "center"});
+	// 				}, 300);
+	// 			}
+	// 		};
 
-			const handleAnimationEnd = () => {
-				setIsGameboyOn(true);
+	// 		const handleAnimationEnd = () => {
+	// 			setIsGameboyOn(true);
 
-				setTimeout(() => {
-					// clickedCard.classList.remove("clicked");
-					// cardsDiv.style.left = "";
-					// cardsDiv.style.transition = "";
+	// 			setTimeout(() => {
+	// 				// clickedCard.classList.remove("clicked");
+	// 				// cardsDiv.style.left = "";
+	// 				// cardsDiv.style.transition = "";
 
-					clickedCard.removeEventListener("animationend", handleAnimationEnd);
-				}, 700);
-			};
+	// 				clickedCard.removeEventListener("animationend", handleAnimationEnd);
+	// 			}, 700);
+	// 		};
 
-			clickedCard.addEventListener("animationend", handleAnimationEnd);
-		}
-		const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
-		cards.forEach(card => {
-			card.addEventListener("mouseenter", handleMouseEnter);
-			card.addEventListener("click", onCardClick);
-		});
+	// 		clickedCard.addEventListener("animationend", handleAnimationEnd);
+	// 	}
+	// 	const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
+	// 	cards.forEach(card => {
+	// 		card.addEventListener("mouseenter", handleMouseEnter);
+	// 		card.addEventListener("click", onCardClick);
+	// 	});
 
-		return () => {
-			cards.forEach(card => {
-				card.removeEventListener("mouseenter", handleMouseEnter);
-				card.removeEventListener("click", onCardClick);
-			});
-		};
-	}, []);
+	// 	return () => {
+	// 		cards.forEach(card => {
+	// 			card.removeEventListener("mouseenter", handleMouseEnter);
+	// 			card.removeEventListener("click", onCardClick);
+	// 		});
+	// 	};
+	// }, []);
 
 	/* 스크롤 위치에 따라 배경색을 변경하는 로직*/
 	// useEffect(() => {
@@ -805,15 +772,44 @@ export default function Home() {
 		}
 	}, [tags]);
 
+	useEffect(() => {
+		const loop = cartridgeCardsRef.current;
+		const gallery = cartridgeCardsContainerRef.current;
+
+		if (!loop || !gallery) return;
+		const buffer = 50;
+
+		const paddingRight = parseFloat(getComputedStyle(loop).paddingRight || "0");
+		const scrollDistance = loop.scrollWidth - gallery.offsetWidth + paddingRight;
+
+		const tween = gsap.to(loop, {
+			x: -scrollDistance,
+			ease: "none",
+			scrollTrigger: {
+				trigger: ".projects-section",
+				start: `top top`,
+				end: `+=${scrollDistance}`,
+				scrub: true,
+				pin: true,
+				pinSpacing: true,
+			},
+		});
+
+		return () => {
+			tween.scrollTrigger?.kill();
+			tween.kill();
+		};
+	}, []);
+
 	return (
-		<div ref={mainRef} className="py-52 text-white w-full h-full flex flex-col items-center justify-start gap-4 overflow-x-hidden">
+		<div ref={mainRef} className="py-52 text-white w-full overflow-hidden flex flex-col items-center justify-start">
 			<div className="fixed top-0 p-4 pointer-events-none w-full">
 				<div className="w-full flex flex-row items-center justify-between mb-auto">
 					<span>ha</span>
 				</div>
 			</div>
 
-			<section className="flex-col z-30">
+			<section className="w-full flex flex-col items-center">
 				<div className="flex flex-col justify-center items-center">
 					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-white text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
 						SEOEONGEUEUN's
@@ -866,7 +862,7 @@ export default function Home() {
 					</div>
 				</div>
 
-				<div className="fixed bottom-0 p-20 pointer-events-none z-[99]">
+				<div className="fixed w-full bottom-0 p-20 pointer-events-none z-[99]">
 					<div className="flex flex-col items-center justify-center text-white text-xl">
 						<span className="drop-shadow-md">{textFile["000"]}</span>
 						<MdKeyboardDoubleArrowDown color="white" size="3rem" className="animate-slide-down drop-shadow-lg"></MdKeyboardDoubleArrowDown>
@@ -885,7 +881,7 @@ export default function Home() {
 
 				<div className="gooey-overlay z-20"></div>
 				<div className="grain-overlay" />
-				<section ref={stickyRef} className="pt-24 flex-row !justify-between !items-end mb-[10rem] shore sticky">
+				<section ref={stickyRef} className="pt-24 flex flex-row w-full min-h-screen justify-between items-center shore">
 					<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
@@ -993,7 +989,7 @@ export default function Home() {
 					</div>
 				</section>
 			</div>
-			<section className="flex-col full-section !h-fit font-dunggeunmo">
+			<section className="w-full full-section min-h-screen text-center font-dunggeunmo projects-section">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
@@ -1005,28 +1001,29 @@ export default function Home() {
 						<label>{textFile["003"]}</label>
 					</div>
 				</div>
-				<div
-					ref={cartridgeCardsContainerRef}
-					className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh]"
-				>
-					<div ref={cartridgeCardsRef} className="cartridge-cards relative">
+				<div ref={cartridgeCardsContainerRef} className="gallery w-full mt-24 md:mt-40 flex overflow-visible">
+					<div ref={cartridgeCardsRef} className="cartridge-loop w-full flex gap-8 md:gap-24 px-24 px-16 md:px-32">
 						{Object.entries(projects).map(([k, v]) => (
-							<div id="card" key={v.title} className={`card card-${k}`} onClick={() => setSelectedProjectTitle(k)}>
+							<div key={v.title} className={`card card-${k} w-fit`} onClick={() => setSelectedProjectTitle(k)}>
 								<Cartridge project={v} />
 							</div>
 						))}
 					</div>
 				</div>
-				<div ref={gameboyHeadRef} className={`relative gameboy-section mt-60 ${isGameboyOn && "power-on"}`}>
+				<div className={`relative mt-32 gameboy-section ${isGameboyOn && "power-on"}`}>
 					<Gameboy project={ProjectsData[selectedProjectTitle as keyof typeof ProjectsData]} />
 				</div>
 			</section>
-			<section className="flex-col bg-red-100 opacity-50 mt-[150vh] fade-up-section">
+			<section className="relative pt-[10vh]"></section>
+			{/* <div className="h-screen">Top content</div>
+			<div className="h-screen">Top content</div> */}
+
+			{/* <section className="flex-col bg-red-100 opacity-50 mt-[150vh] fade-up-section">
 				<div className="flex flex-col justify-start items-center mb-auto">
 					<p className="subtitle">CONTACTS</p>
 					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 				</div>
-			</section>
+			</section> */}
 		</div>
 	);
 }
