@@ -3,10 +3,10 @@ import {stacks} from "../lib/constants";
 import Image from "next/image";
 
 type GameboyProps = {
-	project: Project;
+	project: Project | undefined;
 };
 
-interface Project {
+export interface Project {
 	title: string;
 	subtitle: string;
 	thumbnail: string;
@@ -119,6 +119,7 @@ export default function Gameboy({project}: GameboyProps) {
 											project.stacks?.length > 0 &&
 											project.stacks.map((s: string) => <Image key={s} src={`/icons/${s}.svg`} width={20} height={20} alt={s} />)}
 									</div>
+									<Image src="/assets/spinner.svg" alt="loading spinner" width={40} height={40} className="animate-spin" />
 								</div>
 							</div>
 						</div>

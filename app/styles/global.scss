@@ -307,12 +307,8 @@
 	justify-content: start;
 	will-change: transform;
 
-	&:has(.clicked) {
-		pointer-events: none;
-	}
-
 	//카트리지 열의 각 카트리지
-	> div {
+	.card {
 		flex-shrink: 0;
 		cursor: pointer;
 		position: relative;
@@ -343,15 +339,20 @@
 			top: -7rem;
 
 			&.moveY {
-				animation: insert 1.5s ease-in-out forwards;
+				transition:
+					transform 0.5s ease-in-out,
+					top 1s ease-in-out 0.6s;
+				top: 100vh;
 			}
 		}
 	}
 }
 
-.mini-card {
-	position: relative;
-	top: -70rem;
+.selected-cartridge {
+	transform: scale(0.2);
+	width: fit-content;
+	position: absolute;
+	top: calc(-50% - 3rem);
 }
 
 .cartridge-container {
@@ -1574,21 +1575,6 @@ $transition: 0.5s ease-in-out;
 }
 
 .gameboy-section.power-on {
-	height: 70vh;
-	width: 100%;
-	flex-shrink: 0;
-	background-color: rgba(255, 0, 0, 0.062);
-	> div:first-child {
-		position: sticky;
-		top: 50%;
-
-		> div:first-child {
-			transform: scale(var(--scale));
-			transform-origin: top center;
-			transition: transform 0.5s linear;
-		}
-	}
-
 	.power {
 		background-color: greenyellow;
 		box-shadow:

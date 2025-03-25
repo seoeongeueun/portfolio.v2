@@ -4,7 +4,7 @@ import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
 import {Fragment, useEffect, useState, useRef, useCallback, act} from "react";
 import Cartridge from "./components/cartridge";
-import Gameboy from "./components/gameboy";
+import Gameboy, {Project} from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
 import "./styles/global.scss";
 import "./styles/gsap.scss";
@@ -20,13 +20,6 @@ gsap.registerPlugin(ScrollTrigger);
 const getRandomInt = (val: number): number => Math.ceil(Math.random() * val) * (Math.random() < 0.5 ? -1 : 1);
 
 type TextFileType = Record<string, string>;
-interface Project {
-	title: string;
-	subtitle: string;
-	thumbnail: string;
-	tags: string[];
-	theme: string;
-}
 
 interface Projects {
 	[key: string]: Project;
@@ -38,6 +31,7 @@ export default function Home() {
 	const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
 	const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
+	const [selectedProject, setSelectedProject] = useState<Project>();
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
 	const [isReadyToExplode, setIsReadyToExplode] = useState<boolean>(false);
 
@@ -55,12 +49,32 @@ export default function Home() {
 	const charRefs = useRef<Record<string, HTMLElement>>({});
 	const shadowRefs = useRef<Record<string, HTMLElement>>({});
 	const beachRef = useRef<HTMLDivElement>(null);
+	const overshootRef = useRef<HTMLDivElement>(null);
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const hasExplodedRef = useRef(false);
 	const particleSize = 50;
 
 	const prevScrollTop = useRef(0);
+
+	function preventScroll(e: Event) {
+		e.preventDefault();
+		e.stopPropagation();
+	}
+
+	function lockScroll() {
+		window.addEventListener("wheel", preventScroll, {
+			passive: false,
+		});
+		window.addEventListener("touchmove", preventScroll, {
+			passive: false,
+		});
+	}
+
+	function unlockScroll() {
+		window.removeEventListener("wheel", preventScroll);
+		window.removeEventListener("touchmove", preventScroll);
+	}
 
 	//해변 div를 canvas로 전환해 pixel 폭발 효과를 적용
 	useEffect(() => {
@@ -773,9 +787,10 @@ export default function Home() {
 
 		if (!loop || !gallery) return;
 
+		const buffer = 500;
 		const paddingRight = parseFloat(getComputedStyle(loop).paddingRight || "0");
 		const scrollDistance = loop.scrollWidth - gallery.offsetWidth + paddingRight;
-		const buffer = 500;
+		let clickedCard: HTMLElement | null = null;
 
 		const tween = gsap.to(loop, {
 			x: -scrollDistance,
@@ -783,31 +798,76 @@ export default function Home() {
 			scrollTrigger: {
 				trigger: ".projects-section",
 				start: `top top`,
-				end: `+=${scrollDistance * 1.5}`,
+				end: `+=${scrollDistance * 3}`,
 				scrub: true,
 				pin: true,
 				pinSpacing: true,
+				onLeave: () => {
+					if (clickedCard) clickedCard.classList.remove("moveY", "clicked");
+				},
 			},
 		});
+
+		let outerTimeout: ReturnType<typeof setTimeout> | null = null;
+		let innerTimeout: ReturnType<typeof setTimeout> | null = null;
+
+		function onCardClick(e: MouseEvent) {
+			const card = e.currentTarget as HTMLElement;
+			clickedCard = card;
+			const cardOffset = card.offsetLeft;
+			const cardWidth = card.offsetWidth;
+			const cardCenter = cardOffset + cardWidth / 2;
+			const windowCenter = window.innerWidth / 2;
+			const containerWidth = loop!.scrollWidth;
+			const viewportWidth = gallery!.offsetWidth;
+
+			const desiredShift = cardCenter - windowCenter;
+
+			let fraction = desiredShift / scrollDistance;
+			fraction = Math.max(0, Math.min(1, fraction));
+
+			const tst = tween.scrollTrigger;
+			gsap.to(tween, {
+				progress: fraction,
+				duration: 0.6,
+				ease: "power2.inOut",
+				onUpdate: () => {
+					if (!tst) return;
+					const newScroll = tst.start + (tst.end - tst.start) * tween.progress();
+					tst.scroll(newScroll);
+				},
+			});
+
+			card.classList.add("clicked");
+
+			lockScroll();
+
+			outerTimeout = setTimeout(() => {
+				card.classList.add("moveY");
+				card.addEventListener(
+					"transitionend",
+					() => {
+						innerTimeout = setTimeout(() => {
+							unlockScroll();
+						}, 500);
+					},
+					{once: true}
+				);
+			}, 500);
+		}
+
 		const cardsDiv = cartridgeCardsRef.current;
 		if (!cardsDiv) return;
 
 		const cards = cardsDiv.querySelectorAll<HTMLElement>(".card");
-
-		// function onCardClick(event: MouseEvent) {
-		// 	const clickedCard = event.currentTarget as HTMLElement;
-		// 	cards.forEach(card => card.classList.remove("clicked"));
-		// 	clickedCard.classList.add("clicked");
-		// }
-
-		// cards.forEach(card => {
-		// 	//card.addEventListener("mouseenter", handleMouseEnter);
-		// 	card.addEventListener("click", onCardClick);
-		// });
+		cards.forEach(c => c.addEventListener("click", onCardClick));
 
 		return () => {
 			tween.scrollTrigger?.kill();
 			tween.kill();
+			cards.forEach(c => c.removeEventListener("click", onCardClick));
+			if (outerTimeout) clearTimeout(outerTimeout);
+			if (innerTimeout) clearTimeout(innerTimeout);
 		};
 	}, []);
 
@@ -1012,16 +1072,21 @@ export default function Home() {
 					</div>
 				</div>
 				<div ref={cartridgeCardsContainerRef} className="gallery w-full flex overflow-visible">
-					<div ref={cartridgeCardsRef} className="cartridge-loop w-full flex gap-8 md:gap-24 px-16 md:px-32 py-12 md:py-40">
+					<div ref={cartridgeCardsRef} className="cartridge-loop flex flex-row w-full gap-8 md:gap-24 px-16 md:px-32 py-12 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
-							<div key={v.title} className={`card card-${k} w-fit`} onClick={() => setSelectedProjectTitle(k)}>
+							<div key={v.title} className={`card card-${k} w-fit`} onClick={() => setSelectedProject(v as Project)}>
 								<Cartridge project={v} />
 							</div>
 						))}
 					</div>
 				</div>
-				<div className={`relative mt-32 gameboy-section ${isGameboyOn && "power-on"}`}>
-					<Gameboy project={ProjectsData[selectedProjectTitle as keyof typeof ProjectsData]} />
+				<div className={`relative mt-32 gameboy-section ${selectedProject && "power-on"} flex flex-col items-center justify-center`}>
+					{selectedProject && (
+						<div className="selected-cartridge">
+							<Cartridge project={selectedProject} />
+						</div>
+					)}
+					<Gameboy project={selectedProject} />
 				</div>
 			</section>
 			<section className="relative pt-[10vh]"></section>
