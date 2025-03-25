@@ -307,8 +307,45 @@
 	justify-content: start;
 	will-change: transform;
 
+	&:has(.clicked) {
+		pointer-events: none;
+	}
+
+	//카트리지 열의 각 카트리지
 	> div {
 		flex-shrink: 0;
+		cursor: pointer;
+		position: relative;
+		top: 0;
+		transition:
+			transform 0.5s ease-in-out,
+			top 0.5s ease-in-out;
+
+		&:nth-child(2n + 1) {
+			transform: rotate(2deg);
+		}
+
+		&:nth-child(2n) {
+			transform: rotate(-1deg);
+		}
+
+		&:nth-child(2) {
+			transform: rotate(-2deg);
+		}
+
+		&:hover {
+			top: -5rem;
+			transform: none;
+		}
+
+		&.clicked {
+			transform: scale(0.2);
+			top: -7rem;
+
+			&.moveY {
+				animation: insert 1.5s ease-in-out forwards;
+			}
+		}
 	}
 }
 
@@ -749,20 +786,20 @@
 		transition: opacity 1s ease-in-out 0.5s;
 	}
 
-	// .playlist-title {
-	// 	position: absolute;
-	// 	transform: scaleY(-1) translateX(-50%);
-	// 	font-style: italic;
-	// 	color: var(--button-light);
-	// 	bottom: 2rem;
-	// 	left: 50%;
-	// 	z-index: 30;
-	// 	font-size: 1.7rem;
-	// 	font-weight: 300;
-	// 	text-shadow:
-	// 		0px 1px 0px black,
-	// 		1px -1px 0px black;
-	// }
+	.playlist-title {
+		position: absolute;
+		transform: scaleY(-1) translateX(-50%);
+		font-style: italic;
+		color: var(--button-light);
+		bottom: 2rem;
+		left: 50%;
+		z-index: 30;
+		font-size: 1.7rem;
+		font-weight: 300;
+		text-shadow:
+			0px 1px 0px black,
+			1px -1px 0px black;
+	}
 }
 
 .position-center {

@@ -592,50 +592,45 @@ export default function Home() {
 
 	/* 카트리지 (=통칭 카드) 호버 & 펼침 이벤트 관리 */
 	// useEffect(() => {
-	// 	const parentContainer = cartridgeCardsContainerRef.current;
+	// 	const gallery = cartridgeCardsContainerRef.current;
 	// 	const cardsDiv = cartridgeCardsRef.current;
-	// 	if (!cardsDiv || !parentContainer) return;
+	// 	if (!cardsDiv || !gallery) return;
 
-	// 	const handleMouseEnter = (event: MouseEvent) => {
-	// 		// const hoveredCard = event.currentTarget as HTMLElement;
-	// 		// setTimeout(() => {
-	// 		// 	hoveredCard?.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
-	// 		// }, 500);
-	// 	};
+	// 	const cards = cardsDiv.querySelectorAll<HTMLElement>(".card");
+
 	// 	function onCardClick(event: MouseEvent) {
 	// 		const clickedCard = event.currentTarget as HTMLElement;
 	// 		const rect = clickedCard.getBoundingClientRect();
-	// 		if (!rect || !cardsDiv || !parentContainer) return;
+	// 		if (!rect || !cardsDiv || !gallery) return;
 
-	// 		const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
 	// 		cards.forEach(card => card.classList.remove("clicked"));
 
 	// 		/*
 	// 			선택된 카드를 중앙으로 위치하게 스크롤 하는 로직 + 자동으로 필요한 만큼 여백 추가
 	// 			어떤 디자인을 택할지에 따라 사용하지 않을 수도 있음
 	// 		*/
-	// 		const parentRect = parentContainer.getBoundingClientRect();
+	// 		const parentRect = gallery.getBoundingClientRect();
 	// 		const cardRect = clickedCard.getBoundingClientRect();
 
 	// 		const cardCenterInParentViewport = cardRect.left - parentRect.left + cardRect.width / 2;
-	// 		const cardCenterInParentScrollCoords = parentContainer.scrollLeft + cardCenterInParentViewport;
+	// 		const cardCenterInParentScrollCoords = gallery.scrollLeft + cardCenterInParentViewport;
 	// 		const windowCenterX = window.innerWidth / 2;
 	// 		const desiredDelta = cardCenterInParentScrollCoords - windowCenterX;
-	// 		const maxScroll = parentContainer.scrollWidth - parentContainer.clientWidth;
-	// 		const currentScroll = parentContainer.scrollLeft;
+	// 		const maxScroll = gallery.scrollWidth - gallery.clientWidth;
+	// 		const currentScroll = gallery.scrollLeft;
 
 	// 		let targetScroll = desiredDelta;
 	// 		if (targetScroll < 0) targetScroll = 0;
 	// 		if (targetScroll > maxScroll) targetScroll = maxScroll;
 
-	// 		parentContainer.scrollTo({
+	// 		gallery.scrollTo({
 	// 			top: 0,
 	// 			left: targetScroll,
 	// 			behavior: "smooth",
 	// 		});
 
 	// 		const waitForScrollEnd = () => {
-	// 			if (Math.abs(parentContainer.scrollLeft - targetScroll) < 1) {
+	// 			if (Math.abs(gallery.scrollLeft - targetScroll) < 1) {
 	// 				const actualDelta = currentScroll + desiredDelta - targetScroll;
 
 	// 				if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
@@ -695,7 +690,7 @@ export default function Home() {
 
 	// 		clickedCard.addEventListener("animationend", handleAnimationEnd);
 	// 	}
-	// 	const cards = cardsDiv.querySelectorAll<HTMLElement>("#card");
+
 	// 	cards.forEach(card => {
 	// 		card.addEventListener("mouseenter", handleMouseEnter);
 	// 		card.addEventListener("click", onCardClick);
@@ -777,10 +772,10 @@ export default function Home() {
 		const gallery = cartridgeCardsContainerRef.current;
 
 		if (!loop || !gallery) return;
-		const buffer = 50;
 
 		const paddingRight = parseFloat(getComputedStyle(loop).paddingRight || "0");
 		const scrollDistance = loop.scrollWidth - gallery.offsetWidth + paddingRight;
+		const buffer = 500;
 
 		const tween = gsap.to(loop, {
 			x: -scrollDistance,
@@ -788,12 +783,27 @@ export default function Home() {
 			scrollTrigger: {
 				trigger: ".projects-section",
 				start: `top top`,
-				end: `+=${scrollDistance}`,
+				end: `+=${scrollDistance * 1.5}`,
 				scrub: true,
 				pin: true,
 				pinSpacing: true,
 			},
 		});
+		const cardsDiv = cartridgeCardsRef.current;
+		if (!cardsDiv) return;
+
+		const cards = cardsDiv.querySelectorAll<HTMLElement>(".card");
+
+		// function onCardClick(event: MouseEvent) {
+		// 	const clickedCard = event.currentTarget as HTMLElement;
+		// 	cards.forEach(card => card.classList.remove("clicked"));
+		// 	clickedCard.classList.add("clicked");
+		// }
+
+		// cards.forEach(card => {
+		// 	//card.addEventListener("mouseenter", handleMouseEnter);
+		// 	card.addEventListener("click", onCardClick);
+		// });
 
 		return () => {
 			tween.scrollTrigger?.kill();
@@ -1001,8 +1011,8 @@ export default function Home() {
 						<label>{textFile["003"]}</label>
 					</div>
 				</div>
-				<div ref={cartridgeCardsContainerRef} className="gallery w-full mt-24 md:mt-40 flex overflow-visible">
-					<div ref={cartridgeCardsRef} className="cartridge-loop w-full flex gap-8 md:gap-24 px-24 px-16 md:px-32">
+				<div ref={cartridgeCardsContainerRef} className="gallery w-full flex overflow-visible">
+					<div ref={cartridgeCardsRef} className="cartridge-loop w-full flex gap-8 md:gap-24 px-16 md:px-32 py-12 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
 							<div key={v.title} className={`card card-${k} w-fit`} onClick={() => setSelectedProjectTitle(k)}>
 								<Cartridge project={v} />
