@@ -5,7 +5,11 @@
 		"thumbnail": "/images/orgd_main.JPG",
 		"tags": ["1 DEV", "PERSONAL", "EXHIBITION"],
 		"theme": "#2e2e2e",
-		"stacks": ["js", "nextjs2", "socket", "express", "mongodb", "tailwindcss"]
+		"stacks": ["js", "nextjs2", "socket", "express", "mongodb", "tailwindcss"],
+		"ppl_count": 1,
+		"contribution_kr": [
+			"디자이너가 폰트 사이즈, 색상, 텍스트 위치 등을 수정할 수 있는 커스텀 어드민 패널을 구축하고, 드래그로 텍스트를 자유롭게 옮기고 회전할 수 있는 기능을 만들었습니다. MongoDB를 사용해 데이터 구조를 설계하고 Next.js의 API 라우트를 활용해 관련 API를 개발했습니다."
+		]
 	},
 	"2": {
 		"title": "HeyMap",
@@ -13,7 +17,8 @@
 		"thumbnail": "/images/heymap_main.png",
 		"tags": ["WORK", "TEAM", "WEB"],
 		"theme": "#f9804c",
-		"stacks": ["js", "nextjs2", "express", "postgresql", "tailwindcss"]
+		"stacks": ["js", "nextjs2", "express", "postgresql", "tailwindcss"],
+		"ppl_count": 3
 	},
 
 	"3": {
@@ -22,7 +27,8 @@
 		"thumbnail": "/images/localstorage_main.png",
 		"tags": ["WORK", "TEAM", "WEB"],
 		"theme": "#8bf337",
-		"stacks": ["php", "wordpress", "jquery", "mysql", "css3"]
+		"stacks": ["php", "wordpress", "jquery", "mysql", "css3"],
+		"ppl_count": 4
 	},
 	"4": {
 		"title": "Workmate",
@@ -30,7 +36,8 @@
 		"thumbnail": "/images/workmate_main.png",
 		"tags": ["1 DEV", "PERSONAL", "WEB", "STANDALONE"],
 		"theme": "#4f5293",
-		"stacks": ["typescript", "nextjs2", "electron", "mongodb", "tailwindcss"]
+		"stacks": ["typescript", "nextjs2", "electron", "mongodb", "tailwindcss"],
+		"ppl_count": 1
 	},
 	"5": {
 		"title": "Portfolio",
@@ -38,7 +45,8 @@
 		"thumbnail": "/images/portfolio_main.png",
 		"tags": ["1 DEV", "PERSONAL", "WEB"],
 		"theme": "#2febf1",
-		"stacks": ["typescript", "nextjs2", "tailwindcss"]
+		"stacks": ["typescript", "nextjs2", "tailwindcss"],
+		"ppl_count": 1
 	},
 	"6": {
 		"title": "...And More!",
@@ -46,6 +54,7 @@
 		"thumbnail": "/images/other_main.png",
 		"tags": ["1 DEV", "WORK", "WEB"],
 		"theme": "#2febf1",
-		"stacks": ["typescript", "js", "nextjs2", "reactjs", "playwright", "cypress", "css3", "html5", "mysql", "docker"]
+		"stacks": ["typescript", "js", "nextjs2", "reactjs", "playwright", "cypress", "css3", "html5", "mysql", "docker"],
+		"ppl_count": 5
 	}
 }

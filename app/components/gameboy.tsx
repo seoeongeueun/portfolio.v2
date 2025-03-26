@@ -13,6 +13,7 @@ export interface Project {
 	tags: string[];
 	theme: string;
 	stacks: string[];
+	ppl_count: number;
 }
 
 export default function Gameboy({project}: GameboyProps) {

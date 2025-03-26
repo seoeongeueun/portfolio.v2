@@ -872,7 +872,7 @@ export default function Home() {
 	}, []);
 
 	return (
-		<div ref={mainRef} className="py-52 text-white w-full overflow-hidden flex flex-col items-center justify-start">
+		<div ref={mainRef} className="pt-52 text-white w-full overflow-hidden flex flex-col items-center justify-start">
 			<div className="fixed top-0 p-4 pointer-events-none w-full">
 				<div className="w-full flex flex-row items-center justify-between mb-auto">
 					<span>ha</span>
@@ -1089,7 +1089,52 @@ export default function Home() {
 					<Gameboy project={selectedProject} />
 				</div>
 			</section>
-			<section className="relative pt-[10vh]"></section>
+			{selectedProject && (
+				<section className="sticky bottom-0 project-section full-section font-dunggeunmo track-wider w-full h-fit flex flex-col items-center justify-start bg-blue-400 overflow-y-auto">
+					<div className="project-header text-xl pt-16 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
+						<div className="flex flex-col items-center justify-start">
+							<p>PERSON</p>
+							<p>X {selectedProject.ppl_count || 1}</p>
+						</div>
+						<p className="text-xxxl">{selectedProject.title.toUpperCase()}</p>
+						<div className="stacks-box flex flex-row p-4 outline-2 outline-black">
+							<Image src="/icons/mysql.png" alt="stack" width={200} height={200} />
+						</div>
+					</div>
+					<div className="project-detail px-60 flex flex-row w-full items-cener justify-start">
+						<div className="project-images w-1/3 h-fit">
+							<Image src={selectedProject.thumbnail} alt="project" width={1000} height={1000} />
+						</div>
+						<div className="project-description w-2/3 flex flex-col gap-4 px-6 md:px-12">
+							<div className="sub">
+								<p>주요 성과 및 기여</p>
+							</div>
+							<ul>
+								<li>
+									디자이너가 폰트 사이즈, 색상, 텍스트 위치 등을 수정할 수 있는 커스텀 어드민 패널을 구축하고, 드래그로 텍스트를 자유롭게
+									옮기고 회전할 수 있는 기능을 만들었습니다. MongoDB를 사용해 데이터 구조를 설계하고 Next.js의 API 라우트를 활용해 관련 API를
+									개발했습니다.
+								</li>
+								<li>
+									디자이너가 폰트 사이즈, 색상, 텍스트 위치 등을 수정할 수 있는 커스텀 어드민 패널을 구축하고, 드래그로 텍스트를 자유롭게
+									옮기고 회전할 수 있는 기능을 만들었습니다. MongoDB를 사용해 데이터 구조를 설계하고 Next.js의 API 라우트를 활용해 관련 API를
+									개발했습니다.
+								</li>
+							</ul>
+
+							<div className="sub mt-4">
+								<p>회고</p>
+							</div>
+							<ul>
+								<li>
+									유료 전시인만큼 안정적인 관람을 보장하기 위해, 실시간 소켓 이벤트 처리와 시스템 최적화에 큰 책임감을 가지고 개발에 임하며,
+									원활한 진행을 위한 최적화 방법과 관람객의 흥미를 끌 수 있는 기능을 고민할 수 있던 경험이었습니다.
+								</li>
+							</ul>
+						</div>
+					</div>
+				</section>
+			)}
 			{/* <div className="h-screen">Top content</div>
 			<div className="h-screen">Top content</div> */}
 
