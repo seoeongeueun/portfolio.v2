@@ -1096,14 +1096,14 @@ export default function Home() {
 				</div>
 			</section>
 			{selectedProject && (
-				<section className="sticky top-0 fade-up project-section full-section font-dunggeunmo w-full h-fit min-h-screen flex flex-col items-center justify-start bg-blue-400">
-					<div className="project-header tracking-widest z-40 text-xl pt-16 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
+				<section className="project-section full-section font-dunggeunmo w-full h-screen flex flex-col items-center justify-start bg-blue-400 relative">
+					<div className="project-header tracking-widest z-40 text-xl py-8 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
 						<div className="flex flex-col items-center justify-start">
 							<p>PERSON</p>
-							<p>X {selectedProject.ppl_count || 1}</p>
+							<p className="text-theme-yellow">X {selectedProject.ppl_count || 1}</p>
 						</div>
 						<div className="flex flex-col items-center justify-start">
-							<p className="text-xxxl">{selectedProject.title.toUpperCase()}</p>
+							<p className="text-xxxl text-theme-yellow">{selectedProject.title.toUpperCase()}</p>
 							<p>{selectedProject?.subtitle}</p>
 						</div>
 
@@ -1112,18 +1112,14 @@ export default function Home() {
 						</div>
 					</div>
 
-					<div className="project-detail px-60 flex flex-col w-full items-center justify-start relative">
-						<div className={`arrow-text flex flex-row items-center justify-start overflow-hidden h-fit ${isSpecialSlide ? "show" : ""}`}>
-							<div className="arrow ml-2"></div>
-							<p className={`text-lg whitespace-nowrap opacity-0 ml-2 ${isSpecialSlide ? "opacity-100" : "opacity-0"}`}>that's me!</p>
-						</div>
+					<div className="project-detail flex flex-col md:flex-row w-full h-full items-start justify-start relative px-12 md:px-[15%]">
 						<Swiper
 							modules={[Pagination, Autoplay]}
 							pagination={{clickable: true}}
 							spaceBetween={20}
 							slidesPerView={1}
 							loop={true}
-							autoplay={{delay: 5000, disableOnInteraction: false}}
+							autoplay={{delay: 5000, disableOnInteraction: true}}
 							onSlideChange={(swiper: SwiperClass) => {
 								const activeSlide = swiper.slides[swiper.activeIndex];
 								if (activeSlide?.dataset.id === "special-slide") {
@@ -1132,7 +1128,7 @@ export default function Home() {
 									setIsSpecialSlide(false);
 								}
 							}}
-							className={`projects-swiper max-w-full md:max-w-2/3 h-auto max-h-2/3`}
+							className={`projects-swiper max-w-full md:max-w-1/2 h-auto`}
 						>
 							<SwiperSlide>
 								<video src={"/projects/orgd/video1.mp4"} autoPlay muted loop playsInline />
@@ -1147,17 +1143,33 @@ export default function Home() {
 								<Image src={"/projects/orgd/orgd3.png"} alt="project" width={2000} height={2000} />
 							</SwiperSlide>
 							<SwiperSlide data-id="special-slide">
+								<div className={`arrow-text flex flex-row items-center justify-start overflow-hidden h-fit ${isSpecialSlide ? "show" : ""}`}>
+									<div className="arrow ml-2"></div>
+									<p className={`text-lg whitespace-nowrap opacity-0 ml-2 ${isSpecialSlide ? "opacity-100" : "opacity-0"}`}>that's me!</p>
+								</div>
 								<Image src={"/projects/orgd/orgd4.png"} alt="project" width={2000} height={2000} />
 							</SwiperSlide>
 							<SwiperSlide>
 								<Image src={"/projects/orgd/orgd5.png"} alt="project" width={2000} height={2000} />
 							</SwiperSlide>
 						</Swiper>
-						<div className="project-description w-full h-fit flex flex-col gap-4 px-6 md:px-[20%] py-32 pt-16 z-30">
+						<div className="project-description w-full md:max-w-1/2 h-full md:h-[70vh] flex flex-col gap-4 z-30 ml-0 md:ml-20 overflow-y-auto">
 							<div className="sub">
 								<p>프로젝트 소개</p>
 							</div>
 							<ul>
+								<li>
+									디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 팀 Studio Baton의 개발자로 ORGD 2024 전시에 참여해 소켓 통신을 활용한 참여형
+									인터랙티브 전시 작품을 개발하였습니다. 기획에 참여하고, 전체 개발 프로세스를 단독으로 담당 했습니다.
+								</li>
+								<li>
+									디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 팀 Studio Baton의 개발자로 ORGD 2024 전시에 참여해 소켓 통신을 활용한 참여형
+									인터랙티브 전시 작품을 개발하였습니다. 기획에 참여하고, 전체 개발 프로세스를 단독으로 담당 했습니다.
+								</li>
+								<li>
+									디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 팀 Studio Baton의 개발자로 ORGD 2024 전시에 참여해 소켓 통신을 활용한 참여형
+									인터랙티브 전시 작품을 개발하였습니다. 기획에 참여하고, 전체 개발 프로세스를 단독으로 담당 했습니다.
+								</li>
 								<li>
 									디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 팀 Studio Baton의 개발자로 ORGD 2024 전시에 참여해 소켓 통신을 활용한 참여형
 									인터랙티브 전시 작품을 개발하였습니다. 기획에 참여하고, 전체 개발 프로세스를 단독으로 담당 했습니다.
@@ -1194,8 +1206,14 @@ export default function Home() {
 								</li>
 							</ul>
 						</div>
-						<div className="floor absolute bottom-0 bg-green-500 w-full h-46 z-10"></div>
 					</div>
+					<div className="fish animate-float absolute">
+						<Image src="/assets/fish0.gif" alt="fish" width={100} height={100} />
+					</div>
+					<div className="absolute bottom-28 left-[5%]">
+						<Image src="/assets/coral.png" alt="coral" width={100} height={100} />
+					</div>
+					<div className="floor absolute bottom-0 bg-theme-sand w-full h-32 z-10 border-t-2 border-black"></div>
 				</section>
 			)}
 			{/* <div className="h-screen">Top content</div>

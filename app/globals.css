@@ -57,11 +57,15 @@
 	--color-body: var(--body);
 	--color-gray-4: var(--gray-4);
 	--color-theme-yellow: var(--theme-yellow);
+	--color-theme-sand: var(--theme-sand);
+	--color-theme-orange: var(--theme-orange);
+	--color-theme-blue: var(--theme-blue);
 
 	--breakpoint-md: 641px;
 	--breakpoint-lg: 1025px;
 
 	--animate-slide-down: slide-down 2s ease-in-out infinite;
+	--animate-float: float 10s ease-in-out infinite;
 }
 
 :root {

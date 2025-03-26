@@ -145,3 +145,18 @@
 		transform: translate(-50%, -50%) skewX(2deg) scale(1, 1);
 	}
 }
+
+@keyframes float {
+	0% {
+		right: 5%;
+		bottom: 48%;
+	}
+	50% {
+		right: 6%;
+		bottom: 50%;
+	}
+	100% {
+		right: 5%;
+		bottom: 48%;
+	}
+}
