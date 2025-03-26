@@ -1112,7 +1112,7 @@ export default function Home() {
 						</div>
 					</div>
 
-					<div className="project-detail flex flex-col md:flex-row w-full h-full items-start justify-start relative px-12 md:px-[15%]">
+					<div className="project-detail flex flex-col md:flex-row w-full h-full items-start justify-start relative px-12 md:px-[15%] mt-16">
 						<Swiper
 							modules={[Pagination, Autoplay]}
 							pagination={{clickable: true}}
@@ -1157,54 +1157,15 @@ export default function Home() {
 							<div className="sub">
 								<p>프로젝트 소개</p>
 							</div>
-							<ul>
-								<li>
-									디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 팀 Studio Baton의 개발자로 ORGD 2024 전시에 참여해 소켓 통신을 활용한 참여형
-									인터랙티브 전시 작품을 개발하였습니다. 기획에 참여하고, 전체 개발 프로세스를 단독으로 담당 했습니다.
-								</li>
-								<li>
-									디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 팀 Studio Baton의 개발자로 ORGD 2024 전시에 참여해 소켓 통신을 활용한 참여형
-									인터랙티브 전시 작품을 개발하였습니다. 기획에 참여하고, 전체 개발 프로세스를 단독으로 담당 했습니다.
-								</li>
-								<li>
-									디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 팀 Studio Baton의 개발자로 ORGD 2024 전시에 참여해 소켓 통신을 활용한 참여형
-									인터랙티브 전시 작품을 개발하였습니다. 기획에 참여하고, 전체 개발 프로세스를 단독으로 담당 했습니다.
-								</li>
-								<li>
-									디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 팀 Studio Baton의 개발자로 ORGD 2024 전시에 참여해 소켓 통신을 활용한 참여형
-									인터랙티브 전시 작품을 개발하였습니다. 기획에 참여하고, 전체 개발 프로세스를 단독으로 담당 했습니다.
-								</li>
-							</ul>
+							<ul>{selectedProject.introduction_kr?.map(intro => <li>{intro}</li>)}</ul>
 							<div className="sub">
 								<p>주요 성과 및 기여</p>
 							</div>
-							<ul>
-								<li>
-									디자이너가 폰트 사이즈, 색상, 텍스트 위치 등을 수정할 수 있는 커스텀 어드민 패널을 구축하고, 드래그로 텍스트를 자유롭게
-									옮기고 회전할 수 있는 기능을 만들었습니다. MongoDB를 사용해 데이터 구조를 설계하고 Next.js의 API 라우트를 활용해 관련 API를
-									개발했습니다.
-								</li>
-								<li>
-									디자이너가 폰트 사이즈, 색상, 텍스트 위치 등을 수정할 수 있는 커스텀 어드민 패널을 구축하고, 드래그로 텍스트를 자유롭게
-									옮기고 회전할 수 있는 기능을 만들었습니다. MongoDB를 사용해 데이터 구조를 설계하고 Next.js의 API 라우트를 활용해 관련 API를
-									개발했습니다.
-								</li>
-								<li>
-									디자이너가 폰트 사이즈, 색상, 텍스트 위치 등을 수정할 수 있는 커스텀 어드민 패널을 구축하고, 드래그로 텍스트를 자유롭게
-									옮기고 회전할 수 있는 기능을 만들었습니다. MongoDB를 사용해 데이터 구조를 설계하고 Next.js의 API 라우트를 활용해 관련 API를
-									개발했습니다.
-								</li>
-							</ul>
-
+							<ul>{selectedProject.contribution_kr?.map(c => <li>{c}</li>)}</ul>
 							<div className="sub mt-4">
 								<p>회고</p>
 							</div>
-							<ul>
-								<li>
-									유료 전시인만큼 안정적인 관람을 보장하기 위해, 실시간 소켓 이벤트 처리와 시스템 최적화에 큰 책임감을 가지고 개발에 임하며,
-									원활한 진행을 위한 최적화 방법과 관람객의 흥미를 끌 수 있는 기능을 고민할 수 있던 경험이었습니다.
-								</li>
-							</ul>
+							<ul>{selectedProject.review_kr?.map(r => <li>{r}</li>)}</ul>
 						</div>
 					</div>
 					<div className="fish animate-float absolute">

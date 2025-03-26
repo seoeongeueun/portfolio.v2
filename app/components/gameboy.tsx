@@ -13,6 +13,9 @@ export interface Project {
 	tags: string[];
 	theme: string;
 	stacks: string[];
+	contribution_kr: string[];
+	review_kr: string[];
+	introduction_kr: string[];
 	ppl_count: number;
 }
 
