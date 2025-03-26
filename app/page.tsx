@@ -13,6 +13,11 @@ import gsap from "gsap";
 import {Observer} from "gsap/Observer";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
 import html2canvas from "html2canvas";
+import {Swiper, SwiperSlide} from "swiper/react";
+import {Pagination, Autoplay} from "swiper/modules";
+import {Swiper as SwiperClass} from "swiper/types";
+import "swiper/css";
+import "swiper/css/pagination";
 
 gsap.registerPlugin(Observer);
 gsap.registerPlugin(ScrollTrigger);
@@ -34,6 +39,7 @@ export default function Home() {
 	const [selectedProject, setSelectedProject] = useState<Project>();
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
 	const [isReadyToExplode, setIsReadyToExplode] = useState<boolean>(false);
+	const [isSpecialSlide, setIsSpecialSlide] = useState<boolean>(false);
 
 	const bowlRef = useRef<HTMLDivElement | null>(null);
 	const charPositionsRef = useRef<Record<string, {x: number; y: number}>>({});
@@ -1090,26 +1096,82 @@ export default function Home() {
 				</div>
 			</section>
 			{selectedProject && (
-				<section className="sticky bottom-0 project-section full-section font-dunggeunmo track-wider w-full h-fit flex flex-col items-center justify-start bg-blue-400 overflow-y-auto">
-					<div className="project-header text-xl pt-16 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
+				<section className="sticky top-0 fade-up project-section full-section font-dunggeunmo w-full h-fit min-h-screen flex flex-col items-center justify-start bg-blue-400">
+					<div className="project-header tracking-widest z-40 text-xl pt-16 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
 						<div className="flex flex-col items-center justify-start">
 							<p>PERSON</p>
 							<p>X {selectedProject.ppl_count || 1}</p>
 						</div>
-						<p className="text-xxxl">{selectedProject.title.toUpperCase()}</p>
+						<div className="flex flex-col items-center justify-start">
+							<p className="text-xxxl">{selectedProject.title.toUpperCase()}</p>
+							<p>{selectedProject?.subtitle}</p>
+						</div>
+
 						<div className="stacks-box flex flex-row p-4 outline-2 outline-black">
 							<Image src="/icons/mysql.png" alt="stack" width={200} height={200} />
 						</div>
 					</div>
-					<div className="project-detail px-60 flex flex-row w-full items-cener justify-start">
-						<div className="project-images w-1/3 h-fit">
-							<Image src={selectedProject.thumbnail} alt="project" width={1000} height={1000} />
+
+					<div className="project-detail px-60 flex flex-col w-full items-center justify-start relative">
+						<div className={`arrow-text flex flex-row items-center justify-start overflow-hidden h-fit ${isSpecialSlide ? "show" : ""}`}>
+							<div className="arrow ml-2"></div>
+							<p className={`text-lg whitespace-nowrap opacity-0 ml-2 ${isSpecialSlide ? "opacity-100" : "opacity-0"}`}>that's me!</p>
 						</div>
-						<div className="project-description w-2/3 flex flex-col gap-4 px-6 md:px-12">
+						<Swiper
+							modules={[Pagination, Autoplay]}
+							pagination={{clickable: true}}
+							spaceBetween={20}
+							slidesPerView={1}
+							loop={true}
+							autoplay={{delay: 5000, disableOnInteraction: false}}
+							onSlideChange={(swiper: SwiperClass) => {
+								const activeSlide = swiper.slides[swiper.activeIndex];
+								if (activeSlide?.dataset.id === "special-slide") {
+									setIsSpecialSlide(true);
+								} else {
+									setIsSpecialSlide(false);
+								}
+							}}
+							className={`projects-swiper max-w-full md:max-w-2/3 h-auto max-h-2/3`}
+						>
+							<SwiperSlide>
+								<video src={"/projects/orgd/video1.mp4"} autoPlay muted loop playsInline />
+							</SwiperSlide>
+							<SwiperSlide>
+								<Image src={"/projects/orgd/orgd0.jpg"} alt="project" width={2000} height={2000} />
+							</SwiperSlide>
+							<SwiperSlide>
+								<Image src={"/projects/orgd/orgd1.jpg"} alt="project" width={2000} height={2000} />
+							</SwiperSlide>
+							<SwiperSlide>
+								<Image src={"/projects/orgd/orgd3.png"} alt="project" width={2000} height={2000} />
+							</SwiperSlide>
+							<SwiperSlide data-id="special-slide">
+								<Image src={"/projects/orgd/orgd4.png"} alt="project" width={2000} height={2000} />
+							</SwiperSlide>
+							<SwiperSlide>
+								<Image src={"/projects/orgd/orgd5.png"} alt="project" width={2000} height={2000} />
+							</SwiperSlide>
+						</Swiper>
+						<div className="project-description w-full h-fit flex flex-col gap-4 px-6 md:px-[20%] py-32 pt-16 z-30">
+							<div className="sub">
+								<p>프로젝트 소개</p>
+							</div>
+							<ul>
+								<li>
+									디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 팀 Studio Baton의 개발자로 ORGD 2024 전시에 참여해 소켓 통신을 활용한 참여형
+									인터랙티브 전시 작품을 개발하였습니다. 기획에 참여하고, 전체 개발 프로세스를 단독으로 담당 했습니다.
+								</li>
+							</ul>
 							<div className="sub">
 								<p>주요 성과 및 기여</p>
 							</div>
 							<ul>
+								<li>
+									디자이너가 폰트 사이즈, 색상, 텍스트 위치 등을 수정할 수 있는 커스텀 어드민 패널을 구축하고, 드래그로 텍스트를 자유롭게
+									옮기고 회전할 수 있는 기능을 만들었습니다. MongoDB를 사용해 데이터 구조를 설계하고 Next.js의 API 라우트를 활용해 관련 API를
+									개발했습니다.
+								</li>
 								<li>
 									디자이너가 폰트 사이즈, 색상, 텍스트 위치 등을 수정할 수 있는 커스텀 어드민 패널을 구축하고, 드래그로 텍스트를 자유롭게
 									옮기고 회전할 수 있는 기능을 만들었습니다. MongoDB를 사용해 데이터 구조를 설계하고 Next.js의 API 라우트를 활용해 관련 API를
@@ -1132,6 +1194,7 @@ export default function Home() {
 								</li>
 							</ul>
 						</div>
+						<div className="floor absolute bottom-0 bg-green-500 w-full h-46 z-10"></div>
 					</div>
 				</section>
 			)}

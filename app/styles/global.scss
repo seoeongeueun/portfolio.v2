@@ -1603,12 +1603,14 @@ $transition: 0.5s ease-in-out;
 			0px 2px black,
 			2px 0px black,
 			0px -2px black;
+		font-weight: 600;
 	}
-
 	.project-detail {
 		.project-description {
-			margin-left: 5rem;
-
+			color: black;
+			> * {
+				background-color: rgba(255, 255, 255, 0.8);
+			}
 			p,
 			span {
 				text-shadow: none;
@@ -1621,11 +1623,13 @@ $transition: 0.5s ease-in-out;
 				li {
 					position: relative;
 					padding-left: 1.5rem;
+					font-size: 1.4rem;
+					font-weight: 500;
 
 					&::before {
 						content: "$";
 						position: absolute;
-						left: 0;
+						left: -0.5rem;
 						top: 0.45rem;
 						width: 1.2rem;
 						height: 1.2rem;
@@ -1647,7 +1651,7 @@ $transition: 0.5s ease-in-out;
 			> .sub {
 				p {
 					font-size: 1.6rem;
-					color: black;
+					padding: 0 1rem;
 				}
 			}
 		}
@@ -1663,9 +1667,69 @@ $transition: 0.5s ease-in-out;
 		}
 	}
 
-	.project-images {
-		> img {
-			border: 2px solid black;
+	.projects-swiper {
+		.swiper-slide {
+			height: 70vh;
+			width: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		img {
+			height: 100%;
+			width: auto;
+			object-fit: contain;
+			object-position: top;
+		}
+	}
+
+	.swiper-pagination-bullet-active {
+		background-color: var(--theme-yellow);
+		border: 2px solid black;
+		width: 1rem;
+		height: 1rem;
+	}
+}
+
+.arrow-text {
+	transform: rotate(-10deg);
+	z-index: 30;
+	position: absolute;
+	top: 5rem;
+	left: calc(50% + 6rem);
+
+	transition: none;
+	width: 0;
+
+	&.show {
+		width: 30rem;
+		transition: width 0.7s ease-in-out 0.1s;
+	}
+
+	p {
+		transition: opacity 0.2s ease-in-out 0.7s;
+	}
+
+	.arrow {
+		position: relative;
+		width: 6rem;
+		height: 0.3rem;
+		background-color: black;
+
+		&::before {
+			content: "";
+			position: absolute;
+			top: 50%;
+			left: 0;
+			transform: translateY(-50%);
+			width: 1.3rem;
+			height: 1.3rem;
+			background: transparent;
+			border-top: 0.3rem solid black;
+			border-left: 0.3rem solid black;
+			transform: translateY(-50%) rotate(-45deg);
+			border-radius: 0;
 		}
 	}
 }

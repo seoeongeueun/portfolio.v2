@@ -9,7 +9,8 @@
 		"ppl_count": 1,
 		"contribution_kr": [
 			"디자이너가 폰트 사이즈, 색상, 텍스트 위치 등을 수정할 수 있는 커스텀 어드민 패널을 구축하고, 드래그로 텍스트를 자유롭게 옮기고 회전할 수 있는 기능을 만들었습니다. MongoDB를 사용해 데이터 구조를 설계하고 Next.js의 API 라우트를 활용해 관련 API를 개발했습니다."
-		]
+		],
+		"links": ["https://github.com/seoeongeueun/orgd.web"]
 	},
 	"2": {
 		"title": "HeyMap",
