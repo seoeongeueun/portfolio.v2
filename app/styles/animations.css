@@ -171,11 +171,22 @@
 
 @keyframes section-fade-up {
 	0% {
-		opacity: 1;
+		opacity: 0;
 		transform: translateY(120vh);
 	}
 	100% {
 		opacity: 1;
 		transform: translateY(0);
+	}
+}
+
+@keyframes section-fade-down {
+	0% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(110vh);
 	}
 }

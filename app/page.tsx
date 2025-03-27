@@ -60,6 +60,7 @@ export default function Home() {
 	const shadowRefs = useRef<Record<string, HTMLElement>>({});
 	const beachRef = useRef<HTMLDivElement>(null);
 	const overshootRef = useRef<HTMLDivElement>(null);
+	const projectDetailRef = useRef<HTMLDivElement>(null);
 	const swiperReadyRef = useRef<{
 		promise: Promise<void>;
 		resolve: () => void;
@@ -860,7 +861,7 @@ export default function Home() {
 
 	useEffect(() => {
 		if (selectedProject) {
-			const section = document.querySelector<HTMLDivElement>(".project-section");
+			const section = projectDetailRef.current;
 			if (!section) return;
 
 			//바뀐 스와이퍼에 새로운 ready promise를 연결
@@ -870,7 +871,7 @@ export default function Home() {
 
 			const run = async () => {
 				//section 내부 이미지와 swiper가 모두 로딩 되면 준비 완료로 변경
-				// 최소로 3초는 기다리기
+				//최소로 3초는 기다리기
 				await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current!.promise, sleep(3000)]);
 
 				setIsSectionReady(true);
@@ -879,8 +880,30 @@ export default function Home() {
 			run();
 		} else {
 			setIsSectionReady(false);
+			projectDetailRef.current?.classList.remove("clear", "ready");
 		}
 	}, [selectedProject]);
+
+	const handleCloseProject = () => {
+		const section = projectDetailRef.current;
+		if (!section) return;
+
+		section.classList.add("clear");
+
+		const clearProjectPage = () => {
+			setTimeout(() => {
+				setIsGameboyOn(false);
+				setIsSectionReady(false);
+				setSelectedProject(undefined);
+				section.classList.remove("clear", "ready");
+			}, 300);
+		};
+		section.addEventListener("animationend", clearProjectPage);
+
+		return () => {
+			section.removeEventListener("animationend", clearProjectPage);
+		};
+	};
 
 	return (
 		<div ref={mainRef} className="text-white w-full overflow-hidden flex flex-col items-center justify-start">
@@ -1097,7 +1120,8 @@ export default function Home() {
 			</section>
 			{selectedProject && (
 				<section
-					className={`project-section fixed top-0 left-0 z-40 h-full opacity-0 ${isSectionReady ? "animate-section-fade-up" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
+					ref={projectDetailRef}
+					className={`project-section fixed top-0 left-0 z-40 h-full opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
 				>
 					<div className="project-header tracking-widest text-xl py-8 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
 						<div className="flex flex-col items-center justify-start">
@@ -1109,9 +1133,12 @@ export default function Home() {
 							<p>{selectedProject?.subtitle}</p>
 						</div>
 
-						<div className="stacks-box flex flex-row p-4 outline-2 outline-black">
+						{/* <div className="stacks-box flex flex-row p-4 outline-2 outline-black">
 							<Image src="/icons/mysql.png" alt="stack" width={200} height={200} />
-						</div>
+						</div> */}
+						<button className="text-xxxl cursor-pointer" onClick={() => handleCloseProject()}>
+							<p className="pointer-events-none">X</p>
+						</button>
 					</div>
 
 					<div className="project-detail flex flex-col md:flex-row w-full h-full items-start justify-start relative px-12 md:px-[15%] mt-16">
