@@ -2,7 +2,7 @@
 import Image from "next/image";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
-import {Fragment, useEffect, useState, useRef, useCallback, act} from "react";
+import {Fragment, useEffect, useState, useRef} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy, {Project} from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
@@ -12,6 +12,7 @@ import {stacks} from "./lib/constants";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
+import {Draggable} from "gsap/Draggable";
 import html2canvas from "html2canvas";
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination, Autoplay} from "swiper/modules";
@@ -21,6 +22,7 @@ import "swiper/css/pagination";
 
 gsap.registerPlugin(Observer);
 gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(Draggable);
 
 const getRandomInt = (val: number): number => Math.ceil(Math.random() * val) * (Math.random() < 0.5 ? -1 : 1);
 
@@ -626,6 +628,65 @@ export default function Home() {
 		return setupObservers();
 	}, []);
 
+	//카트리지 카드 wrapper에 마우스 드래그 스크롤 기능 추가
+	useEffect(() => {
+		const parentContainer = cartridgeCardsContainerRef.current;
+		if (!parentContainer) return;
+
+		let isDragging = false;
+		let startX = 0;
+		let scrollLeft = 0;
+		let dragDistance = 0;
+
+		const onMouseDown = (e: MouseEvent) => {
+			isDragging = true;
+			startX = e.pageX - parentContainer.offsetLeft;
+			scrollLeft = parentContainer.scrollLeft;
+			dragDistance = 0;
+			parentContainer.classList.add("dragging");
+		};
+
+		const onMouseLeave = () => {
+			isDragging = false;
+			parentContainer.classList.remove("dragging");
+		};
+
+		const onMouseUp = () => {
+			isDragging = false;
+			parentContainer.classList.remove("dragging");
+		};
+
+		const onMouseMove = (e: MouseEvent) => {
+			if (!isDragging) return;
+			e.preventDefault();
+			const x = e.pageX - parentContainer.offsetLeft;
+			const walk = (x - startX) * 1.5;
+			parentContainer.scrollLeft = scrollLeft - walk;
+			dragDistance += Math.abs(walk);
+		};
+
+		const onClick = (e: MouseEvent) => {
+			if (dragDistance > 5) {
+				e.stopPropagation();
+				e.preventDefault();
+			}
+		};
+
+		parentContainer.addEventListener("mousedown", onMouseDown);
+		parentContainer.addEventListener("mouseleave", onMouseLeave);
+		parentContainer.addEventListener("mouseup", onMouseUp);
+		parentContainer.addEventListener("mousemove", onMouseMove);
+		parentContainer.addEventListener("click", onClick, true);
+
+		return () => {
+			parentContainer.removeEventListener("mousedown", onMouseDown);
+			parentContainer.removeEventListener("mouseleave", onMouseLeave);
+			parentContainer.removeEventListener("mouseup", onMouseUp);
+			parentContainer.removeEventListener("mousemove", onMouseMove);
+			parentContainer.removeEventListener("click", onClick, true);
+		};
+	}, []);
+
 	/* 카트리지 (=통칭 카드) 호버 & 펼침 이벤트 관리 */
 	useEffect(() => {
 		const parentContainer = cartridgeCardsContainerRef.current;
@@ -633,6 +694,7 @@ export default function Home() {
 		if (!cardsDiv || !parentContainer) return;
 
 		const cards = cardsDiv.querySelectorAll<HTMLElement>(".card");
+		const timeouts: ReturnType<typeof setTimeout>[] = [];
 
 		const handleClearChanges = () => {
 			cardsDiv.style.left = "";
@@ -700,10 +762,11 @@ export default function Home() {
 
 			if (desiredDelta > maxScroll) {
 				cardsDiv.style.left = `${-1 * desiredDelta}px`;
-				setTimeout(() => {
+				const t = setTimeout(() => {
 					clickedCard.classList.add("clicked");
 					moveGameboyHead();
 				}, 500);
+				timeouts.push(t);
 			} else {
 				clickedCard.classList.add("clicked");
 				requestAnimationFrame(waitForScrollEnd);
@@ -713,30 +776,29 @@ export default function Home() {
 			const moveGameboyHead = () => {
 				const gameboyHead = document.querySelector("#gameboy-head");
 				if (gameboyHead) {
-					setTimeout(() => {
+					const t = setTimeout(() => {
 						const referencePosition = gameboyHead.getBoundingClientRect().top;
 						const cardPosition = rect.top;
 						const distance = referencePosition - cardPosition - clickedCard.offsetHeight * 0.4;
-
-						//카트리지가 들어간 효과를 위해 추가 Y 값 (= 20)
 						clickedCard.style.setProperty("--y-distance", `${distance + 20}px`);
 						clickedCard.classList.add("moveY");
-
-						setTimeout(() => {
+						const t2 = setTimeout(() => {
 							window.scrollTo({top: window.scrollY + distance, behavior: "smooth"});
 						}, 300);
+						timeouts.push(t2);
 					}, 800);
+					timeouts.push(t);
 				}
 			};
 
 			const handleAnimationEnd = () => {
 				unlockScroll();
-				setTimeout(() => {
+				const t = setTimeout(() => {
 					handleClearChanges();
 					cards.forEach(card => card.classList.remove("forbid-click", "moveY", "clicked"));
-
 					clickedCard.removeEventListener("animationend", handleAnimationEnd);
 				}, 1000);
+				timeouts.push(t);
 			};
 
 			clickedCard.addEventListener("animationend", handleAnimationEnd);
@@ -750,35 +812,9 @@ export default function Home() {
 			cards.forEach(card => {
 				card.removeEventListener("click", onCardClick);
 			});
+			timeouts.forEach(t => clearTimeout(t));
 		};
 	}, []);
-
-	/* 스크롤 위치에 따라 배경색을 변경하는 로직*/
-	// useEffect(() => {
-	// 	if (!mainRef.current) return;
-	// 	const main = mainRef.current;
-
-	// 	function handleBackgroundColorChange() {
-	// 		const startColor: [number, number, number] = [134, 211, 255];
-	// 		const endColor: [number, number, number] = [255, 215, 151];
-
-	// 		const scrollTop = window.scrollY;
-	// 		const scrollHeight = document.body.scrollHeight;
-	// 		const clientHeight = window.innerHeight;
-	// 		const scrollFraction = scrollTop / (scrollHeight - clientHeight);
-
-	// 		const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * scrollFraction);
-	// 		const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * scrollFraction);
-	// 		const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * scrollFraction);
-
-	// 		document.documentElement.style.setProperty("--main-bg", `rgb(${r}, ${g}, ${b})`);
-	// 	}
-
-	// 	window.addEventListener("scroll", handleBackgroundColorChange);
-	// 	return () => {
-	// 		window.removeEventListener("scroll", handleBackgroundColorChange);
-	// 	};
-	// }, []);
 
 	/* 메인 페이지 타이틀에 애니메이션 추가 */
 	useEffect(() => {
@@ -1106,10 +1142,7 @@ export default function Home() {
 						<label>{textFile["003"]}</label>
 					</div>
 				</div>
-				<div
-					ref={cartridgeCardsContainerRef}
-					className="gallery w-full flex items-start justify-center overflow-x-auto overflow-y-hidden min-h-screen md:min-h-[100vh]"
-				>
+				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full flex overflow-x-auto overflow-y-hidden min-h-screen md:min-h-[100vh]">
 					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-8 md:gap-24 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
 							<div key={v.title} data-project={k} className={`card card-${k} w-fit`}>
@@ -1118,18 +1151,6 @@ export default function Home() {
 						))}
 					</div>
 				</div>
-				{/* <div
-					ref={cartridgeCardsContainerRef}
-					className="w-full flex items-start justify-center overflow-x-auto overflow-y-visible min-h-screen md:min-h-[100vh]"
-				>
-					<div ref={cartridgeCardsRef} className="cartridge-cards relative spread">
-						{Object.entries(projects).map(([k, v]) => (
-							<div key={v.title} className={`card card-${k}`} onClick={() => setSelectedProjectTitle(k)}>
-								<Cartridge project={v} />
-							</div>
-						))}
-					</div>
-				</div> */}
 				<div className={`relative -mt-32 gameboy-section ${isGameboyOn && "power-on"} flex flex-col items-center justify-center`}>
 					<Gameboy project={selectedProject} />
 				</div>
