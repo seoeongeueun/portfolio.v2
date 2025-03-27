@@ -29,18 +29,15 @@
 @keyframes insert {
 	0% {
 		transform: scale(0.2) translateY(0);
-	}
-	50% {
-		transform: scale(0.2) translateY(calc(calc(var(--y-distance) / 0.2) - 10rem));
-	}
-	87% {
-		transform: scale(0.2) translateY(calc(calc(var(--y-distance) / 0.2) - 20rem));
+		opacity: 1;
 	}
 	90% {
-		transform: scale(0.2) translateY(calc(calc(var(--y-distance) / 0.2) - 20rem));
+		transform: scale(0.2) translateY(calc(var(--y-distance) / 0.2));
+		opacity: 1;
 	}
 	100% {
-		transform: scale(0.2) translateY(calc(var(--y-distance) / 0.2));
+		transform: scale(0.2) translateY(calc(calc(var(--y-distance) / 0.2 + 8rem)));
+		opacity: 1;
 	}
 }
 
@@ -158,5 +155,16 @@
 	100% {
 		right: 5%;
 		bottom: 48%;
+	}
+}
+
+@keyframes card-fade-up {
+	0% {
+		opacity: 0;
+		transform: translateY(3rem) scale(0.2);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(0.2);
 	}
 }

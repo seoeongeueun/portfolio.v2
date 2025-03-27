@@ -66,6 +66,7 @@
 
 	--animate-slide-down: slide-down 2s ease-in-out infinite;
 	--animate-float: float 10s ease-in-out infinite;
+	--animate-card-fade-up: card-fade-up 1s ease-in-out 2.1s forwards;
 }
 
 :root {
