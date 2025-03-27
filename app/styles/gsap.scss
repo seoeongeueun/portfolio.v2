@@ -93,24 +93,24 @@
 	grid-area: bowl;
 }
 
-.gooey-overlay {
+.shore-overlay {
 	border-bottom: 5px solid white;
-	box-shadow: 0 20px 10px 0px rgba(163, 94, 30, 0.15);
-	width: 120vw;
+	box-shadow: 0 13px 3px 0px rgba(163, 94, 30, 0.15);
+	width: 125vw;
 	height: 45vh;
-	border-radius: 40%;
+	border-radius: 30%;
 	position: relative;
 	top: -10vh;
-	right: 5vw;
+	right: 10vw;
 	background: linear-gradient(
-		179deg,
+		181deg,
 		var(--main-bg) 0%,
-		rgb(83, 215, 255) 60%,
-		rgba(140, 242, 255, 0.9) 70%,
-		rgba(207, 247, 255, 0.2) 80%,
+		rgb(83, 215, 255) 65%,
+		rgba(140, 242, 255, 0.9) 75%,
+		rgba(207, 247, 255, 0.2) 85%,
 		rgb(255, 255, 255) 100%
 	);
-	filter: url(#gooey);
+	filter: url(#shore);
 	pointer-events: none;
 	transform: rotate(3deg);
 }

@@ -6,6 +6,7 @@ import {Fragment, useEffect, useState, useRef} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy, {Project} from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
+import CareerData from "./data/careers.json" assert {type: "json"};
 import "./styles/global.scss";
 import "./styles/gsap.scss";
 import {stacks} from "./lib/constants";
@@ -20,6 +21,7 @@ import {Swiper as SwiperClass} from "swiper/types";
 import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt} from "./lib/tools";
 import "swiper/css";
 import "swiper/css/pagination";
+import {Jersey_10} from "next/font/google";
 
 gsap.registerPlugin(Observer);
 gsap.registerPlugin(ScrollTrigger);
@@ -194,7 +196,48 @@ export default function Home() {
 	};
 
 	useEffect(() => {
-		// gsap.to("#turbGooey", {
+		// gsap.to("#turbShore", {
+		// 	attr: {baseFrequency: "0.02 0.08"},
+		// 	scrollTrigger: {
+		// 		trigger: ".main-page",
+		// 		start: "top top",
+		// 		end: "bottom bottom",
+		// 		scrub: 1,
+		// 	},
+		// });
+
+		// gsap.to("#dispShore", {
+		// 	attr: {scale: 50},
+		// 	scrollTrigger: {
+		// 		trigger: ".main-page",
+		// 		start: "top top",
+		// 		end: "bottom bottom",
+		// 		scrub: 1,
+		// 	},
+		// });
+
+		const waveTl = gsap.timeline({repeat: 1, yoyo: true, ease: "power3.inOut"});
+		waveTl
+			.to("#dispShore", {
+				attr: {scale: 50},
+				scrollTrigger: {
+					trigger: ".main-page",
+					start: "top top",
+					end: "bottom bottom",
+					scrub: 1,
+				},
+			})
+			.to("#turbShore", {
+				attr: {baseFrequency: "0.02 0.08"},
+				scrollTrigger: {
+					trigger: ".main-page",
+					start: "top top",
+					end: "bottom bottom",
+					scrub: 1,
+				},
+			});
+
+		// gsap.to("#turbShore", {
 		// 	attr: {baseFrequency: "0.02 0.08"},
 		// 	scrollTrigger: {
 		// 		trigger: ".beach-container",
@@ -204,7 +247,7 @@ export default function Home() {
 		// 	},
 		// });
 
-		// gsap.to("#dispGooey", {
+		// gsap.to("#dispShore", {
 		// 	attr: {scale: 50},
 		// 	scrollTrigger: {
 		// 		trigger: ".beach-container",
@@ -212,6 +255,33 @@ export default function Home() {
 		// 		end: "bottom bottom",
 		// 		scrub: 1,
 		// 	},
+		// });
+
+		// gsap.to(".shore-overlay", {
+		// 	height: 400,
+		// 	scrollTrigger: {
+		// 		trigger: ".beach-container",
+		// 		start: "top top",
+		// 		end: "bottom bottom",
+		// 		scrub: 1,
+		// 	},
+		// });
+
+		// const waveTl = gsap.timeline({repeat: -1, yoyo: true, ease: "power3.inOut", paused: true});
+
+		// waveTl
+		// 	.to("#turbShore", {attr: {baseFrequency: "0.02 0.08"}, duration: 2}, 0)
+		// 	.to("#dispShore", {attr: {scale: 30}, duration: 2}, 0)
+		// 	.to(".shore-overlay", {y: -30, duration: 1}, 0);
+
+		// ScrollTrigger.create({
+		// 	trigger: ".shore-overlay",
+		// 	start: "top bottom",
+		// 	end: "bottom top",
+		// 	onEnter: () => waveTl.play(),
+		// 	onLeave: () => waveTl.pause(),
+		// 	onEnterBack: () => waveTl.play(),
+		// 	onLeaveBack: () => waveTl.pause(),
 		// });
 
 		if (!bowlRef.current) return;
@@ -267,7 +337,7 @@ export default function Home() {
 				const vmin = Math.min(window.innerWidth, window.innerHeight);
 				const yMargin = (vmin * 4) / 100;
 				const xMargin = (vmin * 12) / 100;
-
+				console.log(newY, bowlRect.top, yMargin, pseudoRect.top, bowlRect.top - yMargin - charBounds.width);
 				if (newX < bowlRect.left + xMargin) newX = bowlRect.left + xMargin;
 				if (newX + charBounds.width > pseudoRect.right - xMargin) newX = pseudoRect.right - xMargin - charBounds.width / 2.5;
 				if (newY < bowlRect.top + yMargin) newY = bowlRect.top + yMargin;
@@ -394,10 +464,11 @@ export default function Home() {
 		let prevScrollTop = window.scrollY;
 		let positions = towels.map((_, i) => i * towelHeight);
 
-		const isStickyVisible = () => {
-			//무한 카드 스위칭을 막기 위해 하단에 카드 3개가 남았을 때 루프를 종료
+		const checkShouldContinue = () => {
+			//카드 2개분의 자리가 있다면 계속 루프
 			const rect = stickyRef.current!.getBoundingClientRect();
-			const shouldContinue = rect.bottom > towelHeight * 3 && rect.top < window.innerHeight;
+			const shouldContinue = rect.bottom > towelHeight * 2 && rect.top < window.innerHeight;
+
 			setIsReadyToExplode(!shouldContinue);
 			return shouldContinue;
 		};
@@ -425,11 +496,11 @@ export default function Home() {
 
 		const updatePositions = (deltaY: number) => {
 			currentOffset += deltaY;
-			if (isStickyVisible()) {
+			if (checkShouldContinue()) {
 				towels.forEach((towel, index) => {
 					positions[index] += deltaY;
 
-					if (positions[index] <= -towelHeight) {
+					if (positions[index] <= -(towelHeight - towelHeight / 2)) {
 						positions[index] += (towelHeight + marginTop) * (totalTowels * totalTowels);
 					}
 
@@ -900,7 +971,7 @@ export default function Home() {
 	};
 
 	return (
-		<div ref={mainRef} className="text-white w-full overflow-hidden flex flex-col items-center justify-start">
+		<div ref={mainRef} className="main-page text-white w-full overflow-hidden flex flex-col items-center justify-start">
 			<div className="fixed top-0 p-4 pointer-events-none w-full">
 				<div className="w-full flex flex-row items-center justify-between mb-auto">
 					<span>ha</span>
@@ -925,7 +996,7 @@ export default function Home() {
 						<svg width="0" height="0">
 							<defs>
 								<filter id="turb">
-									<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="3" result="turbulence" />
+									<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.01 0.08" numOctaves="1" result="turbulence" />
 									<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale="5" />
 								</filter>
 							</defs>
@@ -967,19 +1038,19 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<div ref={beachRef} className="w-full h-fit beach-container">
+			<div ref={beachRef} className="w-full h-fit beach-container overflow-hidden">
 				<svg width="0" height="0">
 					<defs>
-						<filter id="gooey">
-							<feTurbulence id="turbGooey" type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="1" result="turbulence" />
-							<feDisplacementMap id="dispGooey" in="SourceGraphic" in2="turbulence" scale="70" />
+						<filter id="shore">
+							<feTurbulence id="turbShore" type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="1" result="turbulence" />
+							<feDisplacementMap id="dispShore" in="SourceGraphic" in2="turbulence" scale="70" />
 						</filter>
 					</defs>
 				</svg>
 
-				<div className="gooey-overlay z-20"></div>
+				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
-				<section ref={stickyRef} className="pt-24 flex flex-row w-full min-h-screen justify-between items-center shore">
+				<section ref={stickyRef} className="pt-24 flex flex-row w-full min-h-screen justify-between items-center shore relative z-20">
 					<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
@@ -1018,72 +1089,40 @@ export default function Home() {
 								</div>
 							</div>
 						</div>
-						<p className="description text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
+						<p className="description text-m max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 					</div>
 
 					<div ref={towelsRef} className="towels-container pt-32 spread">
-						<div className="towel-wrapper">
-							<svg>
-								<filter id="wibble-1">
-									<feTurbulence id="turbTowel-1" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
-									<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
-								</filter>
-							</svg>
-							<div data-towel-index="1" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-1)"}}>
-								<p className="text-xl">Frontend Developer</p>
-								<p>BATON</p>
-								<ul>
-									<li>
-										React.js, Next.js, Typescript, jQuery 등을 사용하여 다양한 클라이언트의 웹 애플리케이션과 관리자 페이지를 개발하고,
-										반응형 디자인과 최적화된 애니메이션을 구현했습니다.
-									</li>
-									<li>
-										필요에 따라 API 설계와 MySQL과 PostgreSQL 데이터베이스 설계 및 쿼리 작성 등 백엔드 작업을 포함한 통합 개발을 수행하여
-										프론트-백 간의 원활한 데이터 연동을 구현했습니다.
-									</li>
-									<li>
-										팀의 개발 효율성을 위해 적극적으로 새로운 스택을 테스트하고 도입하여 팀의 개발 시스템을 현대화하고 작업 생산성 향상에
-										기여했습니다.
-									</li>
-								</ul>
-								<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
-							</div>
-						</div>
-						<div className="towel-wrapper">
-							<svg>
-								<filter id="wibble-2">
-									<feTurbulence id="turbTowel-2" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
-									<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
-								</filter>
-							</svg>
-							<div data-towel-index="2" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-2)"}}>
-								<p className="text-xl">Software Engineer</p>
-								<p>Market Stadium</p>
-								<ul>
-									<li>
-										풀스택 개발자 인턴으로 React.js, Semantic UI, Chart.js를 사용하여 macroeconomics 지표 데이터를 그래프로 시각화하는
-										대시보드 기능을 구현했습니다.
-									</li>
-									<li>DynamoDB 와 연동된 RESTful API를 개발하여 관련 데이터를 관리하고 조회하는 기능을 만들었습니다.</li>
-									<li>Mocha와 Chai를 이용해 데이터 유효성 검증 테스트를 추가하여 안정성을 높였습니다.</li>
-								</ul>
-								<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
-							</div>
-						</div>
-						<div className="towel-wrapper">
-							<svg>
-								<filter id="wibble-3">
-									<feTurbulence id="turbTowel-3" type="fractalNoise" baseFrequency="0.002 0.003" numOctaves="1" result="turbulence" />
-									<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
-								</filter>
-							</svg>
-							<div data-towel-index="3" className="towel w-full flex flex-col items-start justify-start p-10" style={{filter: "url(#wibble-3)"}}>
-								<p className="text-xl">Bachelor's Degree of Computer Science</p>
-								<p>The State University of New York, Stony Brook</p>
-								<p>Stony Brook University에서 Computer Science를 전공했습니다.</p>
-								<p className="tag mt-auto ml-auto">2023년 8월 - 2024년 11월</p>
-							</div>
-						</div>
+						{CareerData &&
+							Object.entries(CareerData).map(([k, v], i) => (
+								<div className="towel-wrapper">
+									<svg>
+										<filter id={`wibble-${i + 1}`}>
+											<feTurbulence
+												id={`turbTowel-${i + 1}`}
+												type="fractalNoise"
+												baseFrequency="0.002 0.003"
+												numOctaves="1"
+												result="turbulence"
+											/>
+											<feDisplacementMap in2="turbulence" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
+										</filter>
+									</svg>
+									<div
+										data-towel-index={i + 1}
+										className="towel w-full flex flex-col items-start justify-start p-10 px-12"
+										style={{filter: `url(#wibble-${i + 1})`}}
+									>
+										<div className="flex flex-wrap items-center justify-start mb-2">
+											<p className="title mr-4 whitespace-nowrap">{v.position}</p>
+											<p>@ {k}</p>
+										</div>
+
+										<ul>{v.text_kr?.length > 0 && v.text_kr.map((t, i) => <li key={k + i}>{t}</li>)}</ul>
+										<p className="tag mt-auto ml-auto">{v.date}</p>
+									</div>
+								</div>
+							))}
 					</div>
 				</section>
 			</div>
