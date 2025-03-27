@@ -19,8 +19,8 @@
 	display: grid;
 	place-items: center;
 	grid-template-areas: "bowl";
-	width: 75vmin;
-	height: 60vmin;
+	width: 65vmin;
+	height: 50vmin;
 	border-radius: 5px;
 	text-transform: uppercase;
 	overflow: hidden;
@@ -64,6 +64,15 @@
 		transform: perspective(500px) rotateZ(30deg);
 		flex-shrink: 0;
 		z-index: 10;
+		will-change: transform;
+		width: 10rem;
+		height: auto;
+		filter: url(#turb);
+
+		&.ducky, &.javascript {
+			width: 6rem;
+			filter: url(#turb) hue-rotate(20deg);
+		}
 	}
 
 	.shadow {

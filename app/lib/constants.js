@@ -21,16 +21,23 @@
 // 	mysql: "mysql",
 // };
 
+// export const stacks = {
+// 	javascript: "java\nscript",
+// 	typescript: "type\nscript",
+// 	python: "python",
+// 	php: "php",
+// 	mysql: "mysql",
+// 	react: "react",
+// 	html: "html",
+// 	mongodb: "mongo\ndb",
+// 	nodejs: "node.js",
+// 	jquery: "jquery",
+// 	tailwind: "tailwind\ncss",
+// };
+
 export const stacks = {
-	javascript: "java\nscript",
-	typescript: "type\nscript",
-	python: "python",
-	php: "php",
-	mysql: "mysql",
-	react: "react",
-	html: "html",
-	mongodb: "mongo\ndb",
-	nodejs: "node.js",
-	jquery: "jquery",
-	tailwind: "tailwind\ncss",
+	gameboy: "gameboy",
+	javascript: "javascript",
+	ducky: "ducky",
+	laptop: "laptop",
 };

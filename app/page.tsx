@@ -17,15 +17,13 @@ import html2canvas from "html2canvas";
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination, Autoplay} from "swiper/modules";
 import {Swiper as SwiperClass} from "swiper/types";
-import {waitForAllImagesToLoad, sleep} from "./lib/tools";
+import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt} from "./lib/tools";
 import "swiper/css";
 import "swiper/css/pagination";
 
 gsap.registerPlugin(Observer);
 gsap.registerPlugin(ScrollTrigger);
 gsap.registerPlugin(Draggable);
-
-const getRandomInt = (val: number): number => Math.ceil(Math.random() * val) * (Math.random() < 0.5 ? -1 : 1);
 
 type TextFileType = Record<string, string>;
 
@@ -56,8 +54,6 @@ export default function Home() {
 	const mainTitleRef = useRef<HTMLParagraphElement>(null);
 	const miniTitleRef = useRef<HTMLParagraphElement>(null);
 	const gameboyHeadRef = useRef<HTMLDivElement>(null);
-	const charRefs = useRef<Record<string, HTMLElement>>({});
-	const shadowRefs = useRef<Record<string, HTMLElement>>({});
 	const beachRef = useRef<HTMLDivElement>(null);
 	const overshootRef = useRef<HTMLDivElement>(null);
 	const projectDetailRef = useRef<HTMLDivElement>(null);
@@ -69,27 +65,6 @@ export default function Home() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const hasExplodedRef = useRef(false);
 	const particleSize = 50;
-
-	const prevScrollTop = useRef(0);
-
-	function preventScroll(e: Event) {
-		e.preventDefault();
-		e.stopPropagation();
-	}
-
-	function lockScroll() {
-		window.addEventListener("wheel", preventScroll, {
-			passive: false,
-		});
-		window.addEventListener("touchmove", preventScroll, {
-			passive: false,
-		});
-	}
-
-	function unlockScroll() {
-		window.removeEventListener("wheel", preventScroll);
-		window.removeEventListener("touchmove", preventScroll);
-	}
 
 	//해변 div를 canvas로 전환해 pixel 폭발 효과를 적용
 	useEffect(() => {
@@ -219,27 +194,28 @@ export default function Home() {
 	};
 
 	useEffect(() => {
-		gsap.to("#turbGooey", {
-			attr: {baseFrequency: "0.02 0.08"},
-			scrollTrigger: {
-				trigger: ".wrapper",
-				start: "top top",
-				end: "bottom bottom",
-				scrub: 1,
-			},
-		});
+		// gsap.to("#turbGooey", {
+		// 	attr: {baseFrequency: "0.02 0.08"},
+		// 	scrollTrigger: {
+		// 		trigger: ".beach-container",
+		// 		start: "top top",
+		// 		end: "bottom bottom",
+		// 		scrub: 1,
+		// 	},
+		// });
 
-		gsap.to("#dispGooey", {
-			attr: {scale: 50},
-			scrollTrigger: {
-				trigger: ".wrapper",
-				start: "top top",
-				end: "bottom bottom",
-				scrub: 1,
-			},
-		});
+		// gsap.to("#dispGooey", {
+		// 	attr: {scale: 50},
+		// 	scrollTrigger: {
+		// 		trigger: ".beach-container",
+		// 		start: "top top",
+		// 		end: "bottom bottom",
+		// 		scrub: 1,
+		// 	},
+		// });
 
 		if (!bowlRef.current) return;
+
 		Object.keys(stacks).forEach(key => {
 			if (!charPositionsRef.current[key]) {
 				charPositionsRef.current[key] = {
@@ -251,32 +227,40 @@ export default function Home() {
 
 		gsap.defaults({overwrite: true});
 
-		gsap.to(".char", {
-			x: () => getRandomInt(10),
-			y: () => getRandomInt(10),
-			rotation: () => getRandomInt(20),
-			duration: 5,
-		});
+		let bowlRect: DOMRect;
+		let pseudoRect: any;
+
+		function measureBowl() {
+			if (!bowlRef.current) return;
+			bowlRect = bowlRef.current.getBoundingClientRect();
+			pseudoRect = getPseudoBounds(bowlRef.current, "::before");
+		}
+		measureBowl();
+
+		//과부화 방지용 쓰로틀 추가
+		let lastMoveTime = 0;
+		const moveThrottle = 40;
 
 		let moveCharsFrameId: number | null = null;
-		let rippleFrameId: number | null = null;
 
-		const moveChars = (obj: {event: MouseEvent; deltaX: number; deltaY: number}) => {
+		function moveChars({event, deltaX, deltaY}: {event: MouseEvent; deltaX: number; deltaY: number}) {
 			if (moveCharsFrameId) return;
 
+			//시간으로 throttle 계산
+			if (Date.now() - lastMoveTime < moveThrottle) return;
+			lastMoveTime = Date.now();
+
 			moveCharsFrameId = requestAnimationFrame(() => {
-				const {event, deltaX, deltaY} = obj;
+				moveCharsFrameId = null;
+
 				const el = event.target as HTMLElement;
 				const id = el.classList.contains("char") ? el.className.match(/char-(\S+)/)?.[1] : null;
-
 				if (!id || !bowlRef.current) return;
 
 				const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
 				const charBounds = el.getBoundingClientRect();
-				const pseudoBounds = getPseudoBounds(bowlRef.current, "::before");
-				const bowlBounds = bowlRef.current.getBoundingClientRect();
-				const t = 3;
 
+				const t = 1;
 				let newX = charBounds.left + deltaX * t;
 				let newY = charBounds.top + deltaY * t;
 
@@ -284,10 +268,10 @@ export default function Home() {
 				const yMargin = (vmin * 4) / 100;
 				const xMargin = (vmin * 12) / 100;
 
-				if (newX < bowlBounds.left + xMargin) newX = pseudoBounds.left + xMargin;
-				if (newX + charBounds.width > pseudoBounds.right - xMargin + 10) newX = pseudoBounds.right - charBounds.width - xMargin + 10;
-				if (newY < bowlBounds.top + yMargin) newY = bowlBounds.top + yMargin;
-				if (newY + charBounds.height > bowlBounds.bottom - yMargin) newY = bowlBounds.bottom - charBounds.height - yMargin;
+				if (newX < bowlRect.left + xMargin) newX = bowlRect.left + xMargin;
+				if (newX + charBounds.width > pseudoRect.right - xMargin) newX = pseudoRect.right - xMargin - charBounds.width / 2.5;
+				if (newY < bowlRect.top + yMargin) newY = bowlRect.top + yMargin;
+				if (newY + charBounds.height > bowlRect.bottom - yMargin) newY = bowlRect.bottom - charBounds.height - yMargin;
 
 				const xMovement = newX - charBounds.left;
 				const yMovement = newY - charBounds.top;
@@ -295,7 +279,7 @@ export default function Home() {
 				gsap.to(el, {
 					x: `+=${xMovement}`,
 					y: `+=${yMovement}`,
-					rotation: `-=${deltaX * t * Math.sign(event.clientY - (charBounds.top + charBounds.height / 2))}`,
+					rotation: `-=${deltaX * 1.2 * Math.sign(event.clientY - (charBounds.top + charBounds.height / 2))}`,
 					duration: 3,
 					ease: "expo.out",
 				});
@@ -308,11 +292,10 @@ export default function Home() {
 						ease: "expo.out",
 					});
 				}
-
-				moveCharsFrameId = null;
 			});
-		};
+		}
 
+		//마우스 드래그
 		const observer = Observer.create({
 			target: bowlRef.current,
 			onMove: self => {
@@ -327,30 +310,39 @@ export default function Home() {
 			},
 		});
 
+		let rippleFrameId: number | null = null;
+		let lastWaveTime = 0;
+		const waveThrottle = 50;
+
 		const turbWave = document.querySelector("#turbwave");
 		const dispMap = document.querySelector("#dispMap");
 
 		const handleMouseMove = (e: MouseEvent) => {
+			//과부화 방지
+			if (Date.now() - lastWaveTime < waveThrottle) return;
+			lastWaveTime = Date.now();
+
 			if (rippleFrameId) return;
 
 			rippleFrameId = requestAnimationFrame(() => {
+				rippleFrameId = null;
 				const rect = bowlRef.current?.getBoundingClientRect();
-				if (!rect) return;
+				if (!bowlRef.current || !turbWave || !dispMap || !rect) return;
+
 				const x = (e.clientX - rect.left) / rect.width;
 				const y = (e.clientY - rect.top) / rect.height;
 
 				gsap.to(turbWave, {
 					attr: {baseFrequency: `${0.01 + y * 0.02} ${0.04 + x * 0.04}`},
-					duration: 0.3,
-					ease: "power2.out",
+					duration: 0.2,
+					ease: "none",
 				});
 
 				gsap.to(dispMap, {
-					attr: {scale: 5 + y * 15},
-					duration: 0.3,
-					ease: "power2.out",
+					attr: {scale: 6 + y * 15},
+					duration: 0.2,
+					ease: "none",
 				});
-				rippleFrameId = null;
 			});
 		};
 
@@ -359,11 +351,13 @@ export default function Home() {
 			dispMap?.setAttribute("scale", "2");
 		};
 
-		bowlRef.current?.addEventListener("mousemove", handleMouseMove);
-		bowlRef.current?.addEventListener("mouseleave", handleMouseLeave);
+		bowlRef.current.addEventListener("mousemove", handleMouseMove);
+		bowlRef.current.addEventListener("mouseleave", handleMouseLeave);
 
 		return () => {
 			observer.kill();
+			bowlRef.current?.removeEventListener("mousemove", handleMouseMove);
+			bowlRef.current?.removeEventListener("mouseleave", handleMouseLeave);
 			if (moveCharsFrameId) cancelAnimationFrame(moveCharsFrameId);
 			if (rippleFrameId) cancelAnimationFrame(rippleFrameId);
 		};
@@ -931,7 +925,7 @@ export default function Home() {
 						<svg width="0" height="0">
 							<defs>
 								<filter id="turb">
-									<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.02 0.04" numOctaves="3" result="turbulence" />
+									<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="3" result="turbulence" />
 									<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale="5" />
 								</filter>
 							</defs>
@@ -945,9 +939,9 @@ export default function Home() {
 										<Image
 											src={`/icons/${k}.png`}
 											alt={k}
-											className={`char char-${k}`}
-											width={70}
-											height={70}
+											className={`char char-${k} ${k}`}
+											width={100}
+											height={100}
 											style={{
 												top: `${y}%`,
 												left: `${x}%`,

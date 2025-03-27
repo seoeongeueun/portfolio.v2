@@ -31,3 +31,25 @@ export function waitForAllImagesToLoad(container: HTMLElement): Promise<void> {
 }
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export const getRandomInt = (val: number): number => Math.ceil(Math.random() * val) * (Math.random() < 0.5 ? -1 : 1);
+
+
+function preventScroll(e: Event) {
+	e.preventDefault();
+	e.stopPropagation();
+}
+
+export function lockScroll() {
+	window.addEventListener("wheel", preventScroll, {
+		passive: false,
+	});
+	window.addEventListener("touchmove", preventScroll, {
+		passive: false,
+	});
+}
+
+export function unlockScroll() {
+	window.removeEventListener("wheel", preventScroll);
+	window.removeEventListener("touchmove", preventScroll);
+}
