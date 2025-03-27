@@ -168,3 +168,14 @@
 		transform: translateY(0) scale(0.2);
 	}
 }
+
+@keyframes section-fade-up {
+	0% {
+		opacity: 1;
+		transform: translateY(120vh);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

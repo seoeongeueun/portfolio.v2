@@ -17,6 +17,7 @@ import html2canvas from "html2canvas";
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination, Autoplay} from "swiper/modules";
 import {Swiper as SwiperClass} from "swiper/types";
+import {waitForAllImagesToLoad, sleep} from "./lib/tools";
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -42,6 +43,7 @@ export default function Home() {
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
 	const [isReadyToExplode, setIsReadyToExplode] = useState<boolean>(false);
 	const [isSpecialSlide, setIsSpecialSlide] = useState<boolean>(false);
+	const [isSectionReady, setIsSectionReady] = useState<boolean>(false);
 
 	const bowlRef = useRef<HTMLDivElement | null>(null);
 	const charPositionsRef = useRef<Record<string, {x: number; y: number}>>({});
@@ -58,6 +60,10 @@ export default function Home() {
 	const shadowRefs = useRef<Record<string, HTMLElement>>({});
 	const beachRef = useRef<HTMLDivElement>(null);
 	const overshootRef = useRef<HTMLDivElement>(null);
+	const swiperReadyRef = useRef<{
+		promise: Promise<void>;
+		resolve: () => void;
+	} | null>(null);
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const hasExplodedRef = useRef(false);
@@ -852,105 +858,39 @@ export default function Home() {
 		}
 	}, [tags]);
 
-	// useEffect(() => {
-	// 	const loop = cartridgeCardsRef.current;
-	// 	const gallery = cartridgeCardsContainerRef.current;
+	useEffect(() => {
+		if (selectedProject) {
+			const section = document.querySelector<HTMLDivElement>(".project-section");
+			if (!section) return;
 
-	// 	if (!loop || !gallery) return;
+			//바뀐 스와이퍼에 새로운 ready promise를 연결
+			let resolve: () => void;
+			const promise = new Promise<void>(r => (resolve = r));
+			swiperReadyRef.current = {promise, resolve: resolve!};
 
-	// 	const buffer = 500;
-	// 	const paddingRight = parseFloat(getComputedStyle(loop).paddingRight || "0");
-	// 	const scrollDistance = loop.scrollWidth - gallery.offsetWidth + paddingRight;
-	// 	let clickedCard: HTMLElement | null = null;
+			const run = async () => {
+				//section 내부 이미지와 swiper가 모두 로딩 되면 준비 완료로 변경
+				// 최소로 3초는 기다리기
+				await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current!.promise, sleep(3000)]);
 
-	// 	const tween = gsap.to(loop, {
-	// 		x: -scrollDistance,
-	// 		ease: "none",
-	// 		scrollTrigger: {
-	// 			trigger: ".projects-section",
-	// 			start: `top top`,
-	// 			end: `+=${scrollDistance * 3}`,
-	// 			scrub: true,
-	// 			pin: true,
-	// 			pinSpacing: true,
-	// 			onLeave: () => {
-	// 				if (clickedCard) clickedCard.classList.remove("moveY", "clicked");
-	// 			},
-	// 		},
-	// 	});
+				setIsSectionReady(true);
+			};
 
-	// 	let outerTimeout: ReturnType<typeof setTimeout> | null = null;
-	// 	let innerTimeout: ReturnType<typeof setTimeout> | null = null;
-
-	// 	function onCardClick(e: MouseEvent) {
-	// 		const card = e.currentTarget as HTMLElement;
-	// 		clickedCard = card;
-	// 		const cardOffset = card.offsetLeft;
-	// 		const cardWidth = card.offsetWidth;
-	// 		const cardCenter = cardOffset + cardWidth / 2;
-	// 		const windowCenter = window.innerWidth / 2;
-	// 		const containerWidth = loop!.scrollWidth;
-	// 		const viewportWidth = gallery!.offsetWidth;
-
-	// 		const desiredShift = cardCenter - windowCenter;
-
-	// 		let fraction = desiredShift / scrollDistance;
-	// 		fraction = Math.max(0, Math.min(1, fraction));
-
-	// 		const tst = tween.scrollTrigger;
-	// 		gsap.to(tween, {
-	// 			progress: fraction,
-	// 			duration: 0.6,
-	// 			ease: "power2.inOut",
-	// 			onUpdate: () => {
-	// 				if (!tst) return;
-	// 				const newScroll = tst.start + (tst.end - tst.start) * tween.progress();
-	// 				tst.scroll(newScroll);
-	// 			},
-	// 		});
-
-	// 		card.classList.add("clicked");
-
-	// 		lockScroll();
-
-	// 		outerTimeout = setTimeout(() => {
-	// 			card.classList.add("moveY");
-	// 			card.addEventListener(
-	// 				"transitionend",
-	// 				() => {
-	// 					innerTimeout = setTimeout(() => {
-	// 						unlockScroll();
-	// 					}, 500);
-	// 				},
-	// 				{once: true}
-	// 			);
-	// 		}, 500);
-	// 	}
-
-	// 	const cardsDiv = cartridgeCardsRef.current;
-	// 	if (!cardsDiv) return;
-
-	// 	const cards = cardsDiv.querySelectorAll<HTMLElement>(".card");
-	// 	cards.forEach(c => c.addEventListener("click", onCardClick));
-
-	// 	return () => {
-	// 		tween.scrollTrigger?.kill();
-	// 		tween.kill();
-	// 		cards.forEach(c => c.removeEventListener("click", onCardClick));
-	// 		if (outerTimeout) clearTimeout(outerTimeout);
-	// 		if (innerTimeout) clearTimeout(innerTimeout);
-	// 	};
-	// }, []);
+			run();
+		} else {
+			setIsSectionReady(false);
+		}
+	}, [selectedProject]);
 
 	return (
-		<div ref={mainRef} className="pt-52 text-white w-full overflow-hidden flex flex-col items-center justify-start">
+		<div ref={mainRef} className="text-white w-full overflow-hidden flex flex-col items-center justify-start">
 			<div className="fixed top-0 p-4 pointer-events-none w-full">
 				<div className="w-full flex flex-row items-center justify-between mb-auto">
 					<span>ha</span>
 				</div>
 			</div>
 
-			<section className="w-full flex flex-col items-center">
+			<section className="w-full flex flex-col items-center pt-52">
 				<div className="flex flex-col justify-center items-center">
 					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-white text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
 						SEOEONGEUEUN's
@@ -1155,9 +1095,11 @@ export default function Home() {
 					<Gameboy project={selectedProject} />
 				</div>
 			</section>
-			{selectedProject && isGameboyOn && (
-				<section className="project-section full-section font-dunggeunmo w-full h-screen flex flex-col items-center justify-start bg-blue-400 relative">
-					<div className="project-header tracking-widest z-40 text-xl py-8 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
+			{selectedProject && (
+				<section
+					className={`project-section fixed top-0 left-0 z-40 h-full opacity-0 ${isSectionReady ? "animate-section-fade-up" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
+				>
+					<div className="project-header tracking-widest text-xl py-8 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
 						<div className="flex flex-col items-center justify-start">
 							<p>PERSON</p>
 							<p className="text-theme-yellow">X {selectedProject.ppl_count || 1}</p>
@@ -1180,6 +1122,13 @@ export default function Home() {
 							slidesPerView={1}
 							loop={true}
 							autoplay={{delay: 5000, disableOnInteraction: true}}
+							onSwiper={(swiper: SwiperClass) => {
+								if (swiper.initialized) {
+									swiperReadyRef.current?.resolve();
+								} else {
+									swiper.on("init", () => swiperReadyRef.current?.resolve());
+								}
+							}}
 							onSlideChange={(swiper: SwiperClass) => {
 								const activeSlide = swiper.slides[swiper.activeIndex];
 								if (activeSlide?.dataset.id === "special-slide") {
