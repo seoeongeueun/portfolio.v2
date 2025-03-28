@@ -101,10 +101,15 @@
 
 	.towel-wrapper {
 		margin-top: 14rem;
+		transition: opacity 0.2s ease-in-out;
 
 		> svg {
 			position: absolute;
 			inset: 0;
+		}
+
+		&:hover {
+			opacity: 100% !important;
 		}
 	}
 

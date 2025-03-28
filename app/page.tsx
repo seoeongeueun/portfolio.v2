@@ -548,42 +548,30 @@ export default function Home() {
 			markers: true,
 			onUpdate: self => {
 				const progress = self.progress;
+
 				gsap.to(towelsRef.current, {
 					y: -progress * scrollPerTowel * totalTowels,
 					overwrite: true,
 					ease: "none",
 				});
+
+				towels.forEach((towel, i) => {
+					const revealStart = i / totalTowels;
+					const revealEnd = (i + 1) / totalTowels;
+
+					let fadeProgress = (progress - revealStart) / (revealEnd - revealStart);
+					fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
+
+					gsap.to(towel, {
+						autoAlpha: fadeProgress + 0.3,
+						y: 50 - 50 * fadeProgress,
+						overwrite: true,
+						ease: "power2.out",
+						duration: 0.1,
+					});
+				});
 			},
 		});
-
-		// const towelsScrollTween = gsap.to(towelsRef.current, {
-		// 	y: () => {
-		// 		const maxScrollUp = towelsRef.current!.scrollHeight - window.innerHeight;
-		// 		return `-${maxScrollUp}`;
-		// 	},
-		// 	ease: "none",
-		// 	scrollTrigger: {
-		// 		trigger: beachRef.current,
-		// 		start: "top top",
-		// 		end: `+=${totalScrollDistance}`,
-		// 		scrub: true,
-		// 		markers: true,
-		// 	},
-		// });
-
-		// towels.forEach((towel, i) => {
-		// 	gsap.from(towel, {
-		// 		autoAlpha: 0,
-		// 		y: 50,
-		// 		ease: "power1.out",
-		// 		scrollTrigger: {
-		// 			trigger: beachRef.current,
-		// 			start: `top+=${i * scrollPerTowel}`,
-		// 			end: `top+=${(i + 0.5) * scrollPerTowel}`,
-		// 			scrub: true,
-		// 		},
-		// 	});
-		// });
 
 		return () => {
 			ScrollTrigger.getAll().forEach(st => st.kill());
