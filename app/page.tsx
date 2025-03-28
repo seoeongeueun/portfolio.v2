@@ -66,123 +66,123 @@ export default function Home() {
 	const particleSize = 50;
 
 	//해변 div를 canvas로 전환해 pixel 폭발 효과를 적용
-	useEffect(() => {
-		let particles: {
-			x: number;
-			y: number;
-			dx: number;
-			dy: number;
-			r: number;
-			g: number;
-			b: number;
-			a: number;
-		}[] = [];
+	// useEffect(() => {
+	// 	let particles: {
+	// 		x: number;
+	// 		y: number;
+	// 		dx: number;
+	// 		dy: number;
+	// 		r: number;
+	// 		g: number;
+	// 		b: number;
+	// 		a: number;
+	// 	}[] = [];
 
-		const explode = async () => {
-			if (!beachRef.current || !shoreRef.current) return;
+	// 	const explode = async () => {
+	// 		if (!beachRef.current || !shoreRef.current) return;
 
-			const beachCanvas = await html2canvas(shoreRef.current, {
-				backgroundColor: "rgb(255, 215, 151)",
-				scale: 1,
-			});
+	// 		const beachCanvas = await html2canvas(shoreRef.current, {
+	// 			backgroundColor: "rgb(255, 215, 151)",
+	// 			scale: 1,
+	// 		});
 
-			const ctx = beachCanvas.getContext("2d");
-			if (!ctx) return;
-			const {width, height} = beachCanvas;
+	// 		const ctx = beachCanvas.getContext("2d");
+	// 		if (!ctx) return;
+	// 		const {width, height} = beachCanvas;
 
-			const imageData = ctx.getImageData(0, 0, width, height);
-			const {data} = imageData;
+	// 		const imageData = ctx.getImageData(0, 0, width, height);
+	// 		const {data} = imageData;
 
-			// Create a new canvas overlay for the "dust"
-			dustCanvasRef.current = document.createElement("canvas");
-			dustCanvasRef.current.width = width;
-			dustCanvasRef.current.height = height;
-			dustCanvasRef.current.style.position = "fixed";
-			dustCanvasRef.current.style.top = "0";
-			dustCanvasRef.current.style.left = "0";
-			dustCanvasRef.current.style.pointerEvents = "none";
-			dustCanvasRef.current.style.zIndex = "999";
-			shoreRef.current.parentElement?.appendChild(dustCanvasRef.current);
+	// 		// Create a new canvas overlay for the "dust"
+	// 		dustCanvasRef.current = document.createElement("canvas");
+	// 		dustCanvasRef.current.width = width;
+	// 		dustCanvasRef.current.height = height;
+	// 		dustCanvasRef.current.style.position = "fixed";
+	// 		dustCanvasRef.current.style.top = "0";
+	// 		dustCanvasRef.current.style.left = "0";
+	// 		dustCanvasRef.current.style.pointerEvents = "none";
+	// 		dustCanvasRef.current.style.zIndex = "999";
+	// 		shoreRef.current.parentElement?.appendChild(dustCanvasRef.current);
 
-			for (let y = 0; y < height; y += particleSize) {
-				for (let x = 0; x < width; x += particleSize) {
-					const i = (y * width + x) * 4;
-					const [r, g, b, a] = data.slice(i, i + 4);
-					if (a > 0) {
-						particles.push({
-							x,
-							y,
-							dx: (Math.random() - 0.5) * 300,
-							dy: (Math.random() - 1) * 300,
-							r,
-							g,
-							b,
-							a,
-						});
-					}
-				}
-			}
-		};
+	// 		for (let y = 0; y < height; y += particleSize) {
+	// 			for (let x = 0; x < width; x += particleSize) {
+	// 				const i = (y * width + x) * 4;
+	// 				const [r, g, b, a] = data.slice(i, i + 4);
+	// 				if (a > 0) {
+	// 					particles.push({
+	// 						x,
+	// 						y,
+	// 						dx: (Math.random() - 0.5) * 300,
+	// 						dy: (Math.random() - 1) * 300,
+	// 						r,
+	// 						g,
+	// 						b,
+	// 						a,
+	// 					});
+	// 				}
+	// 			}
+	// 		}
+	// 	};
 
-		function drawParticles(progress: number, shoreTop: number) {
-			const dustCtx = dustCanvasRef.current?.getContext("2d");
-			if (!dustCtx || !dustCanvasRef.current || !shoreRef.current) return;
+	// 	function drawParticles(progress: number, shoreTop: number) {
+	// 		const dustCtx = dustCanvasRef.current?.getContext("2d");
+	// 		if (!dustCtx || !dustCanvasRef.current || !shoreRef.current) return;
 
-			const {width, height} = dustCanvasRef.current;
-			dustCtx.clearRect(0, 0, width, height);
+	// 		const {width, height} = dustCanvasRef.current;
+	// 		dustCtx.clearRect(0, 0, width, height);
 
-			particles.forEach(p => {
-				const easedProgress = Math.pow(progress, 0.5); //ease-out을 적용
-				const x = p.x + p.dx * progress;
-				const y = p.y + p.dy * progress + window.scrollY + shoreRef.current!.getBoundingClientRect()?.top || 0;
-				const alpha = (p.a / 255) * progress;
-				if (alpha > 0) {
-					dustCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${easedProgress})`;
-					dustCtx.fillRect(x, y, particleSize, particleSize);
-				}
-			});
-		}
+	// 		particles.forEach(p => {
+	// 			const easedProgress = Math.pow(progress, 0.5); //ease-out을 적용
+	// 			const x = p.x + p.dx * progress;
+	// 			const y = p.y + p.dy * progress + window.scrollY + shoreRef.current!.getBoundingClientRect()?.top || 0;
+	// 			const alpha = (p.a / 255) * progress;
+	// 			if (alpha > 0) {
+	// 				dustCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${easedProgress})`;
+	// 				dustCtx.fillRect(x, y, particleSize, particleSize);
+	// 			}
+	// 		});
+	// 	}
 
-		(async () => {
-			await explode();
-			if (!dustCanvasRef.current || !beachRef.current) return;
+	// 	(async () => {
+	// 		await explode();
+	// 		if (!dustCanvasRef.current || !beachRef.current) return;
 
-			gsap.to(
-				{},
-				{
-					scrollTrigger: {
-						trigger: beachRef.current,
-						start: "top top",
-						end: "bottom bottom",
-						pin: true,
-						scrub: true,
-						onUpdate: self => {
-							const p = self.progress;
-							drawParticles(p);
-							//더스트를 날리면서 기존 DIV를 서서히 투명화화
-							shoreRef.current!.style.opacity = String(1 - p);
-						},
+	// 		gsap.to(
+	// 			{},
+	// 			{
+	// 				scrollTrigger: {
+	// 					trigger: beachRef.current,
+	// 					start: "top top",
+	// 					end: "bottom bottom",
+	// 					pin: true,
+	// 					scrub: true,
+	// 					onUpdate: self => {
+	// 						const p = self.progress;
+	// 						drawParticles(p);
+	// 						//더스트를 날리면서 기존 DIV를 서서히 투명화화
+	// 						shoreRef.current!.style.opacity = String(1 - p);
+	// 					},
 
-						onToggle: self => {
-							// 다시 거의 처음으로 돌아왔다면 더스트를 없애고 원래 DIV를 노출
-							if (!self.isActive && self.progress < 0.01) {
-								dustCanvasRef.current?.remove();
-								dustCanvasRef.current = null;
-								particles = [];
-								shoreRef.current!.style.opacity = "1";
-							}
-						},
-					},
-				}
-			);
-		})();
+	// 					onToggle: self => {
+	// 						// 다시 거의 처음으로 돌아왔다면 더스트를 없애고 원래 DIV를 노출
+	// 						if (!self.isActive && self.progress < 0.01) {
+	// 							dustCanvasRef.current?.remove();
+	// 							dustCanvasRef.current = null;
+	// 							particles = [];
+	// 							shoreRef.current!.style.opacity = "1";
+	// 						}
+	// 					},
+	// 				},
+	// 			}
+	// 		);
+	// 	})();
 
-		return () => {
-			dustCanvasRef.current?.remove();
-			dustCanvasRef.current = null;
-			particles = [];
-		};
-	}, []);
+	// 	return () => {
+	// 		dustCanvasRef.current?.remove();
+	// 		dustCanvasRef.current = null;
+	// 		particles = [];
+	// 	};
+	// }, []);
 
 	//pseudo element의 너비를 계산하는 함수
 	const getPseudoBounds = (element: HTMLElement, pseudo: "::before" | "::after") => {
@@ -449,83 +449,146 @@ export default function Home() {
 	}, [selectedProject]);
 
 	//비치타월 스크롤 루프
+	// useEffect(() => {
+	// 	if (!towelsRef.current || !shoreRef.current) return;
+
+	// 	const container = towelsRef.current;
+	// 	const towels = Array.from(container.querySelectorAll<HTMLDivElement>(".towel-wrapper"));
+	// 	const towelHeight = towels[0]?.offsetHeight || 0;
+	// 	const totalTowels = towels.length;
+	// 	const totalScrollHeight = towelHeight * totalTowels;
+	// 	const marginTop = towelHeight / -2;
+
+	// 	let currentOffset = 0;
+	// 	let prevScrollTop = window.scrollY;
+	// 	let positions = towels.map((_, i) => i * towelHeight);
+
+	// 	const checkShouldContinue = () => {
+	// 		//카드 2개분의 자리가 있다면 계속 루프
+	// 		const rect = shoreRef.current!.getBoundingClientRect();
+	// 		const shouldContinue = rect.bottom > towelHeight * 2 && rect.top < window.innerHeight;
+	// 		if (!shouldContinue) setIsReadyToExplode(true);
+	// 		//setIsReadyToExplode(!shouldContinue);
+	// 		return shouldContinue;
+	// 	};
+
+	// 	const updateHighlight = () => {
+	// 		let closestCard = null;
+	// 		let closestDistance = Infinity;
+
+	// 		towels.forEach(towel => {
+	// 			const rect = towel.getBoundingClientRect();
+	// 			const distanceToTop = Math.abs(rect.top);
+
+	// 			if (distanceToTop < closestDistance) {
+	// 				closestDistance = distanceToTop;
+	// 				closestCard = towel;
+	// 			}
+
+	// 			towel.classList.remove("highlighted");
+	// 		});
+
+	// 		if (closestCard) {
+	// 			(closestCard as HTMLDivElement).classList.add("highlighted");
+	// 		}
+	// 	};
+
+	// 	const updatePositions = (deltaY: number) => {
+	// 		currentOffset += deltaY;
+	// 		if (checkShouldContinue()) {
+	// 			towels.forEach((towel, index) => {
+	// 				positions[index] += deltaY;
+
+	// 				if (positions[index] <= -(towelHeight - towelHeight / 2)) {
+	// 					positions[index] += (towelHeight + marginTop) * (totalTowels * totalTowels);
+	// 				}
+
+	// 				if (positions[index] >= totalScrollHeight) {
+	// 					positions[index] -= (towelHeight + marginTop) * (totalTowels * totalTowels);
+	// 				}
+	// 				towel.style.setProperty("--y-distance", positions[index] + "px");
+	// 			});
+	// 		}
+	// 		updateHighlight();
+	// 	};
+
+	// 	const handleScroll = () => {
+	// 		const scrollTop = window.scrollY;
+	// 		const deltaY = scrollTop - prevScrollTop;
+	// 		prevScrollTop = scrollTop;
+
+	// 		updatePositions(-deltaY);
+	// 	};
+
+	// 	window.addEventListener("scroll", handleScroll);
+
+	// 	return () => {
+	// 		window.removeEventListener("scroll", handleScroll);
+	// 	};
+	// }, []);
 	useEffect(() => {
-		if (!towelsRef.current || !shoreRef.current) return;
+		if (!beachRef.current || !shoreRef.current || !towelsRef.current) return;
 
-		const container = towelsRef.current;
-		const towels = Array.from(container.querySelectorAll<HTMLDivElement>(".towel-wrapper"));
-		const towelHeight = towels[0]?.offsetHeight || 0;
-		const totalTowels = towels.length;
-		const totalScrollHeight = towelHeight * totalTowels;
-		const marginTop = towelHeight / -2;
+		const towels = Array.from(towelsRef.current!.querySelectorAll<HTMLElement>(".towel-wrapper"));
+		if (towels.length === 0) return;
 
-		let currentOffset = 0;
-		let prevScrollTop = window.scrollY;
-		let positions = towels.map((_, i) => i * towelHeight);
+		const totalTowels = Object.keys(CareerData).length;
+		const towelsHeight = towels[0].offsetHeight;
+		const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
+		const scrollPerTowel = towelsHeight + gap;
+		const totalScrollDistance = scrollPerTowel * totalTowels;
 
-		const checkShouldContinue = () => {
-			//카드 2개분의 자리가 있다면 계속 루프
-			const rect = shoreRef.current!.getBoundingClientRect();
-			const shouldContinue = rect.bottom > towelHeight * 2 && rect.top < window.innerHeight;
-			if (!shouldContinue) setIsReadyToExplode(true);
-			//setIsReadyToExplode(!shouldContinue);
-			return shouldContinue;
-		};
-
-		const updateHighlight = () => {
-			let closestCard = null;
-			let closestDistance = Infinity;
-
-			towels.forEach(towel => {
-				const rect = towel.getBoundingClientRect();
-				const distanceToTop = Math.abs(rect.top);
-
-				if (distanceToTop < closestDistance) {
-					closestDistance = distanceToTop;
-					closestCard = towel;
-				}
-
-				towel.classList.remove("highlighted");
-			});
-
-			if (closestCard) {
-				(closestCard as HTMLDivElement).classList.add("highlighted");
-			}
-		};
-
-		const updatePositions = (deltaY: number) => {
-			currentOffset += deltaY;
-			if (checkShouldContinue()) {
-				towels.forEach((towel, index) => {
-					positions[index] += deltaY;
-
-					if (positions[index] <= -(towelHeight - towelHeight / 2)) {
-						positions[index] += (towelHeight + marginTop) * (totalTowels * totalTowels);
-					}
-
-					if (positions[index] >= totalScrollHeight) {
-						positions[index] -= (towelHeight + marginTop) * (totalTowels * totalTowels);
-					}
-					towel.style.setProperty("--y-distance", positions[index] + "px");
+		ScrollTrigger.create({
+			trigger: beachRef.current,
+			start: "top top",
+			end: `+=${totalScrollDistance}`,
+			pin: true,
+			pinSpacing: true,
+			scrub: true,
+			markers: true,
+			onUpdate: self => {
+				const progress = self.progress;
+				gsap.to(towelsRef.current, {
+					y: -progress * scrollPerTowel * totalTowels,
+					overwrite: true,
+					ease: "none",
 				});
-			}
-			updateHighlight();
-		};
+			},
+		});
 
-		const handleScroll = () => {
-			const scrollTop = window.scrollY;
-			const deltaY = scrollTop - prevScrollTop;
-			prevScrollTop = scrollTop;
+		// const towelsScrollTween = gsap.to(towelsRef.current, {
+		// 	y: () => {
+		// 		const maxScrollUp = towelsRef.current!.scrollHeight - window.innerHeight;
+		// 		return `-${maxScrollUp}`;
+		// 	},
+		// 	ease: "none",
+		// 	scrollTrigger: {
+		// 		trigger: beachRef.current,
+		// 		start: "top top",
+		// 		end: `+=${totalScrollDistance}`,
+		// 		scrub: true,
+		// 		markers: true,
+		// 	},
+		// });
 
-			updatePositions(-deltaY);
-		};
-
-		window.addEventListener("scroll", handleScroll);
+		// towels.forEach((towel, i) => {
+		// 	gsap.from(towel, {
+		// 		autoAlpha: 0,
+		// 		y: 50,
+		// 		ease: "power1.out",
+		// 		scrollTrigger: {
+		// 			trigger: beachRef.current,
+		// 			start: `top+=${i * scrollPerTowel}`,
+		// 			end: `top+=${(i + 0.5) * scrollPerTowel}`,
+		// 			scrub: true,
+		// 		},
+		// 	});
+		// });
 
 		return () => {
-			window.removeEventListener("scroll", handleScroll);
+			ScrollTrigger.getAll().forEach(st => st.kill());
 		};
-	}, []);
+	}, [CareerData]);
 
 	//호버 중인 비치타올에 turbulence 지정
 	useEffect(() => {
@@ -970,16 +1033,13 @@ export default function Home() {
 	};
 
 	return (
-		<div
-			ref={mainRef}
-			className="main-page snap-y snap-proximity text-white h-full w-full overflow-x-hidden overflow-y-auto flex flex-col items-center justify-start"
-		>
+		<div ref={mainRef} className="main-page text-white w-full flex flex-col items-center justify-start">
 			<div className="fixed top-0 p-4 pointer-events-none w-full">
 				<div className="w-full flex flex-row items-center justify-between mb-auto">
 					<span>ha</span>
 				</div>
 			</div>
-			<section className="w-full h-fit flex flex-col items-center pt-52">
+			<section className="w-full flex flex-col items-center pt-52">
 				<div className="flex flex-col justify-center items-center">
 					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-white text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
 						SEOEONGEUEUN's
@@ -1039,7 +1099,7 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
-			<div ref={beachRef} className="w-full h-[200vh] beach-container relative overflow-visible">
+			<div ref={beachRef} className="w-full beach-container relative">
 				<svg width="0" height="0">
 					<defs>
 						<filter id="shore">
@@ -1050,8 +1110,8 @@ export default function Home() {
 				</svg>
 				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
-				<section ref={shoreRef} className="pt-24 flex flex-row w-full h-fit justify-between items-center shore relative z-20">
-					<div className="fade-up-section flex flex-col justify-start items-start mb-auto">
+				<section ref={shoreRef} className="flex flex-row w-full shore relative z-20">
+					<div className="w-1/2 flex flex-col justify-start items-start">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
 							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
@@ -1091,8 +1151,7 @@ export default function Home() {
 						</div>
 						<p className="description text-m max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 					</div>
-
-					<div ref={towelsRef} className="towels-container pt-32 spread">
+					<div ref={towelsRef} className="towels-container spread w-1/2">
 						{CareerData &&
 							Object.entries(CareerData).map(([k, v], i) => (
 								<div className="towel-wrapper">
@@ -1126,40 +1185,32 @@ export default function Home() {
 					</div>
 				</section>
 			</div>
-			<div className="project-list-page h-[200vh] w-full">
-				<section className="w-full full-section min-h-screen text-center font-dunggeunmo projects-section">
-					<p className="subtitle">PROJECTS</p>
-					<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
-						<div className="filter-type flex flex-row items-center gap-8">
-							<input
-								type="checkbox"
-								id="filter-personal"
-								name="personal"
-								defaultChecked
-								onChange={handleProjectsFilter}
-								className="cursor-pointer"
-							/>
-							<label>{textFile["002"]}</label>
-						</div>
-						<div className="filter-type flex flex-row items-center gap-8">
-							<input type="checkbox" id="filter-work" name="work" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
-							<label>{textFile["003"]}</label>
-						</div>
+
+			<section className="w-full full-section min-h-screen text-center font-dunggeunmo projects-section">
+				<p className="subtitle">PROJECTS</p>
+				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
+					<div className="filter-type flex flex-row items-center gap-8">
+						<input type="checkbox" id="filter-personal" name="personal" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
+						<label>{textFile["002"]}</label>
 					</div>
-					<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full flex overflow-x-auto overflow-y-hidden min-h-screen md:min-h-[100vh]">
-						<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-8 md:gap-24 md:py-40">
-							{Object.entries(projects).map(([k, v]) => (
-								<div key={v.title} data-project={k} className={`card card-${k} w-fit`}>
-									<Cartridge project={v} />
-								</div>
-							))}
-						</div>
+					<div className="filter-type flex flex-row items-center gap-8">
+						<input type="checkbox" id="filter-work" name="work" defaultChecked onChange={handleProjectsFilter} className="cursor-pointer" />
+						<label>{textFile["003"]}</label>
 					</div>
-					<div className={`relative -mt-32 gameboy-section ${isGameboyOn && "power-on"} flex flex-col items-center justify-center`}>
-						<Gameboy project={selectedProject} />
+				</div>
+				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full flex overflow-x-auto overflow-y-hidden min-h-screen md:min-h-[100vh]">
+					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-8 md:gap-24 md:py-40">
+						{Object.entries(projects).map(([k, v]) => (
+							<div key={v.title} data-project={k} className={`card card-${k} w-fit`}>
+								<Cartridge project={v} />
+							</div>
+						))}
 					</div>
-				</section>
-			</div>
+				</div>
+				<div className={`relative -mt-32 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} flex flex-col items-center justify-center`}>
+					<Gameboy project={selectedProject} />
+				</div>
+			</section>
 			{selectedProject && (
 				<section
 					ref={projectDetailRef}

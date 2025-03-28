@@ -90,10 +90,8 @@
 }
 
 .towels-container {
-	position: relative;
-	overflow: visible;
-	height: 100%;
-	will-change: transform;
+	display: flex;
+	flex-direction: column;
 
 	--towel-color: var(--theme-orange);
 	--towel-color-dark: rgb(230, 165, 91);
@@ -102,8 +100,7 @@
 	--tag-color: rgb(253, 130, 30);
 
 	.towel-wrapper {
-		transform: translateY(var(--y-distance));
-		transition: transform 0.1s linear;
+		margin-top: 14rem;
 
 		> svg {
 			position: absolute;
@@ -123,15 +120,11 @@
 		transition:
 			transform 0.5s ease-out,
 			right 0.3s ease-in-out 0.2s;
-		height: 24rem;
-		will-change: transform;
-		margin-top: -12rem;
+		min-height: 24rem;
 		position: relative;
-		right: 0;
 		box-shadow:
 			0px 2px 0px 0px var(--towel-color-dark),
 			0px 3px 10px 0px rgba(43, 43, 43, 0.2);
-		overflow: hidden;
 		background-color: rgb(192, 192, 192);
 
 		transition:
@@ -154,7 +147,9 @@
 		li,
 		span {
 			color: white;
-			text-shadow: 1px 1px 0px var(--tag-color), -1px -1px 0px var(--tag-color);
+			text-shadow:
+				1px 1px 0px var(--tag-color),
+				-1px -1px 0px var(--tag-color);
 			font-size: 1.4rem;
 		}
 
@@ -182,7 +177,9 @@
 		.title {
 			font-size: 2.3rem;
 			color: var(--tag-color);
-			text-shadow: 1px 1px 0px white, -1px -1px 0px white;
+			text-shadow:
+				1px 1px 0px white,
+				-1px -1px 0px white;
 		}
 
 		.tag {
@@ -628,8 +625,7 @@
 }
 .beach-container {
 	//background-color: var(--theme-sand);
-	background: linear-gradient(179deg, var(--theme-sand-dark) 0%, var(--theme-sand) 20%, var(--theme-sand) 100%);
-	position: relative;
+	background: linear-gradient(179deg, var(--theme-sand-dark) 0%, var(--theme-sand) 13%, var(--theme-sand) 100%);
 }
 //그레인 base 64
 .grain-overlay {
