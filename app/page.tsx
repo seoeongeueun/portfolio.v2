@@ -9,7 +9,7 @@ import ProjectsData from "./data/projects.json" assert {type: "json"};
 import CareerData from "./data/careers.json" assert {type: "json"};
 import "./styles/global.scss";
 import "./styles/gsap.scss";
-import {stacks, PARTICLE_SIZE, AMPLIFY_BY, BORDER_END, FILL_END, MOVE_START} from "./lib/constants";
+import {stacks, PARTICLE_SIZE, AMPLIFY_BY, BORDER_END, FILL_END, DUST_TIMING} from "./lib/constants";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
@@ -389,7 +389,7 @@ export default function Home() {
 		const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
 		const scrollPerTowel = towelsHeight + gap;
 		const totalTowelDistance = scrollPerTowel * totalTowels;
-		const totalScrollDistance = totalTowelDistance * AMPLIFY_BY;
+		const totalScrollDistance = totalTowelDistance;
 
 		let particles: any[] = [];
 		let dustCtx: CanvasRenderingContext2D | null = null;
@@ -397,6 +397,15 @@ export default function Home() {
 		let dustReady = false;
 		let dustRemoved = false;
 		let dustTriggered = false;
+		let currentDustProgress = 0;
+		let smoothedDustProgress = 0;
+		let rafId: number;
+
+		function animateDust() {
+			rafId = requestAnimationFrame(animateDust);
+			smoothedDustProgress += (currentDustProgress - smoothedDustProgress) * 0.05;
+			if (dustReady) drawDust(smoothedDustProgress);
+		}
 
 		const createDust = async (currentY: number) => {
 			if (!beachRef.current) return;
@@ -425,6 +434,7 @@ export default function Home() {
 			dustCanvas.style.width = `${beachRef.current.offsetWidth}px`;
 			dustCanvas.style.height = `${beachRef.current.offsetHeight}px`;
 			dustCanvas.style.zIndex = "99";
+			dustCanvas.style.pointerEvents = "none";
 			beachRef.current.parentElement!.insertBefore(dustCanvas, beachRef.current);
 
 			dustCtx = dustCanvas.getContext("2d");
@@ -441,7 +451,7 @@ export default function Home() {
 							x,
 							y,
 							dx: (Math.random() - 0.5) * 300,
-							dy: (Math.random() - 1) * 300,
+							dy: (Math.random() - 1) * 500,
 							r,
 							g,
 							b,
@@ -459,19 +469,11 @@ export default function Home() {
 		const drawDust = (progress: number) => {
 			if (!dustCtx || !dustCanvas) return;
 
-			const width = dustCanvas.width;
-			const height = dustCanvas.height;
+			const {width, height} = dustCanvas;
 			dustCtx.clearRect(0, 0, width, height);
-
-			const dustTiming = 0.5;
-			const dustProgress = gsap.utils.clamp(0, 1, (progress - dustTiming) * AMPLIFY_BY);
-
+			const dustProgress = gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY);
 			//color를 칠하는 단계가 마무리 되었으면 원래 beachref div를 투명 처리
-			if (dustProgress >= FILL_END) {
-				beachRef.current!.style.opacity = "0";
-			} else {
-				beachRef.current!.style.opacity = "1";
-			}
+			beachRef.current!.style.opacity = dustProgress >= FILL_END ? "0" : "1";
 
 			particles.forEach(p => {
 				const localProgress = gsap.utils.clamp(0, 1, (dustProgress - p.delay) / (1 - p.delay));
@@ -480,7 +482,6 @@ export default function Home() {
 				//각자 단계 지속시간 const 값으로 진행도를 계산
 				const fillStrength = gsap.utils.clamp(0, 1, (localProgress - BORDER_END) / (FILL_END - BORDER_END));
 				const moveStrength = gsap.utils.clamp(0, 1, (localProgress - FILL_END) / (1 - FILL_END));
-
 				const x = p.x + p.dx * moveStrength;
 				const y = p.y + p.dy * moveStrength;
 
@@ -507,15 +508,13 @@ export default function Home() {
 			start: "top top",
 			end: `+=${totalScrollDistance}`,
 			pin: true,
-			pinSpacing: true,
+			pinSpacing: false,
 			scrub: true,
 			markers: true,
 			onUpdate: self => {
 				const progress = self.progress;
-				// progress를 towel과 dust가 반씩 나눠갖음
-				const dustTiming = 0.5;
 				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
-				const dustProgress = gsap.utils.clamp(0, 1, (progress - dustTiming) * AMPLIFY_BY);
+				currentDustProgress = gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY);
 
 				// towel 움직임
 				gsap.to(towelsRef.current, {
@@ -540,7 +539,7 @@ export default function Home() {
 				});
 
 				// dust 캔버스 생성 예약 (부하 줄이기 위해 setTimeout)
-				if (progress >= dustTiming && !dustReady && !dustTriggered) {
+				if (progress >= DUST_TIMING && !dustReady && !dustTriggered) {
 					dustTriggered = true;
 
 					requestAnimationFrame(() => {
@@ -551,24 +550,17 @@ export default function Home() {
 					});
 				}
 
-				if (dustReady) {
-					drawDust(dustProgress);
-					//실제 진행도보다 빠르게 투명화
-					//beachRef.current!.style.opacity = `${1 - Math.pow(dustProgress, 0.3)}`;
-
-					// scroll up 해서 dust 완전히 복원됐을 때 제거
-					if (dustProgress === 0 && !dustRemoved) {
-						dustCanvas?.remove();
-						dustCanvas = null;
-						dustCtx = null;
-						dustReady = false;
-						dustRemoved = true;
-						particles = [];
-						towelsRef.current!.style.transform = "";
-					}
+				if (smoothedDustProgress === 0 && !dustRemoved) {
+					dustCanvas?.remove();
+					dustCanvas = null;
+					dustCtx = null;
+					dustReady = false;
+					dustRemoved = true;
+					particles = [];
+					towelsRef.current!.style.transform = "";
 				}
 
-				if (progress < dustTiming && dustTriggered) {
+				if (progress < DUST_TIMING && dustTriggered) {
 					dustTriggered = false;
 				}
 			},
@@ -585,6 +577,8 @@ export default function Home() {
 			},
 		});
 
+		rafId = requestAnimationFrame(animateDust);
+
 		return () => {
 			ScrollTrigger.getAll().forEach(st => st.kill());
 			dustCanvas?.remove();
@@ -594,6 +588,7 @@ export default function Home() {
 			dustRemoved = false;
 			dustTriggered = false;
 			particles = [];
+			cancelAnimationFrame(rafId);
 		};
 	}, [CareerData]);
 

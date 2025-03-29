@@ -43,7 +43,8 @@ export const stacks = {
 };
 
 export const PARTICLE_SIZE = 50; //dust particle 크기
-export const AMPLIFY_BY = 2; // dust화 속도
 export const BORDER_END = 0.05; // 0.0 ~ 0.05 : border만
 export const FILL_END = 0.4; // 0.05 ~ 0.4 : fill 진행
-export const MOVE_START = FILL_END; // 0.4 ~ 1.0 : 이동
+export const MOVE_END = 1.2; // 0.4 ~ 1.0 : 이동
+export const DUST_TIMING = 0.5; //scrollTrigger의 몇 퍼센트에서 dust화를 진행할건지
+export const AMPLIFY_BY = 1 / (1 - DUST_TIMING); // dust화 속도
