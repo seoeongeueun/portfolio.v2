@@ -630,6 +630,7 @@
 }
 .beach-container {
 	//background-color: var(--theme-sand);
+	transition: opacity 0.5s ease-in-out 0.2s;
 	background: linear-gradient(179deg, var(--theme-sand-dark) 0%, var(--theme-sand) 13%, var(--theme-sand) 100%);
 }
 //그레인 base 64

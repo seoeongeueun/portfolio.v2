@@ -171,3 +171,7 @@ section.full-section {
 .fade-left-section {
 	opacity: 0;
 }
+
+/* canvas {
+	transition: opacity 5s ease-in-out;
+} */

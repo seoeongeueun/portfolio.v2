@@ -9,7 +9,7 @@ import ProjectsData from "./data/projects.json" assert {type: "json"};
 import CareerData from "./data/careers.json" assert {type: "json"};
 import "./styles/global.scss";
 import "./styles/gsap.scss";
-import {stacks, PARTICLE_SIZE, AMPLIFY_BY} from "./lib/constants";
+import {stacks, PARTICLE_SIZE, AMPLIFY_BY, BORDER_END, FILL_END, MOVE_START} from "./lib/constants";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
@@ -377,248 +377,7 @@ export default function Home() {
 		};
 	}, [selectedProject]);
 
-	//해변 div를 고정하고 비치타월 페이드인 스크롤
-	// useEffect(() => {
-	// 	if (!beachRef.current || !shoreRef.current || !towelsRef.current) return;
-
-	// 	const towels = Array.from(towelsRef.current!.querySelectorAll<HTMLElement>(".towel-wrapper"));
-	// 	if (towels.length === 0) return;
-
-	// 	const totalTowels = Object.keys(CareerData).length;
-	// 	const towelsHeight = towels[0].offsetHeight;
-	// 	const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
-	// 	const scrollPerTowel = towelsHeight + gap;
-	// 	const totalScrollDistance = scrollPerTowel * totalTowels;
-	// 	const amplify = 2; //dust 효과를 위한 자리 확보
-
-	// 	ScrollTrigger.create({
-	// 		trigger: beachRef.current,
-	// 		start: "top top",
-	// 		end: `+=${totalScrollDistance * amplify}`,
-	// 		pin: true,
-	// 		pinSpacing: true,
-	// 		scrub: true,
-	// 		markers: true,
-	// 		onUpdate: self => {
-	// 			const progress = self.progress;
-
-	// 			const towelPhaseProgress = gsap.utils.clamp(0, 1, progress * amplify);
-
-	// 			gsap.to(towelsRef.current, {
-	// 				y: -towelPhaseProgress * scrollPerTowel * totalTowels,
-	// 				overwrite: true,
-	// 				ease: "none",
-	// 			});
-
-	// 			towels.forEach((towel, i) => {
-	// 				const revealStart = i / totalTowels;
-	// 				const revealEnd = (i + 1) / totalTowels;
-
-	// 				let fadeProgress = (towelPhaseProgress - revealStart) / (revealEnd - revealStart);
-	// 				fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
-
-	// 				gsap.to(towel, {
-	// 					autoAlpha: fadeProgress + 0.3,
-	// 					y: 50 - 50 * fadeProgress,
-	// 					overwrite: true,
-	// 					ease: "power2.out",
-	// 					duration: 0.1,
-	// 				});
-	// 			});
-	// 		},
-	// 	});
-
-	// 	return () => {
-	// 		ScrollTrigger.getAll().forEach(st => st.kill());
-	// 	};
-	// }, [CareerData]);
-
-	// useEffect(() => {
-	// 	if (!beachRef.current || !shoreRef.current || !towelsRef.current) return;
-
-	// 	const towels = Array.from(towelsRef.current.querySelectorAll<HTMLElement>(".towel-wrapper"));
-	// 	if (towels.length === 0) return;
-
-	// 	const totalTowels = Object.keys(CareerData).length;
-	// 	const towelsHeight = towels[0].offsetHeight;
-	// 	const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
-	// 	const scrollPerTowel = towelsHeight + gap;
-	// 	const totalTowelDistance = scrollPerTowel * totalTowels;
-
-	// 	const totalScrollDistance = totalTowelDistance * 2;
-
-	// 	let particles: any[] = [];
-	// 	let dustCtx: CanvasRenderingContext2D | null = null;
-	// 	let dustCanvas: HTMLCanvasElement | null = null;
-	// 	let dustReady = false;
-	// 	let dustRemoved = false;
-
-	// 	const createDust = async () => {
-	// 		//towel이 이동한 값을 가져와서 반영
-	// 		const currentY = gsap.getProperty(towelsRef.current!, "y") as number;
-	// 		// 현재 transform 직접 반영해서 정확한 위치로 캡처
-	// 		towelsRef.current!.style.transform = `translateY(${currentY}px)`;
-
-	// 		const canvas = await html2canvas(beachRef.current!, {
-	// 			backgroundColor: null,
-	// 			scale: 1,
-	// 		});
-
-	// 		const srcCtx = canvas.getContext("2d");
-	// 		if (!srcCtx) return;
-
-	// 		const {width, height} = canvas;
-	// 		const data = srcCtx.getImageData(0, 0, width, height).data;
-
-	// 		const size = 60;
-	// 		particles = [];
-
-	// 		dustCanvas = document.createElement("canvas");
-	// 		dustCanvas.width = width;
-	// 		dustCanvas.height = height;
-	// 		dustCanvas.style.position = "absolute";
-	// 		dustCanvas.style.left = "0";
-	// 		dustCanvas.style.top = "0";
-	// 		dustCanvas.style.zIndex = "99";
-	// 		dustCanvas.style.pointerEvents = "none";
-	// 		beachRef.current!.appendChild(dustCanvas);
-
-	// 		dustCtx = dustCanvas.getContext("2d");
-
-	// 		for (let y = 0; y < height; y += size) {
-	// 			for (let x = 0; x < width; x += size) {
-	// 				const i = (y * width + x) * 4;
-	// 				const r = data[i];
-	// 				const g = data[i + 1];
-	// 				const b = data[i + 2];
-	// 				const a = data[i + 3];
-	// 				if (a > 0) {
-	// 					particles.push({
-	// 						x,
-	// 						y,
-	// 						dx: (Math.random() - 0.5) * 300,
-	// 						dy: (Math.random() - 1) * 300,
-	// 						r,
-	// 						g,
-	// 						b,
-	// 						a: a / 255,
-	// 					});
-	// 				}
-	// 			}
-	// 		}
-	// 		dustReady = true;
-	// 		dustCanvas.style.display = "block";
-	// 	};
-
-	// 	const drawDust = (progress: number) => {
-	// 		if (!dustCtx || !dustCanvas) return;
-
-	// 		const width = dustCanvas.width;
-	// 		const height = dustCanvas.height;
-	// 		dustCtx.clearRect(0, 0, width, height);
-
-	// 		particles.forEach(p => {
-	// 			const eased = Math.pow(progress, 0.6);
-	// 			const x = p.x + p.dx * eased;
-	// 			const y = p.y + p.dy * eased;
-	// 			const alpha = p.a * (1 - eased);
-	// 			dustCtx!.fillStyle = `rgba(${p.r},${p.g},${p.b},${alpha})`;
-	// 			dustCtx!.fillRect(x, y, 60, 60);
-	// 		});
-	// 	};
-
-	// 	ScrollTrigger.create({
-	// 		trigger: beachRef.current,
-	// 		start: "top top",
-	// 		end: `+=${totalScrollDistance}`,
-	// 		pin: true,
-	// 		pinSpacing: true,
-	// 		scrub: true,
-	// 		markers: true,
-	// 		onUpdate: self => {
-	// 			const progress = self.progress;
-
-	// 			const towelProgress = gsap.utils.clamp(0, 1, progress * 2);
-
-	// 			gsap.to(towelsRef.current, {
-	// 				y: -towelProgress * scrollPerTowel * totalTowels,
-	// 				overwrite: true,
-	// 				ease: "none",
-	// 			});
-
-	// 			towels.forEach((towel, i) => {
-	// 				const revealStart = i / totalTowels;
-	// 				const revealEnd = (i + 1) / totalTowels;
-
-	// 				let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
-	// 				fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
-
-	// 				gsap.to(towel, {
-	// 					autoAlpha: fadeProgress + 0.3,
-	// 					y: 50 - 50 * fadeProgress,
-	// 					overwrite: true,
-	// 					ease: "power2.out",
-	// 					duration: 0.1,
-	// 				});
-	// 			});
-
-	// 			// 전체 scrolldistance 중 반절 이후에 dust 폭발 실행
-	// 			// if (progress >= 0.5 && !dustReady) {
-	// 			// 	createDust();
-	// 			// }
-
-	// 			// if (progress >= 0.5 && dustReady) {
-	// 			// 	const dustProgress = gsap.utils.clamp(0, 1, (progress - 0.5) * 2);
-	// 			// 	drawDust(dustProgress);
-	// 			// 	shoreRef.current!.style.opacity = `${1 - dustProgress}`;
-	// 			// } else {
-	// 			// 	if (dustReady) {
-	// 			// 		drawDust(0);
-	// 			// 		dustCanvas!.style.display = "none";
-	// 			// 	}
-	// 			// 	shoreRef.current!.style.opacity = "1";
-	// 			// }
-	// 			if (progress >= 0.5 && !dustReady) {
-	// 				// 최초 캔버스 생성
-	// 				const currentY = gsap.getProperty(towelsRef.current!, "y") as number;
-	// 				towelsRef.current!.style.transform = `translateY(${currentY}px)`;
-	// 				createDust();
-	// 				dustRemoved = false;
-	// 			}
-
-	// 			if (dustReady) {
-	// 				const dustProgress = gsap.utils.clamp(0, 1, (progress - 0.5) * 2);
-	// 				drawDust(dustProgress);
-	// 				shoreRef.current!.style.opacity = `${1 - Math.pow(Math.abs(dustProgress), 0.7)}`;
-	// 			}
-
-	// 			if (dustReady && progress < 0.5 && !dustRemoved) {
-	// 				dustCanvas?.remove();
-	// 				dustCanvas = null;
-	// 				dustCtx = null;
-	// 				particles = [];
-	// 				dustReady = false;
-	// 				dustRemoved = true;
-	// 				towelsRef.current!.style.transform = ""; // transform 복원
-	// 			}
-	// 		},
-
-	// 		onLeaveBack: () => {
-	// 			beachRef.current!.style.opacity = "1";
-	// 			dustCanvas?.remove();
-	// 			dustCanvas = null;
-	// 			particles = [];
-	// 		},
-	// 	});
-
-	// 	return () => {
-	// 		ScrollTrigger.getAll().forEach(st => st.kill());
-	// 		dustCanvas?.remove();
-	// 		dustCanvas = null;
-	// 		particles = [];
-	// 	};
-	// }, [CareerData]);
-
+	//해변 div를 고정하고 비치타월 페이드인 스크롤 + 해변 픽셀화
 	useEffect(() => {
 		if (!beachRef.current || !shoreRef.current || !towelsRef.current) return;
 
@@ -649,8 +408,6 @@ export default function Home() {
 				scale: 1,
 			});
 
-			//towelsRef.current!.style.transform = ""; // 원복
-
 			const srcCtx = canvas.getContext("2d");
 			if (!srcCtx) return;
 
@@ -668,8 +425,6 @@ export default function Home() {
 			dustCanvas.style.width = `${beachRef.current.offsetWidth}px`;
 			dustCanvas.style.height = `${beachRef.current.offsetHeight}px`;
 			dustCanvas.style.zIndex = "99";
-			//dustCanvas.style.pointerEvents = "none";
-			//beachRef.current!.appendChild(dustCanvas);
 			beachRef.current.parentElement!.insertBefore(dustCanvas, beachRef.current);
 
 			dustCtx = dustCanvas.getContext("2d");
@@ -691,6 +446,7 @@ export default function Home() {
 							g,
 							b,
 							a: a / 255,
+							delay: Math.random() * 0.2,
 						});
 					}
 				}
@@ -702,19 +458,46 @@ export default function Home() {
 
 		const drawDust = (progress: number) => {
 			if (!dustCtx || !dustCanvas) return;
+
 			const width = dustCanvas.width;
 			const height = dustCanvas.height;
 			dustCtx.clearRect(0, 0, width, height);
 
+			const dustTiming = 0.5;
+			const dustProgress = gsap.utils.clamp(0, 1, (progress - dustTiming) * AMPLIFY_BY);
+
+			//color를 칠하는 단계가 마무리 되었으면 원래 beachref div를 투명 처리
+			if (dustProgress >= FILL_END) {
+				beachRef.current!.style.opacity = "0";
+			} else {
+				beachRef.current!.style.opacity = "1";
+			}
+
 			particles.forEach(p => {
-				const eased = Math.pow(progress, 0.6);
-				const x = p.x + p.dx * eased;
-				const y = p.y + p.dy * eased;
-				const alpha = p.a * (1 - eased) * 1.7;
-				dustCtx!.fillStyle = `rgba(${p.r},${p.g},${p.b},${alpha})`;
-				dustCtx!.lineWidth = 1;
-				dustCtx!.fillRect(x, y, PARTICLE_SIZE, PARTICLE_SIZE);
-				dustCtx!.strokeStyle = `rgba(0,0,0,${alpha / 5})`;
+				const localProgress = gsap.utils.clamp(0, 1, (dustProgress - p.delay) / (1 - p.delay));
+				const alpha = p.a * 1.7;
+
+				//각자 단계 지속시간 const 값으로 진행도를 계산
+				const fillStrength = gsap.utils.clamp(0, 1, (localProgress - BORDER_END) / (FILL_END - BORDER_END));
+				const moveStrength = gsap.utils.clamp(0, 1, (localProgress - FILL_END) / (1 - FILL_END));
+
+				const x = p.x + p.dx * moveStrength;
+				const y = p.y + p.dy * moveStrength;
+
+				//채워진 정도에 따라 alpha 조절
+				const fadeAlpha = alpha * (1 - moveStrength);
+				const fillAlpha = alpha * fillStrength * (1 - moveStrength);
+
+				if (fillStrength > 0) {
+					dustCtx!.fillStyle = `rgba(${p.r},${p.g},${p.b},${fillAlpha})`;
+					dustCtx!.fillRect(x, y, PARTICLE_SIZE, PARTICLE_SIZE);
+				}
+
+				const borderAlphaStrength = gsap.utils.clamp(0, 1, localProgress / BORDER_END);
+				const borderAlpha = fadeAlpha * borderAlphaStrength * 0.3;
+
+				// border는 항상 그리되 이동된 위치에만
+				dustCtx!.strokeStyle = `rgba(0,0,0,${borderAlpha})`;
 				dustCtx!.strokeRect(x, y, PARTICLE_SIZE, PARTICLE_SIZE);
 			});
 		};
@@ -761,9 +544,8 @@ export default function Home() {
 					dustTriggered = true;
 
 					requestAnimationFrame(() => {
-						console.log(towelProgress);
-						const targetY = -towelProgress * scrollPerTowel * totalTowels;
 						setTimeout(() => {
+							const targetY = -towelProgress * scrollPerTowel * totalTowels;
 							createDust(targetY);
 						}, 320);
 					});
@@ -772,7 +554,7 @@ export default function Home() {
 				if (dustReady) {
 					drawDust(dustProgress);
 					//실제 진행도보다 빠르게 투명화
-					beachRef.current!.style.opacity = `${1 - Math.pow(dustProgress, 0.3)}`;
+					//beachRef.current!.style.opacity = `${1 - Math.pow(dustProgress, 0.3)}`;
 
 					// scroll up 해서 dust 완전히 복원됐을 때 제거
 					if (dustProgress === 0 && !dustRemoved) {
