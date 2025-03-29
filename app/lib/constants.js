@@ -41,3 +41,6 @@ export const stacks = {
 	ducky: "ducky",
 	laptop: "laptop",
 };
+
+export const PARTICLE_SIZE = 50; //dust particle 크기
+export const AMPLIFY_BY = 2; // dust화 속도

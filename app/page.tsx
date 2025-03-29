@@ -9,7 +9,7 @@ import ProjectsData from "./data/projects.json" assert {type: "json"};
 import CareerData from "./data/careers.json" assert {type: "json"};
 import "./styles/global.scss";
 import "./styles/gsap.scss";
-import {stacks} from "./lib/constants";
+import {stacks, PARTICLE_SIZE, AMPLIFY_BY} from "./lib/constants";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
@@ -21,7 +21,6 @@ import {Swiper as SwiperClass} from "swiper/types";
 import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt} from "./lib/tools";
 import "swiper/css";
 import "swiper/css/pagination";
-import {Jersey_10} from "next/font/google";
 
 gsap.registerPlugin(Observer);
 gsap.registerPlugin(ScrollTrigger);
@@ -63,8 +62,6 @@ export default function Home() {
 		resolve: () => void;
 	} | null>(null);
 
-	const particleSize = 50;
-
 	//해변 div를 canvas로 전환해 pixel 폭발 효과를 적용
 	// useEffect(() => {
 	// 	let particles: {
@@ -81,8 +78,8 @@ export default function Home() {
 	// 	const explode = async () => {
 	// 		if (!beachRef.current || !shoreRef.current) return;
 
-	// 		const beachCanvas = await html2canvas(shoreRef.current, {
-	// 			backgroundColor: "rgb(255, 215, 151)",
+	// 		const beachCanvas = await html2canvas(beachRef.current, {
+	// 			backgroundColor: null,
 	// 			scale: 1,
 	// 		});
 
@@ -102,7 +99,7 @@ export default function Home() {
 	// 		dustCanvasRef.current.style.left = "0";
 	// 		dustCanvasRef.current.style.pointerEvents = "none";
 	// 		dustCanvasRef.current.style.zIndex = "999";
-	// 		shoreRef.current.parentElement?.appendChild(dustCanvasRef.current);
+	// 		beachRef.current.parentElement?.appendChild(dustCanvasRef.current);
 
 	// 		for (let y = 0; y < height; y += particleSize) {
 	// 			for (let x = 0; x < width; x += particleSize) {
@@ -134,7 +131,7 @@ export default function Home() {
 	// 		particles.forEach(p => {
 	// 			const easedProgress = Math.pow(progress, 0.5); //ease-out을 적용
 	// 			const x = p.x + p.dx * progress;
-	// 			const y = p.y + p.dy * progress + window.scrollY + shoreRef.current!.getBoundingClientRect()?.top || 0;
+	// 			const y = p.y + p.dy * progress + window.scrollY + beachRef.current!.getBoundingClientRect()?.top || 0;
 	// 			const alpha = (p.a / 255) * progress;
 	// 			if (alpha > 0) {
 	// 				dustCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${easedProgress})`;
@@ -160,7 +157,7 @@ export default function Home() {
 	// 						const p = self.progress;
 	// 						drawParticles(p);
 	// 						//더스트를 날리면서 기존 DIV를 서서히 투명화화
-	// 						shoreRef.current!.style.opacity = String(1 - p);
+	// 						beachRef.current!.style.opacity = String(1 - p);
 	// 					},
 
 	// 					onToggle: self => {
@@ -169,7 +166,7 @@ export default function Home() {
 	// 							dustCanvasRef.current?.remove();
 	// 							dustCanvasRef.current = null;
 	// 							particles = [];
-	// 							shoreRef.current!.style.opacity = "1";
+	// 							beachRef.current!.style.opacity = "1";
 	// 						}
 	// 					},
 	// 				},
@@ -195,26 +192,6 @@ export default function Home() {
 	};
 
 	useEffect(() => {
-		// gsap.to("#turbShore", {
-		// 	attr: {baseFrequency: "0.02 0.08"},
-		// 	scrollTrigger: {
-		// 		trigger: ".main-page",
-		// 		start: "top top",
-		// 		end: "bottom bottom",
-		// 		scrub: 1,
-		// 	},
-		// });
-
-		// gsap.to("#dispShore", {
-		// 	attr: {scale: 50},
-		// 	scrollTrigger: {
-		// 		trigger: ".main-page",
-		// 		start: "top top",
-		// 		end: "bottom bottom",
-		// 		scrub: 1,
-		// 	},
-		// });
-
 		const waveTl = gsap.timeline({repeat: 1, yoyo: true, ease: "power3.inOut"});
 		waveTl
 			.to("#dispShore", {
@@ -235,54 +212,6 @@ export default function Home() {
 					scrub: 1,
 				},
 			});
-
-		// gsap.to("#turbShore", {
-		// 	attr: {baseFrequency: "0.02 0.08"},
-		// 	scrollTrigger: {
-		// 		trigger: ".beach-container",
-		// 		start: "top top",
-		// 		end: "bottom bottom",
-		// 		scrub: 1,
-		// 	},
-		// });
-
-		// gsap.to("#dispShore", {
-		// 	attr: {scale: 50},
-		// 	scrollTrigger: {
-		// 		trigger: ".beach-container",
-		// 		start: "top top",
-		// 		end: "bottom bottom",
-		// 		scrub: 1,
-		// 	},
-		// });
-
-		// gsap.to(".shore-overlay", {
-		// 	height: 400,
-		// 	scrollTrigger: {
-		// 		trigger: ".beach-container",
-		// 		start: "top top",
-		// 		end: "bottom bottom",
-		// 		scrub: 1,
-		// 	},
-		// });
-
-		// const waveTl = gsap.timeline({repeat: -1, yoyo: true, ease: "power3.inOut", paused: true});
-
-		// waveTl
-		// 	.to("#turbShore", {attr: {baseFrequency: "0.02 0.08"}, duration: 2}, 0)
-		// 	.to("#dispShore", {attr: {scale: 30}, duration: 2}, 0)
-		// 	.to(".shore-overlay", {y: -30, duration: 1}, 0);
-
-		// ScrollTrigger.create({
-		// 	trigger: ".shore-overlay",
-		// 	start: "top bottom",
-		// 	end: "bottom top",
-		// 	onEnter: () => waveTl.play(),
-		// 	onLeave: () => waveTl.pause(),
-		// 	onEnterBack: () => waveTl.play(),
-		// 	onLeaveBack: () => waveTl.pause(),
-		// });
-
 		if (!bowlRef.current) return;
 
 		Object.keys(stacks).forEach(key => {
@@ -448,95 +377,347 @@ export default function Home() {
 		};
 	}, [selectedProject]);
 
-	//비치타월 스크롤 루프
+	//해변 div를 고정하고 비치타월 페이드인 스크롤
 	// useEffect(() => {
-	// 	if (!towelsRef.current || !shoreRef.current) return;
+	// 	if (!beachRef.current || !shoreRef.current || !towelsRef.current) return;
 
-	// 	const container = towelsRef.current;
-	// 	const towels = Array.from(container.querySelectorAll<HTMLDivElement>(".towel-wrapper"));
-	// 	const towelHeight = towels[0]?.offsetHeight || 0;
-	// 	const totalTowels = towels.length;
-	// 	const totalScrollHeight = towelHeight * totalTowels;
-	// 	const marginTop = towelHeight / -2;
+	// 	const towels = Array.from(towelsRef.current!.querySelectorAll<HTMLElement>(".towel-wrapper"));
+	// 	if (towels.length === 0) return;
 
-	// 	let currentOffset = 0;
-	// 	let prevScrollTop = window.scrollY;
-	// 	let positions = towels.map((_, i) => i * towelHeight);
+	// 	const totalTowels = Object.keys(CareerData).length;
+	// 	const towelsHeight = towels[0].offsetHeight;
+	// 	const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
+	// 	const scrollPerTowel = towelsHeight + gap;
+	// 	const totalScrollDistance = scrollPerTowel * totalTowels;
+	// 	const amplify = 2; //dust 효과를 위한 자리 확보
 
-	// 	const checkShouldContinue = () => {
-	// 		//카드 2개분의 자리가 있다면 계속 루프
-	// 		const rect = shoreRef.current!.getBoundingClientRect();
-	// 		const shouldContinue = rect.bottom > towelHeight * 2 && rect.top < window.innerHeight;
-	// 		if (!shouldContinue) setIsReadyToExplode(true);
-	// 		//setIsReadyToExplode(!shouldContinue);
-	// 		return shouldContinue;
-	// 	};
+	// 	ScrollTrigger.create({
+	// 		trigger: beachRef.current,
+	// 		start: "top top",
+	// 		end: `+=${totalScrollDistance * amplify}`,
+	// 		pin: true,
+	// 		pinSpacing: true,
+	// 		scrub: true,
+	// 		markers: true,
+	// 		onUpdate: self => {
+	// 			const progress = self.progress;
 
-	// 	const updateHighlight = () => {
-	// 		let closestCard = null;
-	// 		let closestDistance = Infinity;
+	// 			const towelPhaseProgress = gsap.utils.clamp(0, 1, progress * amplify);
 
-	// 		towels.forEach(towel => {
-	// 			const rect = towel.getBoundingClientRect();
-	// 			const distanceToTop = Math.abs(rect.top);
-
-	// 			if (distanceToTop < closestDistance) {
-	// 				closestDistance = distanceToTop;
-	// 				closestCard = towel;
-	// 			}
-
-	// 			towel.classList.remove("highlighted");
-	// 		});
-
-	// 		if (closestCard) {
-	// 			(closestCard as HTMLDivElement).classList.add("highlighted");
-	// 		}
-	// 	};
-
-	// 	const updatePositions = (deltaY: number) => {
-	// 		currentOffset += deltaY;
-	// 		if (checkShouldContinue()) {
-	// 			towels.forEach((towel, index) => {
-	// 				positions[index] += deltaY;
-
-	// 				if (positions[index] <= -(towelHeight - towelHeight / 2)) {
-	// 					positions[index] += (towelHeight + marginTop) * (totalTowels * totalTowels);
-	// 				}
-
-	// 				if (positions[index] >= totalScrollHeight) {
-	// 					positions[index] -= (towelHeight + marginTop) * (totalTowels * totalTowels);
-	// 				}
-	// 				towel.style.setProperty("--y-distance", positions[index] + "px");
+	// 			gsap.to(towelsRef.current, {
+	// 				y: -towelPhaseProgress * scrollPerTowel * totalTowels,
+	// 				overwrite: true,
+	// 				ease: "none",
 	// 			});
-	// 		}
-	// 		updateHighlight();
-	// 	};
 
-	// 	const handleScroll = () => {
-	// 		const scrollTop = window.scrollY;
-	// 		const deltaY = scrollTop - prevScrollTop;
-	// 		prevScrollTop = scrollTop;
+	// 			towels.forEach((towel, i) => {
+	// 				const revealStart = i / totalTowels;
+	// 				const revealEnd = (i + 1) / totalTowels;
 
-	// 		updatePositions(-deltaY);
-	// 	};
+	// 				let fadeProgress = (towelPhaseProgress - revealStart) / (revealEnd - revealStart);
+	// 				fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
 
-	// 	window.addEventListener("scroll", handleScroll);
+	// 				gsap.to(towel, {
+	// 					autoAlpha: fadeProgress + 0.3,
+	// 					y: 50 - 50 * fadeProgress,
+	// 					overwrite: true,
+	// 					ease: "power2.out",
+	// 					duration: 0.1,
+	// 				});
+	// 			});
+	// 		},
+	// 	});
 
 	// 	return () => {
-	// 		window.removeEventListener("scroll", handleScroll);
+	// 		ScrollTrigger.getAll().forEach(st => st.kill());
 	// 	};
-	// }, []);
+	// }, [CareerData]);
+
+	// useEffect(() => {
+	// 	if (!beachRef.current || !shoreRef.current || !towelsRef.current) return;
+
+	// 	const towels = Array.from(towelsRef.current.querySelectorAll<HTMLElement>(".towel-wrapper"));
+	// 	if (towels.length === 0) return;
+
+	// 	const totalTowels = Object.keys(CareerData).length;
+	// 	const towelsHeight = towels[0].offsetHeight;
+	// 	const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
+	// 	const scrollPerTowel = towelsHeight + gap;
+	// 	const totalTowelDistance = scrollPerTowel * totalTowels;
+
+	// 	const totalScrollDistance = totalTowelDistance * 2;
+
+	// 	let particles: any[] = [];
+	// 	let dustCtx: CanvasRenderingContext2D | null = null;
+	// 	let dustCanvas: HTMLCanvasElement | null = null;
+	// 	let dustReady = false;
+	// 	let dustRemoved = false;
+
+	// 	const createDust = async () => {
+	// 		//towel이 이동한 값을 가져와서 반영
+	// 		const currentY = gsap.getProperty(towelsRef.current!, "y") as number;
+	// 		// 현재 transform 직접 반영해서 정확한 위치로 캡처
+	// 		towelsRef.current!.style.transform = `translateY(${currentY}px)`;
+
+	// 		const canvas = await html2canvas(beachRef.current!, {
+	// 			backgroundColor: null,
+	// 			scale: 1,
+	// 		});
+
+	// 		const srcCtx = canvas.getContext("2d");
+	// 		if (!srcCtx) return;
+
+	// 		const {width, height} = canvas;
+	// 		const data = srcCtx.getImageData(0, 0, width, height).data;
+
+	// 		const size = 60;
+	// 		particles = [];
+
+	// 		dustCanvas = document.createElement("canvas");
+	// 		dustCanvas.width = width;
+	// 		dustCanvas.height = height;
+	// 		dustCanvas.style.position = "absolute";
+	// 		dustCanvas.style.left = "0";
+	// 		dustCanvas.style.top = "0";
+	// 		dustCanvas.style.zIndex = "99";
+	// 		dustCanvas.style.pointerEvents = "none";
+	// 		beachRef.current!.appendChild(dustCanvas);
+
+	// 		dustCtx = dustCanvas.getContext("2d");
+
+	// 		for (let y = 0; y < height; y += size) {
+	// 			for (let x = 0; x < width; x += size) {
+	// 				const i = (y * width + x) * 4;
+	// 				const r = data[i];
+	// 				const g = data[i + 1];
+	// 				const b = data[i + 2];
+	// 				const a = data[i + 3];
+	// 				if (a > 0) {
+	// 					particles.push({
+	// 						x,
+	// 						y,
+	// 						dx: (Math.random() - 0.5) * 300,
+	// 						dy: (Math.random() - 1) * 300,
+	// 						r,
+	// 						g,
+	// 						b,
+	// 						a: a / 255,
+	// 					});
+	// 				}
+	// 			}
+	// 		}
+	// 		dustReady = true;
+	// 		dustCanvas.style.display = "block";
+	// 	};
+
+	// 	const drawDust = (progress: number) => {
+	// 		if (!dustCtx || !dustCanvas) return;
+
+	// 		const width = dustCanvas.width;
+	// 		const height = dustCanvas.height;
+	// 		dustCtx.clearRect(0, 0, width, height);
+
+	// 		particles.forEach(p => {
+	// 			const eased = Math.pow(progress, 0.6);
+	// 			const x = p.x + p.dx * eased;
+	// 			const y = p.y + p.dy * eased;
+	// 			const alpha = p.a * (1 - eased);
+	// 			dustCtx!.fillStyle = `rgba(${p.r},${p.g},${p.b},${alpha})`;
+	// 			dustCtx!.fillRect(x, y, 60, 60);
+	// 		});
+	// 	};
+
+	// 	ScrollTrigger.create({
+	// 		trigger: beachRef.current,
+	// 		start: "top top",
+	// 		end: `+=${totalScrollDistance}`,
+	// 		pin: true,
+	// 		pinSpacing: true,
+	// 		scrub: true,
+	// 		markers: true,
+	// 		onUpdate: self => {
+	// 			const progress = self.progress;
+
+	// 			const towelProgress = gsap.utils.clamp(0, 1, progress * 2);
+
+	// 			gsap.to(towelsRef.current, {
+	// 				y: -towelProgress * scrollPerTowel * totalTowels,
+	// 				overwrite: true,
+	// 				ease: "none",
+	// 			});
+
+	// 			towels.forEach((towel, i) => {
+	// 				const revealStart = i / totalTowels;
+	// 				const revealEnd = (i + 1) / totalTowels;
+
+	// 				let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
+	// 				fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
+
+	// 				gsap.to(towel, {
+	// 					autoAlpha: fadeProgress + 0.3,
+	// 					y: 50 - 50 * fadeProgress,
+	// 					overwrite: true,
+	// 					ease: "power2.out",
+	// 					duration: 0.1,
+	// 				});
+	// 			});
+
+	// 			// 전체 scrolldistance 중 반절 이후에 dust 폭발 실행
+	// 			// if (progress >= 0.5 && !dustReady) {
+	// 			// 	createDust();
+	// 			// }
+
+	// 			// if (progress >= 0.5 && dustReady) {
+	// 			// 	const dustProgress = gsap.utils.clamp(0, 1, (progress - 0.5) * 2);
+	// 			// 	drawDust(dustProgress);
+	// 			// 	shoreRef.current!.style.opacity = `${1 - dustProgress}`;
+	// 			// } else {
+	// 			// 	if (dustReady) {
+	// 			// 		drawDust(0);
+	// 			// 		dustCanvas!.style.display = "none";
+	// 			// 	}
+	// 			// 	shoreRef.current!.style.opacity = "1";
+	// 			// }
+	// 			if (progress >= 0.5 && !dustReady) {
+	// 				// 최초 캔버스 생성
+	// 				const currentY = gsap.getProperty(towelsRef.current!, "y") as number;
+	// 				towelsRef.current!.style.transform = `translateY(${currentY}px)`;
+	// 				createDust();
+	// 				dustRemoved = false;
+	// 			}
+
+	// 			if (dustReady) {
+	// 				const dustProgress = gsap.utils.clamp(0, 1, (progress - 0.5) * 2);
+	// 				drawDust(dustProgress);
+	// 				shoreRef.current!.style.opacity = `${1 - Math.pow(Math.abs(dustProgress), 0.7)}`;
+	// 			}
+
+	// 			if (dustReady && progress < 0.5 && !dustRemoved) {
+	// 				dustCanvas?.remove();
+	// 				dustCanvas = null;
+	// 				dustCtx = null;
+	// 				particles = [];
+	// 				dustReady = false;
+	// 				dustRemoved = true;
+	// 				towelsRef.current!.style.transform = ""; // transform 복원
+	// 			}
+	// 		},
+
+	// 		onLeaveBack: () => {
+	// 			beachRef.current!.style.opacity = "1";
+	// 			dustCanvas?.remove();
+	// 			dustCanvas = null;
+	// 			particles = [];
+	// 		},
+	// 	});
+
+	// 	return () => {
+	// 		ScrollTrigger.getAll().forEach(st => st.kill());
+	// 		dustCanvas?.remove();
+	// 		dustCanvas = null;
+	// 		particles = [];
+	// 	};
+	// }, [CareerData]);
+
 	useEffect(() => {
 		if (!beachRef.current || !shoreRef.current || !towelsRef.current) return;
 
-		const towels = Array.from(towelsRef.current!.querySelectorAll<HTMLElement>(".towel-wrapper"));
+		const towels = Array.from(towelsRef.current.querySelectorAll<HTMLElement>(".towel-wrapper"));
 		if (towels.length === 0) return;
 
 		const totalTowels = Object.keys(CareerData).length;
 		const towelsHeight = towels[0].offsetHeight;
 		const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
 		const scrollPerTowel = towelsHeight + gap;
-		const totalScrollDistance = scrollPerTowel * totalTowels;
+		const totalTowelDistance = scrollPerTowel * totalTowels;
+		const totalScrollDistance = totalTowelDistance * AMPLIFY_BY;
+
+		let particles: any[] = [];
+		let dustCtx: CanvasRenderingContext2D | null = null;
+		let dustCanvas: HTMLCanvasElement | null = null;
+		let dustReady = false;
+		let dustRemoved = false;
+		let dustTriggered = false;
+
+		const createDust = async (currentY: number) => {
+			if (!beachRef.current) return;
+			//towel이 이동한 값을 가져와서 반영
+			towelsRef.current!.style.transform = `translateY(${currentY}px)`;
+
+			const canvas = await html2canvas(beachRef.current!, {
+				backgroundColor: null,
+				scale: 1,
+			});
+
+			//towelsRef.current!.style.transform = ""; // 원복
+
+			const srcCtx = canvas.getContext("2d");
+			if (!srcCtx) return;
+
+			const {width, height} = canvas;
+			const data = srcCtx.getImageData(0, 0, width, height).data;
+
+			particles = [];
+
+			dustCanvas = document.createElement("canvas");
+			dustCanvas.width = width;
+			dustCanvas.height = height;
+			dustCanvas.style.position = "fixed";
+			dustCanvas.style.top = `${beachRef.current.offsetTop}px`;
+			dustCanvas.style.left = `${beachRef.current.offsetLeft}px`;
+			dustCanvas.style.width = `${beachRef.current.offsetWidth}px`;
+			dustCanvas.style.height = `${beachRef.current.offsetHeight}px`;
+			dustCanvas.style.zIndex = "99";
+			//dustCanvas.style.pointerEvents = "none";
+			//beachRef.current!.appendChild(dustCanvas);
+			beachRef.current.parentElement!.insertBefore(dustCanvas, beachRef.current);
+
+			dustCtx = dustCanvas.getContext("2d");
+
+			for (let y = 0; y < height; y += PARTICLE_SIZE) {
+				for (let x = 0; x < width; x += PARTICLE_SIZE) {
+					const i = (y * width + x) * 4;
+					const r = data[i];
+					const g = data[i + 1];
+					const b = data[i + 2];
+					const a = data[i + 3];
+					if (a > 0) {
+						particles.push({
+							x,
+							y,
+							dx: (Math.random() - 0.5) * 300,
+							dy: (Math.random() - 1) * 300,
+							r,
+							g,
+							b,
+							a: a / 255,
+						});
+					}
+				}
+			}
+			dustReady = true;
+			dustRemoved = false;
+			dustCanvas.style.display = "block";
+		};
+
+		const drawDust = (progress: number) => {
+			if (!dustCtx || !dustCanvas) return;
+			const width = dustCanvas.width;
+			const height = dustCanvas.height;
+			dustCtx.clearRect(0, 0, width, height);
+
+			particles.forEach(p => {
+				const eased = Math.pow(progress, 0.6);
+				const x = p.x + p.dx * eased;
+				const y = p.y + p.dy * eased;
+				const alpha = p.a * (1 - eased) * 1.7;
+				dustCtx!.fillStyle = `rgba(${p.r},${p.g},${p.b},${alpha})`;
+				dustCtx!.lineWidth = 1;
+				dustCtx!.fillRect(x, y, PARTICLE_SIZE, PARTICLE_SIZE);
+				dustCtx!.strokeStyle = `rgba(0,0,0,${alpha / 5})`;
+				dustCtx!.strokeRect(x, y, PARTICLE_SIZE, PARTICLE_SIZE);
+			});
+		};
 
 		ScrollTrigger.create({
 			trigger: beachRef.current,
@@ -548,9 +729,14 @@ export default function Home() {
 			markers: true,
 			onUpdate: self => {
 				const progress = self.progress;
+				// progress를 towel과 dust가 반씩 나눠갖음
+				const dustTiming = 0.5;
+				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
+				const dustProgress = gsap.utils.clamp(0, 1, (progress - dustTiming) * AMPLIFY_BY);
 
+				// towel 움직임
 				gsap.to(towelsRef.current, {
-					y: -progress * scrollPerTowel * totalTowels,
+					y: -towelProgress * scrollPerTowel * totalTowels,
 					overwrite: true,
 					ease: "none",
 				});
@@ -558,8 +744,7 @@ export default function Home() {
 				towels.forEach((towel, i) => {
 					const revealStart = i / totalTowels;
 					const revealEnd = (i + 1) / totalTowels;
-
-					let fadeProgress = (progress - revealStart) / (revealEnd - revealStart);
+					let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
 					fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
 
 					gsap.to(towel, {
@@ -570,11 +755,63 @@ export default function Home() {
 						duration: 0.1,
 					});
 				});
+
+				// dust 캔버스 생성 예약 (부하 줄이기 위해 setTimeout)
+				if (progress >= dustTiming && !dustReady && !dustTriggered) {
+					dustTriggered = true;
+
+					requestAnimationFrame(() => {
+						console.log(towelProgress);
+						const targetY = -towelProgress * scrollPerTowel * totalTowels;
+						setTimeout(() => {
+							createDust(targetY);
+						}, 320);
+					});
+				}
+
+				if (dustReady) {
+					drawDust(dustProgress);
+					//실제 진행도보다 빠르게 투명화
+					beachRef.current!.style.opacity = `${1 - Math.pow(dustProgress, 0.3)}`;
+
+					// scroll up 해서 dust 완전히 복원됐을 때 제거
+					if (dustProgress === 0 && !dustRemoved) {
+						dustCanvas?.remove();
+						dustCanvas = null;
+						dustCtx = null;
+						dustReady = false;
+						dustRemoved = true;
+						particles = [];
+						towelsRef.current!.style.transform = "";
+					}
+				}
+
+				if (progress < dustTiming && dustTriggered) {
+					dustTriggered = false;
+				}
+			},
+
+			onLeaveBack: () => {
+				beachRef.current!.style.opacity = "1";
+				dustCanvas?.remove();
+				dustCanvas = null;
+				dustCtx = null;
+				dustReady = false;
+				dustRemoved = true;
+				dustTriggered = false;
+				particles = [];
 			},
 		});
 
 		return () => {
 			ScrollTrigger.getAll().forEach(st => st.kill());
+			dustCanvas?.remove();
+			dustCanvas = null;
+			dustCtx = null;
+			dustReady = false;
+			dustRemoved = false;
+			dustTriggered = false;
+			particles = [];
 		};
 	}, [CareerData]);
 
@@ -1098,8 +1335,8 @@ export default function Home() {
 				</svg>
 				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
-				<section ref={shoreRef} className="flex flex-row w-full shore relative z-20">
-					<div className="w-1/2 flex flex-col justify-start items-start">
+				<section ref={shoreRef} className="w-full shore relative z-20">
+					<div className="float-left w-1/2 flex flex-col justify-start items-start shore-title">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
 							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
@@ -1139,7 +1376,7 @@ export default function Home() {
 						</div>
 						<p className="description text-m max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
 					</div>
-					<div ref={towelsRef} className="towels-container spread w-1/2">
+					<div ref={towelsRef} className="float-left towels-container spread w-1/2">
 						{CareerData &&
 							Object.entries(CareerData).map(([k, v], i) => (
 								<div className="towel-wrapper">
