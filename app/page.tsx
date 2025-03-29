@@ -38,7 +38,6 @@ export default function Home() {
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
 	const [selectedProject, setSelectedProject] = useState<Project>();
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
-	const [isReadyToExplode, setIsReadyToExplode] = useState<boolean>(false);
 	const [isSpecialSlide, setIsSpecialSlide] = useState<boolean>(false);
 	const [isSectionReady, setIsSectionReady] = useState<boolean>(false);
 
@@ -54,8 +53,6 @@ export default function Home() {
 	const miniTitleRef = useRef<HTMLParagraphElement>(null);
 	const gameboyHeadRef = useRef<HTMLDivElement>(null);
 	const beachRef = useRef<HTMLDivElement>(null);
-	const dustCanvasRef = useRef<HTMLCanvasElement | null>(null);
-	const overshootRef = useRef<HTMLDivElement>(null);
 	const projectDetailRef = useRef<HTMLDivElement>(null);
 	const swiperReadyRef = useRef<{
 		promise: Promise<void>;
@@ -268,7 +265,7 @@ export default function Home() {
 
 		function animateDust() {
 			rafId = requestAnimationFrame(animateDust);
-			smoothedDustProgress += (currentDustProgress - smoothedDustProgress) * 0.05;
+			smoothedDustProgress += (currentDustProgress - smoothedDustProgress) * 0.02;
 			if (dustReady) drawDust(smoothedDustProgress);
 		}
 
@@ -518,70 +515,6 @@ export default function Home() {
 			if (towel.parentElement) observer.observe(towel.parentElement, {attributes: true, attributeFilter: ["class"]});
 		});
 	}, []);
-
-	// useEffect(() => {
-	// 	const handleMobileCardIntersection: IntersectionObserverCallback = (entries, observer) => {
-	// 		entries.forEach(entry => {
-	// 			if (entry.isIntersecting) {
-	// 				const cardContainer = cartridgeCardsContainerRef.current;
-	// 				if (cardContainer) {
-	// 					const firstChild = cardContainer.firstElementChild as HTMLElement | null;
-	// 					if (firstChild) {
-	// 						firstChild.classList.add("spread");
-	// 					}
-	// 					const halfScroll = cardContainer.scrollWidth / 2;
-	// 					cardContainer.scrollLeft = halfScroll;
-	// 				}
-	// 				observer.unobserve(entry.target);
-	// 			}
-	// 		});
-	// 	};
-
-	// 	const handleTitleIntersection: IntersectionObserverCallback = (entries, observer) => {
-	// 		entries.forEach(entry => {
-	// 			if (entry.isIntersecting) {
-	// 				const side = (entry.target as HTMLElement).dataset.side;
-	// 				entry.target.classList.add(`fade-${side}`);
-	// 				observer.unobserve(entry.target);
-	// 			}
-	// 		});
-	// 	};
-
-	// 	const setupObservers = () => {
-	// 		const cardContainer = cartridgeCardsRef.current;
-	// 		if (!cardContainer) return;
-
-	// 		const mobileCardObserver = new IntersectionObserver(handleMobileCardIntersection, {
-	// 			root: null,
-	// 			rootMargin: "0px",
-	// 			threshold: 0.7,
-	// 		});
-
-	// 		const titleObserver = new IntersectionObserver(handleTitleIntersection, {
-	// 			root: null,
-	// 			rootMargin: "0px",
-	// 			threshold: 0.5,
-	// 		});
-
-	// 		mobileCardObserver.observe(cardContainer);
-
-	// 		//fade 애니메이션 효과가 필요한 div
-	// 		const upElements = document.querySelectorAll<HTMLElement>(".fade-up-section");
-	// 		const leftElements = document.querySelectorAll<HTMLElement>(".fade-left-section");
-
-	// 		upElements.forEach(element => {
-	// 			element.dataset.side = "up";
-	// 			titleObserver.observe(element);
-	// 		});
-
-	// 		return () => {
-	// 			mobileCardObserver.disconnect();
-	// 			upElements.forEach(element => titleObserver.unobserve(element));
-	// 		};
-	// 	};
-
-	// 	return setupObservers();
-	// }, []);
 
 	//카트리지 카드 wrapper에 마우스 드래그 스크롤 기능 추가
 	useEffect(() => {
@@ -1043,7 +976,7 @@ export default function Home() {
 				</section>
 			</div>
 
-			<section className="w-full full-section min-h-screen text-center font-dunggeunmo projects-section relative">
+			<section className="mt-24 w-full full-section min-h-screen text-center font-dunggeunmo projects-section relative">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
