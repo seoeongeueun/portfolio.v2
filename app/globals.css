@@ -131,6 +131,10 @@ html {
 	font-weight: 400;
 }
 
+body.lock-scroll {
+	overflow: hidden;
+}
+
 /* ::-webkit-scrollbar {
 	display: none;
 } */

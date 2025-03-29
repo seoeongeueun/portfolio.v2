@@ -1,40 +1,3 @@
-//stack icon library
-// export const stacks = {
-// 	javascript: "java\nscript",
-// 	typescript: "type\nscript",
-// 	python: "python",
-// 	react: "react.js",
-// 	next: "next.js",
-// 	electron: "electron",
-// 	nodejs: "node.js",
-// 	redux: "redux",
-// 	docker: "docker",
-// 	postgresql: "postgre\nsql",
-// 	php: "php",
-// 	mongodb: "mongo\ndb",
-// 	css3: "css",
-// 	html5: "html",
-// 	tailwindcss: "tailwind css",
-// 	ps: "photo\nshop",
-// 	cypress: "cypress",
-// 	playwright: "play\nwright",
-// 	mysql: "mysql",
-// };
-
-// export const stacks = {
-// 	javascript: "java\nscript",
-// 	typescript: "type\nscript",
-// 	python: "python",
-// 	php: "php",
-// 	mysql: "mysql",
-// 	react: "react",
-// 	html: "html",
-// 	mongodb: "mongo\ndb",
-// 	nodejs: "node.js",
-// 	jquery: "jquery",
-// 	tailwind: "tailwind\ncss",
-// };
-
 export const stacks = {
 	gameboy: "gameboy",
 	javascript: "javascript",
@@ -43,8 +6,8 @@ export const stacks = {
 };
 
 export const PARTICLE_SIZE = 50; //dust particle 크기
-export const BORDER_END = 0.05; // 0.0 ~ 0.05 : border만
-export const FILL_END = 0.4; // 0.05 ~ 0.4 : fill 진행
-export const MOVE_END = 1.2; // 0.4 ~ 1.0 : 이동
+export const BORDER_END = 0.06; // border 단계 시간
+export const FILL_END = 0.4; // BORDER_END - FILL_END fill이 끝나는 시간
+export const MOVE_END = 1.2; // particle 이동 끝나는 시간
 export const DUST_TIMING = 0.5; //scrollTrigger의 몇 퍼센트에서 dust화를 진행할건지
 export const AMPLIFY_BY = 1 / (1 - DUST_TIMING); // dust화 속도

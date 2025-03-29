@@ -62,125 +62,6 @@ export default function Home() {
 		resolve: () => void;
 	} | null>(null);
 
-	//해변 div를 canvas로 전환해 pixel 폭발 효과를 적용
-	// useEffect(() => {
-	// 	let particles: {
-	// 		x: number;
-	// 		y: number;
-	// 		dx: number;
-	// 		dy: number;
-	// 		r: number;
-	// 		g: number;
-	// 		b: number;
-	// 		a: number;
-	// 	}[] = [];
-
-	// 	const explode = async () => {
-	// 		if (!beachRef.current || !shoreRef.current) return;
-
-	// 		const beachCanvas = await html2canvas(beachRef.current, {
-	// 			backgroundColor: null,
-	// 			scale: 1,
-	// 		});
-
-	// 		const ctx = beachCanvas.getContext("2d");
-	// 		if (!ctx) return;
-	// 		const {width, height} = beachCanvas;
-
-	// 		const imageData = ctx.getImageData(0, 0, width, height);
-	// 		const {data} = imageData;
-
-	// 		// Create a new canvas overlay for the "dust"
-	// 		dustCanvasRef.current = document.createElement("canvas");
-	// 		dustCanvasRef.current.width = width;
-	// 		dustCanvasRef.current.height = height;
-	// 		dustCanvasRef.current.style.position = "fixed";
-	// 		dustCanvasRef.current.style.top = "0";
-	// 		dustCanvasRef.current.style.left = "0";
-	// 		dustCanvasRef.current.style.pointerEvents = "none";
-	// 		dustCanvasRef.current.style.zIndex = "999";
-	// 		beachRef.current.parentElement?.appendChild(dustCanvasRef.current);
-
-	// 		for (let y = 0; y < height; y += particleSize) {
-	// 			for (let x = 0; x < width; x += particleSize) {
-	// 				const i = (y * width + x) * 4;
-	// 				const [r, g, b, a] = data.slice(i, i + 4);
-	// 				if (a > 0) {
-	// 					particles.push({
-	// 						x,
-	// 						y,
-	// 						dx: (Math.random() - 0.5) * 300,
-	// 						dy: (Math.random() - 1) * 300,
-	// 						r,
-	// 						g,
-	// 						b,
-	// 						a,
-	// 					});
-	// 				}
-	// 			}
-	// 		}
-	// 	};
-
-	// 	function drawParticles(progress: number, shoreTop: number) {
-	// 		const dustCtx = dustCanvasRef.current?.getContext("2d");
-	// 		if (!dustCtx || !dustCanvasRef.current || !shoreRef.current) return;
-
-	// 		const {width, height} = dustCanvasRef.current;
-	// 		dustCtx.clearRect(0, 0, width, height);
-
-	// 		particles.forEach(p => {
-	// 			const easedProgress = Math.pow(progress, 0.5); //ease-out을 적용
-	// 			const x = p.x + p.dx * progress;
-	// 			const y = p.y + p.dy * progress + window.scrollY + beachRef.current!.getBoundingClientRect()?.top || 0;
-	// 			const alpha = (p.a / 255) * progress;
-	// 			if (alpha > 0) {
-	// 				dustCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${easedProgress})`;
-	// 				dustCtx.fillRect(x, y, particleSize, particleSize);
-	// 			}
-	// 		});
-	// 	}
-
-	// 	(async () => {
-	// 		await explode();
-	// 		if (!dustCanvasRef.current || !beachRef.current) return;
-
-	// 		gsap.to(
-	// 			{},
-	// 			{
-	// 				scrollTrigger: {
-	// 					trigger: beachRef.current,
-	// 					start: "top top",
-	// 					end: "bottom bottom",
-	// 					pin: true,
-	// 					scrub: true,
-	// 					onUpdate: self => {
-	// 						const p = self.progress;
-	// 						drawParticles(p);
-	// 						//더스트를 날리면서 기존 DIV를 서서히 투명화화
-	// 						beachRef.current!.style.opacity = String(1 - p);
-	// 					},
-
-	// 					onToggle: self => {
-	// 						// 다시 거의 처음으로 돌아왔다면 더스트를 없애고 원래 DIV를 노출
-	// 						if (!self.isActive && self.progress < 0.01) {
-	// 							dustCanvasRef.current?.remove();
-	// 							dustCanvasRef.current = null;
-	// 							particles = [];
-	// 							beachRef.current!.style.opacity = "1";
-	// 						}
-	// 					},
-	// 				},
-	// 			}
-	// 		);
-	// 	})();
-
-	// 	return () => {
-	// 		dustCanvasRef.current?.remove();
-	// 		dustCanvasRef.current = null;
-	// 		particles = [];
-	// 	};
-	// }, []);
-
 	//pseudo element의 너비를 계산하는 함수
 	const getPseudoBounds = (element: HTMLElement, pseudo: "::before" | "::after") => {
 		const style = window.getComputedStyle(element, pseudo);
@@ -361,22 +242,6 @@ export default function Home() {
 		};
 	}, [stacks]);
 
-	useEffect(() => {
-		let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-		if (!selectedProject) {
-			setIsGameboyOn(false);
-		} else {
-			timeoutId = setTimeout(() => {
-				setIsGameboyOn(true);
-			}, 2000);
-		}
-
-		return () => {
-			if (timeoutId) clearTimeout(timeoutId);
-		};
-	}, [selectedProject]);
-
 	//해변 div를 고정하고 비치타월 페이드인 스크롤 + 해변 픽셀화
 	useEffect(() => {
 		if (!beachRef.current || !shoreRef.current || !towelsRef.current) return;
@@ -409,8 +274,8 @@ export default function Home() {
 
 		const createDust = async (currentY: number) => {
 			if (!beachRef.current) return;
-			//towel이 이동한 값을 가져와서 반영
-			towelsRef.current!.style.transform = `translateY(${currentY}px)`;
+			//towel이 이동한 값을 가져와서 반영 20은 미세 보정
+			towelsRef.current!.style.transform = `translateY(${currentY - gap - 20}px)`;
 
 			const canvas = await html2canvas(beachRef.current!, {
 				backgroundColor: null,
@@ -655,114 +520,68 @@ export default function Home() {
 	}, []);
 
 	// useEffect(() => {
-	// 	if (!gameboyHeadRef.current || !isGameboyOn) return;
-
-	// 	const gameboyHead = gameboyHeadRef.current;
-	// 	const gameboyScreen = gameboyHead.querySelector<HTMLDivElement>(".gameboy-screen");
-	// 	if (!gameboyScreen) return;
-
-	// 	const initialScrollY = window.scrollY;
-	// 	let maxScreenWidth = window.innerWidth * 0.7; // 최대 70vw
-	// 	let maxScale = maxScreenWidth / gameboyScreen.offsetWidth; // 최대 scale 값
-	// 	let lastScrollY = window.scrollY; // 이전 스크롤 위치
-
-	// 	const originalLeft = gameboyScreen.offsetLeft; //scale 적용 전에 screen의 왼쪽 거리를 계산
-
-	// 	const handleScroll = () => {
-	// 		const scrollY = window.scrollY;
-	// 		let scrollDiff = scrollY - initialScrollY; // 기준점 대비 스크롤 이동량
-
-	// 		// 스크롤 위 방향 감지
-	// 		if (scrollY < lastScrollY) {
-	// 			//스크롤을 올릴 때는 자연스럽게 작아지기 위해 기준점을 현재 위치에서 200px 정도 멀리 잡는다
-	// 			scrollDiff -= 100;
-	// 		} else {
-	// 			scrollDiff += 300;
-	// 		}
-	// 		let newScale = 1 + scrollDiff * 0.002;
-	// 		// 1보다는 크고 maxscale보다는 작게
-	// 		newScale = Math.max(1, Math.min(newScale, maxScale));
-
-	// 		//1 이하로는 작아지지 못하게 지정
-	// 		gameboyHead.style.setProperty("--scale", newScale.toString());
-
-	// 		lastScrollY = scrollY;
+	// 	const handleMobileCardIntersection: IntersectionObserverCallback = (entries, observer) => {
+	// 		entries.forEach(entry => {
+	// 			if (entry.isIntersecting) {
+	// 				const cardContainer = cartridgeCardsContainerRef.current;
+	// 				if (cardContainer) {
+	// 					const firstChild = cardContainer.firstElementChild as HTMLElement | null;
+	// 					if (firstChild) {
+	// 						firstChild.classList.add("spread");
+	// 					}
+	// 					const halfScroll = cardContainer.scrollWidth / 2;
+	// 					cardContainer.scrollLeft = halfScroll;
+	// 				}
+	// 				observer.unobserve(entry.target);
+	// 			}
+	// 		});
 	// 	};
 
-	// 	window.addEventListener("scroll", handleScroll);
-	// 	return () => {
-	// 		window.removeEventListener("scroll", handleScroll);
+	// 	const handleTitleIntersection: IntersectionObserverCallback = (entries, observer) => {
+	// 		entries.forEach(entry => {
+	// 			if (entry.isIntersecting) {
+	// 				const side = (entry.target as HTMLElement).dataset.side;
+	// 				entry.target.classList.add(`fade-${side}`);
+	// 				observer.unobserve(entry.target);
+	// 			}
+	// 		});
 	// 	};
-	// }, [isGameboyOn]);
 
-	useEffect(() => {
-		const handleMobileCardIntersection: IntersectionObserverCallback = (entries, observer) => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) {
-					const cardContainer = cartridgeCardsContainerRef.current;
-					if (cardContainer) {
-						const firstChild = cardContainer.firstElementChild as HTMLElement | null;
-						if (firstChild) {
-							firstChild.classList.add("spread");
-						}
-						const halfScroll = cardContainer.scrollWidth / 2;
-						cardContainer.scrollLeft = halfScroll;
-					}
-					observer.unobserve(entry.target);
-				}
-			});
-		};
+	// 	const setupObservers = () => {
+	// 		const cardContainer = cartridgeCardsRef.current;
+	// 		if (!cardContainer) return;
 
-		const handleTitleIntersection: IntersectionObserverCallback = (entries, observer) => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) {
-					const side = (entry.target as HTMLElement).dataset.side;
-					entry.target.classList.add(`fade-${side}`);
-					observer.unobserve(entry.target);
-				}
-			});
-		};
+	// 		const mobileCardObserver = new IntersectionObserver(handleMobileCardIntersection, {
+	// 			root: null,
+	// 			rootMargin: "0px",
+	// 			threshold: 0.7,
+	// 		});
 
-		const setupObservers = () => {
-			const cardContainer = cartridgeCardsRef.current;
-			if (!cardContainer) return;
+	// 		const titleObserver = new IntersectionObserver(handleTitleIntersection, {
+	// 			root: null,
+	// 			rootMargin: "0px",
+	// 			threshold: 0.5,
+	// 		});
 
-			const mobileCardObserver = new IntersectionObserver(handleMobileCardIntersection, {
-				root: null,
-				rootMargin: "0px",
-				threshold: 0.7,
-			});
+	// 		mobileCardObserver.observe(cardContainer);
 
-			const titleObserver = new IntersectionObserver(handleTitleIntersection, {
-				root: null,
-				rootMargin: "0px",
-				threshold: 0.5,
-			});
+	// 		//fade 애니메이션 효과가 필요한 div
+	// 		const upElements = document.querySelectorAll<HTMLElement>(".fade-up-section");
+	// 		const leftElements = document.querySelectorAll<HTMLElement>(".fade-left-section");
 
-			mobileCardObserver.observe(cardContainer);
+	// 		upElements.forEach(element => {
+	// 			element.dataset.side = "up";
+	// 			titleObserver.observe(element);
+	// 		});
 
-			//fade 애니메이션 효과가 필요한 div
-			const upElements = document.querySelectorAll<HTMLElement>(".fade-up-section");
-			const leftElements = document.querySelectorAll<HTMLElement>(".fade-left-section");
+	// 		return () => {
+	// 			mobileCardObserver.disconnect();
+	// 			upElements.forEach(element => titleObserver.unobserve(element));
+	// 		};
+	// 	};
 
-			upElements.forEach(element => {
-				element.dataset.side = "up";
-				titleObserver.observe(element);
-			});
-			// leftElements.forEach(element => {
-			// 	element.dataset.side = "left";
-			// 	titleObserver.observe(element);
-			// });
-
-			return () => {
-				mobileCardObserver.disconnect();
-				upElements.forEach(element => titleObserver.unobserve(element));
-				//leftElements.forEach(element => titleObserver.unobserve(element));
-			};
-		};
-
-		return setupObservers();
-	}, []);
+	// 	return setupObservers();
+	// }, []);
 
 	//카트리지 카드 wrapper에 마우스 드래그 스크롤 기능 추가
 	useEffect(() => {
@@ -823,7 +642,7 @@ export default function Home() {
 		};
 	}, []);
 
-	/* 카트리지 (=통칭 카드) 호버 & 펼침 이벤트 관리 */
+	/* 카트리지 (=통칭 카드) 호버 & 선택 이벤트 관리 */
 	useEffect(() => {
 		const parentContainer = cartridgeCardsContainerRef.current;
 		const cardsDiv = cartridgeCardsRef.current;
@@ -926,18 +745,6 @@ export default function Home() {
 					timeouts.push(t);
 				}
 			};
-
-			const handleAnimationEnd = () => {
-				unlockScroll();
-				const t = setTimeout(() => {
-					handleClearChanges();
-					cards.forEach(card => card.classList.remove("forbid-click", "moveY", "clicked"));
-					clickedCard.removeEventListener("animationend", handleAnimationEnd);
-				}, 1000);
-				timeouts.push(t);
-			};
-
-			clickedCard.addEventListener("animationend", handleAnimationEnd);
 		}
 
 		cards.forEach(card => {
@@ -989,7 +796,14 @@ export default function Home() {
 	}, [tags]);
 
 	useEffect(() => {
+		let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
 		if (selectedProject) {
+			//프로젝트가 선택되면 카트리지 장착 애니메이션 이후 게임기를 켠다
+			timeoutId = setTimeout(() => {
+				setIsGameboyOn(true);
+			}, 2000);
+
 			const section = projectDetailRef.current;
 			if (!section) return;
 
@@ -1008,10 +822,51 @@ export default function Home() {
 
 			run();
 		} else {
+			setIsGameboyOn(false);
 			setIsSectionReady(false);
 			projectDetailRef.current?.classList.remove("clear", "ready");
 		}
+
+		return () => {
+			if (timeoutId) clearTimeout(timeoutId);
+		};
 	}, [selectedProject]);
+
+	useEffect(() => {
+		if (!isSectionReady) return;
+
+		const cardsDiv = cartridgeCardsRef.current;
+		if (!cardsDiv) return;
+
+		const cards = cardsDiv.querySelectorAll<HTMLElement>(".card");
+
+		const timeoutId = setTimeout(() => {
+			cardsDiv.style.left = "";
+			cardsDiv.style.transition = "";
+			unlockScroll();
+
+			cards.forEach(card => {
+				card.classList.remove("forbid-click", "moveY", "clicked");
+			});
+		}, 3000);
+
+		const handleCloseOnScroll = (e: Event) => {
+			e.preventDefault();
+			e.stopPropagation();
+			handleCloseProject();
+		};
+
+		window.addEventListener("wheel", handleCloseOnScroll, {passive: false});
+		window.addEventListener("touchmove", handleCloseOnScroll, {passive: false});
+		window.addEventListener("keydown", handleCloseOnScroll);
+
+		return () => {
+			clearTimeout(timeoutId);
+			window.removeEventListener("wheel", handleCloseOnScroll);
+			window.removeEventListener("touchmove", handleCloseOnScroll);
+			window.removeEventListener("keydown", handleCloseOnScroll);
+		};
+	}, [isSectionReady]);
 
 	const handleCloseProject = () => {
 		const section = projectDetailRef.current;
@@ -1022,8 +877,8 @@ export default function Home() {
 		const clearProjectPage = () => {
 			setTimeout(() => {
 				setIsGameboyOn(false);
-				setIsSectionReady(false);
 				setSelectedProject(undefined);
+				unlockScroll();
 				section.classList.remove("clear", "ready");
 			}, 300);
 		};
@@ -1188,7 +1043,7 @@ export default function Home() {
 				</section>
 			</div>
 
-			<section className="w-full full-section min-h-screen text-center font-dunggeunmo projects-section">
+			<section className="w-full full-section min-h-screen text-center font-dunggeunmo projects-section relative">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
@@ -1212,102 +1067,105 @@ export default function Home() {
 				<div className={`relative -mt-32 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} flex flex-col items-center justify-center`}>
 					<Gameboy project={selectedProject} />
 				</div>
-			</section>
-			{selectedProject && (
-				<section
-					ref={projectDetailRef}
-					className={`project-section fixed top-0 left-0 z-40 h-full opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
-				>
-					<div className="project-header tracking-widest text-xl py-8 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
-						<div className="flex flex-col items-center justify-start">
-							<p>PERSON</p>
-							<p className="text-theme-yellow">X {selectedProject.ppl_count || 1}</p>
-						</div>
-						<div className="flex flex-col items-center justify-start">
-							<p className="text-xxxl text-theme-yellow">{selectedProject.title.toUpperCase()}</p>
-							<p>{selectedProject?.subtitle}</p>
-						</div>
+				{selectedProject && (
+					<section
+						ref={projectDetailRef}
+						className={`project-section absolute bottom-0 left-0 z-40 h-screen text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
+					>
+						<div className="project-header tracking-widest text-xl py-8 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
+							<div className="flex flex-col items-center justify-start">
+								<p>PERSON</p>
+								<p className="text-theme-yellow">X {selectedProject.ppl_count || 1}</p>
+							</div>
+							<div className="flex flex-col items-center justify-start">
+								<p className="text-xxxl text-theme-yellow">{selectedProject.title.toUpperCase()}</p>
+								<p>{selectedProject?.subtitle}</p>
+							</div>
 
-						{/* <div className="stacks-box flex flex-row p-4 outline-2 outline-black">
+							{/* <div className="stacks-box flex flex-row p-4 outline-2 outline-black">
 							<Image src="/icons/mysql.png" alt="stack" width={200} height={200} />
 						</div> */}
-						<button className="text-xxxl cursor-pointer" onClick={() => handleCloseProject()}>
-							<p className="pointer-events-none">X</p>
-						</button>
-					</div>
-
-					<div className="project-detail flex flex-col md:flex-row w-full h-full items-start justify-start relative px-12 md:px-[15%] mt-16">
-						<Swiper
-							modules={[Pagination, Autoplay]}
-							pagination={{clickable: true}}
-							spaceBetween={20}
-							slidesPerView={1}
-							loop={true}
-							autoplay={{delay: 5000, disableOnInteraction: true}}
-							onSwiper={(swiper: SwiperClass) => {
-								if (swiper.initialized) {
-									swiperReadyRef.current?.resolve();
-								} else {
-									swiper.on("init", () => swiperReadyRef.current?.resolve());
-								}
-							}}
-							onSlideChange={(swiper: SwiperClass) => {
-								const activeSlide = swiper.slides[swiper.activeIndex];
-								if (activeSlide?.dataset.id === "special-slide") {
-									setIsSpecialSlide(true);
-								} else {
-									setIsSpecialSlide(false);
-								}
-							}}
-							className={`projects-swiper max-w-full md:max-w-1/2 h-auto`}
-						>
-							<SwiperSlide>
-								<video src={"/projects/orgd/video1.mp4"} autoPlay muted loop playsInline />
-							</SwiperSlide>
-							<SwiperSlide>
-								<Image src={"/projects/orgd/orgd0.jpg"} alt="project" width={2000} height={2000} />
-							</SwiperSlide>
-							<SwiperSlide>
-								<Image src={"/projects/orgd/orgd1.jpg"} alt="project" width={2000} height={2000} />
-							</SwiperSlide>
-							<SwiperSlide>
-								<Image src={"/projects/orgd/orgd3.png"} alt="project" width={2000} height={2000} />
-							</SwiperSlide>
-							<SwiperSlide data-id="special-slide">
-								<div className={`arrow-text flex flex-row items-center justify-start overflow-hidden h-fit ${isSpecialSlide ? "show" : ""}`}>
-									<div className="arrow ml-2"></div>
-									<p className={`text-lg whitespace-nowrap opacity-0 ml-2 ${isSpecialSlide ? "opacity-100" : "opacity-0"}`}>that's me!</p>
-								</div>
-								<Image src={"/projects/orgd/orgd4.png"} alt="project" width={2000} height={2000} />
-							</SwiperSlide>
-							<SwiperSlide>
-								<Image src={"/projects/orgd/orgd5.png"} alt="project" width={2000} height={2000} />
-							</SwiperSlide>
-						</Swiper>
-						<div className="project-description w-full md:max-w-1/2 h-full md:h-[70vh] flex flex-col gap-4 z-30 ml-0 md:ml-20 overflow-y-auto">
-							<div className="sub">
-								<p>프로젝트 소개</p>
-							</div>
-							<ul>{selectedProject.introduction_kr?.map((intro, i) => <li key={i}>{intro}</li>)}</ul>
-							<div className="sub">
-								<p>주요 성과 및 기여</p>
-							</div>
-							<ul>{selectedProject.contribution_kr?.map(c => <li>{c}</li>)}</ul>
-							<div className="sub mt-4">
-								<p>회고</p>
-							</div>
-							<ul>{selectedProject.review_kr?.map(r => <li>{r}</li>)}</ul>
+							<button className="text-xxxl cursor-pointer" onClick={() => handleCloseProject()}>
+								<p className="pointer-events-none">X</p>
+							</button>
 						</div>
-					</div>
-					<div className="fish animate-float absolute">
-						<Image src="/assets/fish0.gif" alt="fish" width={100} height={100} />
-					</div>
-					<div className="absolute bottom-28 left-[5%]">
-						<Image src="/assets/coral.png" alt="coral" width={100} height={100} />
-					</div>
-					<div className="floor absolute bottom-0 bg-theme-sand w-full h-32 z-10 border-t-2 border-black"></div>
-				</section>
-			)}
+
+						<div className="project-detail flex flex-col md:flex-row w-full h-full items-start justify-start relative px-12 md:px-[15%] mt-16">
+							<Swiper
+								modules={[Pagination, Autoplay]}
+								pagination={{clickable: true}}
+								spaceBetween={20}
+								slidesPerView={1}
+								loop={true}
+								autoplay={{delay: 5000, disableOnInteraction: true}}
+								onSwiper={(swiper: SwiperClass) => {
+									if (swiper.initialized) {
+										swiperReadyRef.current?.resolve();
+									} else {
+										swiper.on("init", () => swiperReadyRef.current?.resolve());
+									}
+								}}
+								onSlideChange={(swiper: SwiperClass) => {
+									const activeSlide = swiper.slides[swiper.activeIndex];
+									if (activeSlide?.dataset.id === "special-slide") {
+										setIsSpecialSlide(true);
+									} else {
+										setIsSpecialSlide(false);
+									}
+								}}
+								className={`projects-swiper max-w-full md:max-w-1/2 h-auto`}
+							>
+								<SwiperSlide>
+									<video src={"/projects/orgd/video1.mp4"} autoPlay muted loop playsInline />
+								</SwiperSlide>
+								<SwiperSlide>
+									<Image src={"/projects/orgd/orgd0.jpg"} alt="project" width={2000} height={2000} />
+								</SwiperSlide>
+								<SwiperSlide>
+									<Image src={"/projects/orgd/orgd1.jpg"} alt="project" width={2000} height={2000} />
+								</SwiperSlide>
+								<SwiperSlide>
+									<Image src={"/projects/orgd/orgd3.png"} alt="project" width={2000} height={2000} />
+								</SwiperSlide>
+								<SwiperSlide data-id="special-slide">
+									<div
+										className={`arrow-text flex flex-row items-center justify-start overflow-hidden h-fit ${isSpecialSlide ? "show" : ""}`}
+									>
+										<div className="arrow ml-2"></div>
+										<p className={`text-lg whitespace-nowrap opacity-0 ml-2 ${isSpecialSlide ? "opacity-100" : "opacity-0"}`}>that's me!</p>
+									</div>
+									<Image src={"/projects/orgd/orgd4.png"} alt="project" width={2000} height={2000} />
+								</SwiperSlide>
+								<SwiperSlide>
+									<Image src={"/projects/orgd/orgd5.png"} alt="project" width={2000} height={2000} />
+								</SwiperSlide>
+							</Swiper>
+							<div className="project-description w-full md:max-w-1/2 h-full md:h-[70vh] flex flex-col gap-4 z-30 ml-0 md:ml-20 overflow-y-auto">
+								<div className="sub">
+									<p>프로젝트 소개</p>
+								</div>
+								<ul>{selectedProject.introduction_kr?.map((intro, i) => <li key={"intro" + i}>{intro}</li>)}</ul>
+								<div className="sub">
+									<p>주요 성과 및 기여</p>
+								</div>
+								<ul>{selectedProject.contribution_kr?.map((c, i) => <li key={"c" + i}>{c}</li>)}</ul>
+								<div className="sub mt-4">
+									<p>회고</p>
+								</div>
+								<ul>{selectedProject.review_kr?.map((r, i) => <li key={"r" + i}>{r}</li>)}</ul>
+							</div>
+						</div>
+						<div className="fish animate-float absolute">
+							<Image src="/assets/fish0.gif" alt="fish" width={100} height={100} />
+						</div>
+						<div className="absolute bottom-28 left-[5%]">
+							<Image src="/assets/coral.png" alt="coral" width={100} height={100} />
+						</div>
+						<div className="floor absolute bottom-0 bg-theme-sand w-full h-32 z-10 border-t-2 border-black"></div>
+					</section>
+				)}
+			</section>
+
 			{/* <div className="h-screen">Top content</div>
 			<div className="h-screen">Top content</div> */}
 

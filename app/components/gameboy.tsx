@@ -117,12 +117,8 @@ export default function Gameboy({project}: GameboyProps) {
 						<div className="w-[32rem] h-[20rem] bg-off-screen">
 							<div className="gameboy-screen w-full h-full">
 								<div className="contents w-full h-full flex flex-col justify-center items-center text-black font-dunggeunmo font-normal gap-2">
-									<p className="text-xl">{project?.title.toUpperCase()}</p>
-									<div className="flex flex-wrap-reverse justify-center w-full h-fit gap-2 px-4">
-										{project &&
-											project.stacks?.length > 0 &&
-											project.stacks.map((s: string) => <Image key={s} src={`/icons/${s}.svg`} width={20} height={20} alt={s} />)}
-									</div>
+									<p className="text-xxl">{project?.title.toUpperCase()}</p>
+									<p className="text-m">loading</p>
 									<Image src="/assets/spinner.svg" alt="loading spinner" width={40} height={40} className="animate-spin" />
 								</div>
 							</div>
