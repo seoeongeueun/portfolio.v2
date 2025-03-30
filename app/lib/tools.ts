@@ -34,7 +34,6 @@ export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, 
 
 export const getRandomInt = (val: number): number => Math.ceil(Math.random() * val) * (Math.random() < 0.5 ? -1 : 1);
 
-
 function preventScroll(e: Event) {
 	e.preventDefault();
 	e.stopPropagation();
@@ -52,4 +51,24 @@ export function lockScroll() {
 export function unlockScroll() {
 	window.removeEventListener("wheel", preventScroll);
 	window.removeEventListener("touchmove", preventScroll);
+}
+
+export function throttle<T extends (...args: any[]) => void>(func: T, delay: number): T {
+	let lastCall = 0;
+	let timeoutId: NodeJS.Timeout | null = null;
+
+	return function (...args: any[]) {
+		const now = Date.now();
+
+		if (now - lastCall < delay) {
+			if (timeoutId) clearTimeout(timeoutId);
+			timeoutId = setTimeout(() => {
+				lastCall = Date.now();
+				func(...args);
+			}, delay);
+		} else {
+			lastCall = now;
+			func(...args);
+		}
+	} as T;
 }

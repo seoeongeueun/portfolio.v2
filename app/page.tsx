@@ -2,7 +2,7 @@
 import Image from "next/image";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
-import {Fragment, useEffect, useState, useRef} from "react";
+import {Fragment, useEffect, useState, useRef, useLayoutEffect, useCallback, useMemo} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy, {Project} from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
@@ -18,7 +18,7 @@ import html2canvas from "html2canvas";
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination, Autoplay} from "swiper/modules";
 import {Swiper as SwiperClass} from "swiper/types";
-import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt} from "./lib/tools";
+import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt, throttle} from "./lib/tools";
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -42,6 +42,8 @@ export default function Home() {
 	const [isSectionReady, setIsSectionReady] = useState<boolean>(false);
 
 	const bowlRef = useRef<HTMLDivElement | null>(null);
+	const bowlRectRef = useRef<DOMRect | null>(null);
+	const pseudoRectRef = useRef<{left: number; right: number; top: number; bottom: number} | null>(null);
 	const charPositionsRef = useRef<Record<string, {x: number; y: number}>>({});
 
 	const mainRef = useRef<HTMLDivElement>(null);
@@ -69,6 +71,28 @@ export default function Home() {
 		return {top, left, right: left + width, bottom: top + height, width, height};
 	};
 
+	function measureBowl() {
+		if (!bowlRef.current) return;
+		bowlRectRef.current = bowlRef.current.getBoundingClientRect();
+		pseudoRectRef.current = getPseudoBounds(bowlRef.current, "::before");
+	}
+
+	useEffect(() => {
+		if (!bowlRef.current) return;
+
+		measureBowl();
+
+		const throttledResize = throttle(() => {
+			measureBowl();
+		}, 200);
+
+		window.addEventListener("resize", throttledResize);
+
+		return () => {
+			window.removeEventListener("resize", throttledResize);
+		};
+	}, []);
+
 	useEffect(() => {
 		const waveTl = gsap.timeline({repeat: 1, yoyo: true, ease: "power3.inOut"});
 		waveTl
@@ -92,6 +116,16 @@ export default function Home() {
 			});
 		if (!bowlRef.current) return;
 
+		const allChars = bowlRef.current.querySelectorAll<HTMLElement>(".char");
+		allChars.forEach(char => {
+			gsap.set(char, {x: 0, y: 0, rotation: 0});
+		});
+
+		const allShadows = bowlRef.current.querySelectorAll<HTMLElement>(".shadow");
+		allShadows.forEach(shadow => {
+			gsap.set(shadow, {x: 0, y: 0});
+		});
+
 		Object.keys(stacks).forEach(key => {
 			if (!charPositionsRef.current[key]) {
 				charPositionsRef.current[key] = {
@@ -103,14 +137,6 @@ export default function Home() {
 
 		gsap.defaults({overwrite: true});
 
-		let bowlRect: DOMRect;
-		let pseudoRect: any;
-
-		function measureBowl() {
-			if (!bowlRef.current) return;
-			bowlRect = bowlRef.current.getBoundingClientRect();
-			pseudoRect = getPseudoBounds(bowlRef.current, "::before");
-		}
 		measureBowl();
 
 		//과부화 방지용 쓰로틀 추가
@@ -121,6 +147,11 @@ export default function Home() {
 
 		function moveChars({event, deltaX, deltaY}: {event: MouseEvent; deltaX: number; deltaY: number}) {
 			if (moveCharsFrameId) return;
+			measureBowl();
+			const bowlRect = bowlRectRef.current;
+			const pseudoRect = pseudoRectRef.current;
+
+			if (!bowlRect || !pseudoRect) return;
 
 			//시간으로 throttle 계산
 			if (Date.now() - lastMoveTime < moveThrottle) return;
@@ -136,18 +167,23 @@ export default function Home() {
 				const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
 				const charBounds = el.getBoundingClientRect();
 
-				const t = 1;
+				const t = 3; //이동 강도
 				let newX = charBounds.left + deltaX * t;
 				let newY = charBounds.top + deltaY * t;
 
 				const vmin = Math.min(window.innerWidth, window.innerHeight);
 				const yMargin = (vmin * 4) / 100;
 				const xMargin = (vmin * 12) / 100;
-				console.log(newY, bowlRect.top, yMargin, pseudoRect.top, bowlRect.top - yMargin - charBounds.width);
+
+				const width = charBounds.width;
+				const height = charBounds.height;
+
+				if (!bowlRect || !pseudoRect) return;
+
 				if (newX < bowlRect.left + xMargin) newX = bowlRect.left + xMargin;
-				if (newX + charBounds.width > pseudoRect.right - xMargin) newX = pseudoRect.right - xMargin - charBounds.width / 2.5;
+				if (newX + width > pseudoRect.right - xMargin) newX = pseudoRect.right - xMargin - width / 2.5;
 				if (newY < bowlRect.top + yMargin) newY = bowlRect.top + yMargin;
-				if (newY + charBounds.height > bowlRect.bottom - yMargin) newY = bowlRect.bottom - charBounds.height - yMargin;
+				if (newY + height > bowlRect.bottom - yMargin) newY = bowlRect.bottom - height - yMargin;
 
 				const xMovement = newX - charBounds.left;
 				const yMovement = newY - charBounds.top;
@@ -232,6 +268,7 @@ export default function Home() {
 
 		return () => {
 			observer.kill();
+			waveTl.kill();
 			bowlRef.current?.removeEventListener("mousemove", handleMouseMove);
 			bowlRef.current?.removeEventListener("mouseleave", handleMouseLeave);
 			if (moveCharsFrameId) cancelAnimationFrame(moveCharsFrameId);
@@ -341,9 +378,8 @@ export default function Home() {
 				const localProgress = gsap.utils.clamp(0, 1, (dustProgress - p.delay) / (1 - p.delay));
 				const alpha = p.a * 1.7;
 
-				//각자 단계 지속시간 const 값으로 진행도를 계산
-				const fillStrength = gsap.utils.clamp(0, 1, (localProgress - BORDER_END) / (FILL_END - BORDER_END));
-				const moveStrength = gsap.utils.clamp(0, 1, (localProgress - FILL_END) / (1 - FILL_END));
+				const fillStrength = Math.min(Math.max((localProgress - BORDER_END) / (FILL_END - BORDER_END), 0), 1);
+				const moveStrength = Math.min(Math.max((localProgress - FILL_END) / (1 - FILL_END), 0), 1);
 				const x = p.x + p.dx * moveStrength;
 				const y = p.y + p.dy * moveStrength;
 
@@ -351,12 +387,12 @@ export default function Home() {
 				const fadeAlpha = alpha * (1 - moveStrength);
 				const fillAlpha = alpha * fillStrength * (1 - moveStrength);
 
-				if (fillStrength > 0) {
-					dustCtx!.fillStyle = `rgba(${p.r},${p.g},${p.b},${fillAlpha})`;
-					dustCtx!.fillRect(x, y, PARTICLE_SIZE, PARTICLE_SIZE);
+				if (fillStrength > 0 && dustCtx) {
+					dustCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${fillAlpha})`;
+					dustCtx.fillRect(x, y, PARTICLE_SIZE, PARTICLE_SIZE);
 				}
 
-				const borderAlphaStrength = gsap.utils.clamp(0, 1, localProgress / BORDER_END);
+				const borderAlphaStrength = Math.min(Math.max(localProgress / BORDER_END, 0), 1);
 				const borderAlpha = fadeAlpha * borderAlphaStrength * 0.3;
 
 				// border는 항상 그리되 이동된 위치에만
@@ -709,10 +745,10 @@ export default function Home() {
 		};
 	}, []);
 
-	const handleProjectsFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleProjectsFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		const {name, checked} = e.target;
 		setTags(prev => (checked ? [...prev, name.toUpperCase()] : prev.filter(filter => filter !== name.toUpperCase())));
-	};
+	}, []);
 
 	useEffect(() => {
 		if (!tags) {
@@ -801,7 +837,7 @@ export default function Home() {
 		};
 	}, [isSectionReady]);
 
-	const handleCloseProject = () => {
+	const handleCloseProject = useCallback(() => {
 		const section = projectDetailRef.current;
 		if (!section) return;
 
@@ -820,6 +856,16 @@ export default function Home() {
 		return () => {
 			section.removeEventListener("animationend", clearProjectPage);
 		};
+	}, []);
+
+	const usePerformanceMonitor = (label: string) => {
+		useEffect(() => {
+			const start = performance.now();
+			return () => {
+				const end = performance.now();
+				console.log(`${label}: ${end - start}ms`);
+			};
+		}, [label]);
 	};
 
 	return (
@@ -976,7 +1022,7 @@ export default function Home() {
 				</section>
 			</div>
 
-			<section className="mt-24 w-full full-section min-h-screen text-center font-dunggeunmo projects-section relative">
+			<section className="w-full full-section min-h-screen text-center font-dunggeunmo projects-section relative">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
@@ -1032,7 +1078,7 @@ export default function Home() {
 								loop={true}
 								autoplay={{delay: 5000, disableOnInteraction: true}}
 								onSwiper={(swiper: SwiperClass) => {
-									if (swiper.initialized) {
+									if (swiper.isBeginning) {
 										swiperReadyRef.current?.resolve();
 									} else {
 										swiper.on("init", () => swiperReadyRef.current?.resolve());
