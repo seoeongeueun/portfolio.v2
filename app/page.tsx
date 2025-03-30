@@ -2,7 +2,7 @@
 import Image from "next/image";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
-import {Fragment, useEffect, useState, useRef, useLayoutEffect, useCallback, useMemo} from "react";
+import {Fragment, useEffect, useState, useRef, useCallback} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy, {Project} from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
@@ -18,7 +18,7 @@ import html2canvas from "html2canvas";
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination, Autoplay} from "swiper/modules";
 import {Swiper as SwiperClass} from "swiper/types";
-import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt, throttle} from "./lib/tools";
+import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt, throttle, debounce} from "./lib/tools";
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -41,8 +41,8 @@ export default function Home() {
 	const [isSpecialSlide, setIsSpecialSlide] = useState<boolean>(false);
 	const [isSectionReady, setIsSectionReady] = useState<boolean>(false);
 
-	const bowlRef = useRef<HTMLDivElement | null>(null);
-	const bowlRectRef = useRef<DOMRect | null>(null);
+	const poolRef = useRef<HTMLDivElement | null>(null);
+	const poolRectRef = useRef<DOMRect | null>(null);
 	const pseudoRectRef = useRef<{left: number; right: number; top: number; bottom: number} | null>(null);
 	const charPositionsRef = useRef<Record<string, {x: number; y: number}>>({});
 
@@ -71,25 +71,26 @@ export default function Home() {
 		return {top, left, right: left + width, bottom: top + height, width, height};
 	};
 
-	function measureBowl() {
-		if (!bowlRef.current) return;
-		bowlRectRef.current = bowlRef.current.getBoundingClientRect();
-		pseudoRectRef.current = getPseudoBounds(bowlRef.current, "::before");
+	function measurePool() {
+		if (!poolRef.current) return;
+		poolRectRef.current = poolRef.current.getBoundingClientRect();
+		pseudoRectRef.current = getPseudoBounds(poolRef.current, "::before");
 	}
 
 	useEffect(() => {
-		if (!bowlRef.current) return;
+		if (!poolRef.current) return;
 
-		measureBowl();
+		//수영장 크기 첫 측정 후 리사이즈 경우에만 측정
+		measurePool();
 
-		const throttledResize = throttle(() => {
-			measureBowl();
+		const debouncedResize = debounce(() => {
+			measurePool();
 		}, 200);
 
-		window.addEventListener("resize", throttledResize);
+		window.addEventListener("resize", debouncedResize);
 
 		return () => {
-			window.removeEventListener("resize", throttledResize);
+			window.removeEventListener("resize", debouncedResize);
 		};
 	}, []);
 
@@ -114,14 +115,14 @@ export default function Home() {
 					scrub: 1,
 				},
 			});
-		if (!bowlRef.current) return;
+		if (!poolRef.current) return;
 
-		const allChars = bowlRef.current.querySelectorAll<HTMLElement>(".char");
+		const allChars = poolRef.current.querySelectorAll<HTMLElement>(".char");
 		allChars.forEach(char => {
 			gsap.set(char, {x: 0, y: 0, rotation: 0});
 		});
 
-		const allShadows = bowlRef.current.querySelectorAll<HTMLElement>(".shadow");
+		const allShadows = poolRef.current.querySelectorAll<HTMLElement>(".shadow");
 		allShadows.forEach(shadow => {
 			gsap.set(shadow, {x: 0, y: 0});
 		});
@@ -137,7 +138,7 @@ export default function Home() {
 
 		gsap.defaults({overwrite: true});
 
-		measureBowl();
+		measurePool();
 
 		//과부화 방지용 쓰로틀 추가
 		let lastMoveTime = 0;
@@ -147,11 +148,11 @@ export default function Home() {
 
 		function moveChars({event, deltaX, deltaY}: {event: MouseEvent; deltaX: number; deltaY: number}) {
 			if (moveCharsFrameId) return;
-			measureBowl();
-			const bowlRect = bowlRectRef.current;
+			measurePool();
+			const poolRect = poolRectRef.current;
 			const pseudoRect = pseudoRectRef.current;
 
-			if (!bowlRect || !pseudoRect) return;
+			if (!poolRect || !pseudoRect) return;
 
 			//시간으로 throttle 계산
 			if (Date.now() - lastMoveTime < moveThrottle) return;
@@ -162,7 +163,7 @@ export default function Home() {
 
 				const el = event.target as HTMLElement;
 				const id = el.classList.contains("char") ? el.className.match(/char-(\S+)/)?.[1] : null;
-				if (!id || !bowlRef.current) return;
+				if (!id || !poolRef.current) return;
 
 				const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
 				const charBounds = el.getBoundingClientRect();
@@ -178,12 +179,12 @@ export default function Home() {
 				const width = charBounds.width;
 				const height = charBounds.height;
 
-				if (!bowlRect || !pseudoRect) return;
+				if (!poolRect || !pseudoRect) return;
 
-				if (newX < bowlRect.left + xMargin) newX = bowlRect.left + xMargin;
+				if (newX < poolRect.left + xMargin) newX = poolRect.left + xMargin;
 				if (newX + width > pseudoRect.right - xMargin) newX = pseudoRect.right - xMargin - width / 2.5;
-				if (newY < bowlRect.top + yMargin) newY = bowlRect.top + yMargin;
-				if (newY + height > bowlRect.bottom - yMargin) newY = bowlRect.bottom - height - yMargin;
+				if (newY < poolRect.top + yMargin) newY = poolRect.top + yMargin;
+				if (newY + height > poolRect.bottom - yMargin) newY = poolRect.bottom - height - yMargin;
 
 				const xMovement = newX - charBounds.left;
 				const yMovement = newY - charBounds.top;
@@ -209,7 +210,7 @@ export default function Home() {
 
 		//마우스 드래그
 		const observer = Observer.create({
-			target: bowlRef.current,
+			target: poolRef.current,
 			onMove: self => {
 				const mouseEvent = self.event as MouseEvent;
 				if (self.event instanceof MouseEvent && self.event.target instanceof HTMLElement && self.event.target.matches(".char")) {
@@ -238,8 +239,8 @@ export default function Home() {
 
 			rippleFrameId = requestAnimationFrame(() => {
 				rippleFrameId = null;
-				const rect = bowlRef.current?.getBoundingClientRect();
-				if (!bowlRef.current || !turbWave || !dispMap || !rect) return;
+				const rect = poolRef.current?.getBoundingClientRect();
+				if (!poolRef.current || !turbWave || !dispMap || !rect) return;
 
 				const x = (e.clientX - rect.left) / rect.width;
 				const y = (e.clientY - rect.top) / rect.height;
@@ -263,14 +264,14 @@ export default function Home() {
 			dispMap?.setAttribute("scale", "2");
 		};
 
-		bowlRef.current.addEventListener("mousemove", handleMouseMove);
-		bowlRef.current.addEventListener("mouseleave", handleMouseLeave);
+		poolRef.current.addEventListener("mousemove", handleMouseMove);
+		poolRef.current.addEventListener("mouseleave", handleMouseLeave);
 
 		return () => {
 			observer.kill();
 			waveTl.kill();
-			bowlRef.current?.removeEventListener("mousemove", handleMouseMove);
-			bowlRef.current?.removeEventListener("mouseleave", handleMouseLeave);
+			poolRef.current?.removeEventListener("mousemove", handleMouseMove);
+			poolRef.current?.removeEventListener("mouseleave", handleMouseLeave);
 			if (moveCharsFrameId) cancelAnimationFrame(moveCharsFrameId);
 			if (rippleFrameId) cancelAnimationFrame(rippleFrameId);
 		};
@@ -889,7 +890,7 @@ export default function Home() {
 				</div>
 
 				<div className="w-full flex justify-center h-fit">
-					<div ref={bowlRef} className="bowl">
+					<div ref={poolRef} className="pool">
 						<svg width="0" height="0">
 							<defs>
 								<filter id="turb">

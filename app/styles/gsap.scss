@@ -13,12 +13,12 @@
 	aspect-ratio: 5 / 4;
 }
 
-.bowl {
+.pool {
 	z-index: 30;
 	position: relative;
 	display: grid;
 	place-items: center;
-	grid-template-areas: "bowl";
+	grid-template-areas: "pool";
 	width: 65vmin;
 	height: 50vmin;
 	border-radius: 5px;
@@ -90,8 +90,8 @@
 	}
 }
 
-.bowl > * {
-	grid-area: bowl;
+.pool > * {
+	grid-area: pool;
 }
 
 .shore-overlay {
