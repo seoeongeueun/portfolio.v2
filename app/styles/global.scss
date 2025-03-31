@@ -92,7 +92,7 @@
 .main-header {
 	color: rgb(46, 46, 46);
 	background-color: transparent;
-	overflow: hidden;
+	--intro-bg: rgb(221, 221, 221);
 
 	> * {
 		transition:
@@ -101,61 +101,12 @@
 	}
 
 	> .open {
-		height: 100vh;
-		height: 100svh;
-		background-color: white;
-
-		> div:first-child {
-			background-color: var(--theme-orange);
-		}
-		//background: linear-gradient(to bottom, white 70%, var(--theme-navy) 30%);
+		height: 25rem;
+		background-color: var(--intro-bg);
 	}
 
 	> .close {
 		height: 5rem;
-	}
-
-	.rope-container {
-		position: absolute;
-		top: -10rem;
-		left: 0;
-
-		.rope {
-			width: 40rem;
-			height: 10rem;
-			position: relative;
-
-			&::after {
-				content: "";
-				position: absolute;
-				bottom: 0;
-				left: 0;
-				width: 20rem;
-				height: 10rem;
-				background: transparent;
-				border-top-left-radius: 100px;
-				border-top-right-radius: 100px;
-				box-shadow:
-					0 -5px 0 0px var(--gray-1),
-					-2px -7px 4px 0px rgba(99, 99, 99, 0.1);
-				transform: rotate(170deg) scaleY(1.5) scaleX(2);
-			}
-
-			&:nth-child(2n + 1) {
-				&::after {
-					transform: rotate(180deg) scaleY(1.5) scaleX(4);
-					left: 4rem;
-				}
-			}
-
-			&:last-child {
-				&::after {
-					transform: rotate(180deg) scaleY(1.5) scaleX(4);
-					left: -4rem;
-					top: 2rem;
-				}
-			}
-		}
 	}
 
 	.lifebuoy {
@@ -172,15 +123,23 @@
 			var(--theme-orange) 270deg 315deg,
 			white 315deg 360deg
 		);
-		box-shadow: inset 0 0 10px 10px rgba(184, 66, 11, 0.2);
-		position: relative;
+		box-shadow:
+			inset 0 0 10px 10px rgba(184, 66, 11, 0.2),
+			5px 5px 6px 0px rgb(189, 177, 171, 0.1);
+		flex-shrink: 0;
+
+		&.mini {
+			--intro-bg: var(--main-bg);
+			transform: scale(0.15);
+			cursor: pointer;
+		}
 
 		&::before {
 			content: "";
 			position: absolute;
 			width: 40%;
 			height: 40%;
-			background-color: white;
+			background-color: var(--intro-bg);
 			border-radius: 100%;
 			left: 50%;
 			top: 50%;
@@ -206,19 +165,63 @@
 		}
 	}
 
+	.rope-container {
+		position: absolute;
+		top: -10rem;
+		left: 0;
+
+		.rope {
+			width: 40rem;
+			height: 10rem;
+			position: relative;
+
+			&::after {
+				content: "";
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				width: 20rem;
+				height: 10rem;
+				background: transparent;
+				border-top-left-radius: 100px;
+				border-top-right-radius: 100px;
+				box-shadow:
+					0 -3px 0 0px var(--gray-1),
+					-2px -5px 2px 0px rgba(99, 99, 99, 0.1);
+				transform: rotate(170deg) scaleY(1.5) scaleX(2);
+			}
+
+			&:nth-child(2n + 1) {
+				&::after {
+					transform: rotate(180deg) scaleY(2.5) scaleX(4);
+					left: 4rem;
+				}
+			}
+
+			&:last-child {
+				&::after {
+					transform: rotate(180deg) scaleY(1.5) scaleX(4);
+					left: -4rem;
+					top: 2rem;
+				}
+			}
+		}
+	}
+
 	.window {
 		width: 10rem;
 		height: 10rem;
-		border: 1rem solid var(--theme-blue);
+		border: 1rem solid var(--theme-navy);
 		box-shadow:
 			inset 0 0 10px 3px rgba(42, 65, 87, 0.2),
-			inset 0 0 2px 1px rgba(0, 0, 0, 0.8);
+			inset 0 0 2px 1px rgba(0, 0, 0, 0.8),
+			0px 0px 1px 3px rgba(0, 0, 0, 0.1);
 		position: relative;
 		border-radius: 100%;
 		flex-shrink: 0;
 		overflow: hidden;
 		pointer-events: auto;
-		background-color: rgba(0, 0, 0, 0.3);
+		background-color: rgba(88, 88, 88, 0.8);
 		transition: background-color 0.3s ease-in-out;
 
 		&::after {
@@ -234,7 +237,7 @@
 		}
 
 		&:hover {
-			background-color: transparent;
+			background-color: white;
 			&::after {
 				opacity: 0;
 			}
@@ -252,7 +255,9 @@
 
 	.header-base {
 		background: var(--theme-navy);
-		border-top: 1rem solid var(--theme-blue);
+		box-shadow:
+			0 -0.5rem 0 0 white,
+			0 -1.5rem 0 0 var(--theme-navy);
 	}
 }
 

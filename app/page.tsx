@@ -875,39 +875,43 @@ export default function Home() {
 
 	return (
 		<div ref={mainRef} className="main-page text-white w-full flex flex-col items-center justify-start">
-			<div className={`fixed top-0 main-header pointer-events-none w-full h-fit z-40`}>
-				<div className={`w-full flex flex-col items-center justify-start mb-auto ${headerOpen ? "open" : "close"}`}>
-					<div className="w-full justify-between flex flex-row items-center">
-						<span>ha</span>
-						<button className="pointer-events-auto" onClick={() => openHeader()}>
-							open
-						</button>
+			<div className={`fixed top-0 h-fit main-header pointer-events-none w-full h-fit z-40 flex flex-row-reverse`}>
+				<button className="pointer-events-auto w-20 h-20 flex items-center justify-center float-right" onClick={() => openHeader()}>
+					<div className="lifebuoy mini hover:rotate-60 transition-transform duration-300"></div>
+				</button>
+				{headerOpen && (
+					<div className="mt-4 bg-white p-4 w-fit h-fit rounded-sm border border-4 border-theme-orange text-theme-orange outline-4 outline-white">
+						<div className="flex flex-row items-center mb-1">
+							<p className="text-md mr-2 mt-2 text-gray-4">CONTACTS</p>
+							<Image src="/assets/anchor.svg" alt="anchor" width={15} height={15} />
+						</div>
+						<p className="text-[1rem]">github.com/seoeongeueun</p>
+						<p className="text-[1rem]">seongeun9901@gmail.com</p>
 					</div>
-					<div className="h-full w-full p-12">
-						{/* <div className="flex flex-row w-fit h-full rotate-10 absolute -top-10">
-							<div className="h-full w-[10vw] bg-theme-yellow"></div>
-							<div className="h-full w-4 bg-theme-orange"></div>
-						</div> */}
-						<div className="flex flex-row items-center justify-around w-full py-12">
-							<div className="flex flex-row rope-container">
+				)}
+
+				{/* <div className="h-full w-full">
+						<div className="flex flex-row items-start justify-around w-full">
+							<div className="flex flex-row rope-container z-20">
 								<div className="rope"></div>
 								<div className="rope two"></div>
 								<div className="rope two"></div>
 								<div className="rope two"></div>
 							</div>
-							<div className="lifebuoy mini pointer-events-auto rotate-40 hover:rotate-180 transition-transform duration-1000"></div>
-							<div className="lifebuoy mini pointer-events-auto rotate-20 hover:rotate-180 transition-transform duration-1000"></div>
+							<div className="lifebuoy pointer-events-auto rotate-40 hover:rotate-180 transition-transform duration-1000"></div>
+							<div className="lifebuoy pointer-events-auto rotate-20 hover:rotate-180 transition-transform duration-1000"></div>
 							<div className="window"></div>
 							<div className="window">
 								<Image src="/icons/github.png" alt="github" width={100} height={100} />
 							</div>
 							<div className="window"></div>
 						</div>
-						<p>wa wa wa stuff stuff about about stuff</p>
-					</div>
-
-					<div className="header-base w-full h-[30vh]"></div>
-				</div>
+						<div className="flex flex-row items-center absolute bottom-32 left-20">
+							<p className="text-[4rem] mr-4 mt-4">CONTACTS</p>
+							<Image src="/assets/anchor.svg" alt="anchor" width={30} height={30} />
+						</div>
+						<div className="header-base w-full h-[8rem]"></div>
+					</div> */}
 				{/* <div className="h-full w-full flex flex-row bg-blue-100"></div> */}
 			</div>
 			<section className="w-full flex flex-col items-center pt-52">
