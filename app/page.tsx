@@ -40,6 +40,7 @@ export default function Home() {
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
 	const [isSpecialSlide, setIsSpecialSlide] = useState<boolean>(false);
 	const [isSectionReady, setIsSectionReady] = useState<boolean>(false);
+	const [headerOpen, setHeaderOpen] = useState<boolean>(false);
 
 	const poolRef = useRef<HTMLDivElement | null>(null);
 	const poolRectRef = useRef<DOMRect | null>(null);
@@ -409,7 +410,6 @@ export default function Home() {
 			pin: true,
 			pinSpacing: false,
 			scrub: true,
-			markers: true,
 			onUpdate: self => {
 				const progress = self.progress;
 				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
@@ -869,12 +869,46 @@ export default function Home() {
 		}, [label]);
 	};
 
+	const openHeader = () => {
+		setHeaderOpen(prev => !prev);
+	};
+
 	return (
 		<div ref={mainRef} className="main-page text-white w-full flex flex-col items-center justify-start">
-			<div className="fixed top-0 p-4 pointer-events-none w-full">
-				<div className="w-full flex flex-row items-center justify-between mb-auto">
-					<span>ha</span>
+			<div className={`fixed top-0 main-header pointer-events-none w-full h-fit z-40`}>
+				<div className={`w-full flex flex-col items-center justify-start mb-auto ${headerOpen ? "open" : "close"}`}>
+					<div className="w-full justify-between flex flex-row items-center">
+						<span>ha</span>
+						<button className="pointer-events-auto" onClick={() => openHeader()}>
+							open
+						</button>
+					</div>
+					<div className="h-full w-full p-12">
+						{/* <div className="flex flex-row w-fit h-full rotate-10 absolute -top-10">
+							<div className="h-full w-[10vw] bg-theme-yellow"></div>
+							<div className="h-full w-4 bg-theme-orange"></div>
+						</div> */}
+						<div className="flex flex-row items-center justify-around w-full py-12">
+							<div className="flex flex-row rope-container">
+								<div className="rope"></div>
+								<div className="rope two"></div>
+								<div className="rope two"></div>
+								<div className="rope two"></div>
+							</div>
+							<div className="lifebuoy mini pointer-events-auto rotate-40 hover:rotate-180 transition-transform duration-1000"></div>
+							<div className="lifebuoy mini pointer-events-auto rotate-20 hover:rotate-180 transition-transform duration-1000"></div>
+							<div className="window"></div>
+							<div className="window">
+								<Image src="/icons/github.png" alt="github" width={100} height={100} />
+							</div>
+							<div className="window"></div>
+						</div>
+						<p>wa wa wa stuff stuff about about stuff</p>
+					</div>
+
+					<div className="header-base w-full h-[30vh]"></div>
 				</div>
+				{/* <div className="h-full w-full flex flex-row bg-blue-100"></div> */}
 			</div>
 			<section className="w-full flex flex-col items-center pt-52">
 				<div className="flex flex-col justify-center items-center">

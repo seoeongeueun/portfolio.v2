@@ -89,6 +89,173 @@
 	padding: 3rem 2rem;
 }
 
+.main-header {
+	color: rgb(46, 46, 46);
+	background-color: transparent;
+	overflow: hidden;
+
+	> * {
+		transition:
+			background-color 0.7s ease-in-out,
+			height 0.7s ease-in-out;
+	}
+
+	> .open {
+		height: 100vh;
+		height: 100svh;
+		background-color: white;
+
+		> div:first-child {
+			background-color: var(--theme-orange);
+		}
+		//background: linear-gradient(to bottom, white 70%, var(--theme-navy) 30%);
+	}
+
+	> .close {
+		height: 5rem;
+	}
+
+	.rope-container {
+		position: absolute;
+		top: -10rem;
+		left: 0;
+
+		.rope {
+			width: 40rem;
+			height: 10rem;
+			position: relative;
+
+			&::after {
+				content: "";
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				width: 20rem;
+				height: 10rem;
+				background: transparent;
+				border-top-left-radius: 100px;
+				border-top-right-radius: 100px;
+				box-shadow:
+					0 -5px 0 0px var(--gray-1),
+					-2px -7px 4px 0px rgba(99, 99, 99, 0.1);
+				transform: rotate(170deg) scaleY(1.5) scaleX(2);
+			}
+
+			&:nth-child(2n + 1) {
+				&::after {
+					transform: rotate(180deg) scaleY(1.5) scaleX(4);
+					left: 4rem;
+				}
+			}
+
+			&:last-child {
+				&::after {
+					transform: rotate(180deg) scaleY(1.5) scaleX(4);
+					left: -4rem;
+					top: 2rem;
+				}
+			}
+		}
+	}
+
+	.lifebuoy {
+		width: 17rem;
+		height: 17rem;
+		border-radius: 100%;
+		background: conic-gradient(
+			var(--theme-orange) 0deg 45deg,
+			white 45deg 90deg,
+			var(--theme-orange) 90deg 135deg,
+			white 135deg 180deg,
+			var(--theme-orange) 180deg 225deg,
+			white 225deg 270deg,
+			var(--theme-orange) 270deg 315deg,
+			white 315deg 360deg
+		);
+		box-shadow: inset 0 0 10px 10px rgba(184, 66, 11, 0.2);
+		position: relative;
+
+		&::before {
+			content: "";
+			position: absolute;
+			width: 40%;
+			height: 40%;
+			background-color: white;
+			border-radius: 100%;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			box-shadow:
+				0 0 10px 10px rgba(139, 74, 44, 0.3),
+				inset 0 0 7px 3px rgba(0, 0, 0, 0.1);
+		}
+
+		&::after {
+			content: "";
+			position: absolute;
+			width: 63%;
+			height: 63%;
+			background-color: transparent;
+			border-radius: 100%;
+			left: 50%;
+			top: 50%;
+			filter: blur(6px);
+			transform: translate(-50%, -50%);
+			box-shadow: 0 0 5px 15px rgba(255, 255, 255, 0.3);
+			box-shadow: 0 0 5% 15% rgba(255, 255, 255, 0.3);
+		}
+	}
+
+	.window {
+		width: 10rem;
+		height: 10rem;
+		border: 1rem solid var(--theme-blue);
+		box-shadow:
+			inset 0 0 10px 3px rgba(42, 65, 87, 0.2),
+			inset 0 0 2px 1px rgba(0, 0, 0, 0.8);
+		position: relative;
+		border-radius: 100%;
+		flex-shrink: 0;
+		overflow: hidden;
+		pointer-events: auto;
+		background-color: rgba(0, 0, 0, 0.3);
+		transition: background-color 0.3s ease-in-out;
+
+		&::after {
+			position: absolute;
+			inset: 0;
+			content: "";
+			border-radius: 100%;
+			background: linear-gradient(-60deg, var(--main-bg) 0%, white 50%, var(--main-bg) 80%, var(--main-bg) 100%);
+			opacity: 0.8;
+			transition: opacity 0.3s ease-in-out;
+			mix-blend-mode: hard-light;
+			cursor: pointer;
+		}
+
+		&:hover {
+			background-color: transparent;
+			&::after {
+				opacity: 0;
+			}
+		}
+
+		> img {
+			position: absolute;
+			object-fit: cover;
+			width: 100%;
+			height: auto;
+			padding: 1rem;
+			top: 1.5rem;
+		}
+	}
+
+	.header-base {
+		background: var(--theme-navy);
+		border-top: 1rem solid var(--theme-blue);
+	}
+}
+
 .towels-container {
 	display: flex;
 	flex-direction: column;
