@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
 import {Fragment, useEffect, useState, useRef, useCallback} from "react";
@@ -708,7 +709,7 @@ export default function Home() {
 						clickedCard.style.setProperty("--y-distance", `${distance + 20}px`);
 						clickedCard.classList.add("moveY");
 						const t2 = setTimeout(() => {
-							window.scrollTo({top: window.scrollY + distance, behavior: "smooth"});
+							window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
 						}, 300);
 						timeouts.push(t2);
 					}, 800);
@@ -880,12 +881,18 @@ export default function Home() {
 					<div className="lifebuoy mini hover:rotate-60 transition-transform duration-300"></div>
 				</button>
 				{headerOpen && (
-					<div className="mt-4 bg-white p-4 w-fit h-fit rounded-sm border border-4 border-theme-orange text-theme-orange outline-4 outline-white">
+					<div className="pointer-events-auto contact-box opacity-90 drop-shadow-sm mt-4 bg-theme-orange p-4 w-fit h-fit rounded-sm border border-4 border-white text-white outline-4 outline-theme-orange">
 						<div className="flex flex-row items-center mb-1">
-							<p className="text-md mr-2 mt-2 text-gray-4">CONTACTS</p>
+							<p className="text-md mr-2 mt-2">CONTACTS</p>
 							<Image src="/assets/anchor.svg" alt="anchor" width={15} height={15} />
 						</div>
-						<p className="text-[1rem]">github.com/seoeongeueun</p>
+						<Link
+							className="text-[1rem] hover:underline underline-offset-2 decoration-white"
+							href="https://github.com/seoeongeueun"
+							target="__blank"
+						>
+							github.com/seoeongeueun
+						</Link>
 						<p className="text-[1rem]">seongeun9901@gmail.com</p>
 					</div>
 				)}
