@@ -292,6 +292,12 @@ $breakpoint-tablet-max: 1024px;
 		&:hover {
 			opacity: 100% !important;
 		}
+
+		// @media screen and (max-width: $breakpoint-mobile) {
+		// 	&:first-child {
+		// 		margin-top: 0;
+		// 	}
+		// }
 	}
 
 	& > div:nth-child(2n + 1) {
@@ -554,7 +560,7 @@ $breakpoint-tablet-max: 1024px;
 		--scale-factor: 0.2;
 
 		@media screen and (max-width: $breakpoint-mobile) {
-			--scale-factor: 0.5;
+			--scale-factor: 0.4;
 		}
 
 		&:nth-child(2n + 1) {
@@ -1085,6 +1091,12 @@ $breakpoint-tablet-max: 1024px;
 }
 
 .gameboy-section {
+	width: 77rem;
+	height: 40rem;
+
+	@media screen and (max-width: $breakpoint-mobile) {
+		transform: scale(0.6);
+	}
 	.gameboy-screen {
 		background: linear-gradient(130deg, #858383, #3f3c3c);
 	}

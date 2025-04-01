@@ -177,6 +177,10 @@ section.full-section {
 	opacity: 0;
 }
 
+.pin-spacer {
+	overflow: hidden !important;
+}
+
 /* canvas {
 	transition: opacity 5s ease-in-out;
 } */

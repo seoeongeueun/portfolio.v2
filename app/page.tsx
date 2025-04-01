@@ -993,7 +993,7 @@ export default function Home() {
 				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
 				<section ref={shoreRef} className="w-full shore relative z-20">
-					<div className="md:float-left w-full md:w-1/2 flex flex-col justify-start items-start shore-title">
+					<div className="float-left w-full md:w-1/2 flex flex-col justify-start items-start shore-title">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
 							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
@@ -1068,7 +1068,7 @@ export default function Home() {
 				</section>
 			</div>
 
-			<section className="w-full full-section min-h-screen text-center font-dunggeunmo projects-section relative">
+			<section className="w-full full-section text-center font-dunggeunmo projects-section relative -mt-32 md:-mt-0">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
@@ -1092,7 +1092,9 @@ export default function Home() {
 						))}
 					</div>
 				</div>
-				<div className={`relative -mt-32 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} flex flex-col items-center justify-center`}>
+				<div
+					className={`relative mt-0 md:-mt-32 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} justify-self-center flex flex-col items-center justify-center`}
+				>
 					<Gameboy project={selectedProject} />
 				</div>
 				{selectedProject && (
