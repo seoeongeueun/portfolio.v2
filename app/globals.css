@@ -145,17 +145,17 @@ section {
 	padding-right: 15rem;
 }
 
-@media screen and (max-width: 640px) {
-	section {
-		padding-left: 4rem;
-		padding-right: 4rem;
-	}
-}
-
 @media screen and (max-width: 1024px) {
 	section {
 		padding-left: 6rem;
 		padding-right: 6rem;
+	}
+}
+
+@media screen and (max-width: 640px) {
+	section {
+		padding-left: 4rem;
+		padding-right: 4rem;
 	}
 }
 

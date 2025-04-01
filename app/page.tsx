@@ -923,18 +923,18 @@ export default function Home() {
 			</div>
 			<section className="w-full flex flex-col items-center pt-52">
 				<div className="flex flex-col justify-center items-center">
-					<p ref={miniTitleRef} className="underline-text opacity-0 ml-auto text-white text-s lg:text-xl rotate-10 -mb-8 md:-mb-[3rem] z-30">
+					<p ref={miniTitleRef} className="underline-text opacity-0 ml-[90%] text-white text-s lg:text-xl rotate-10 -mb-6 md:-mb-[3rem] z-30">
 						SEOEONGEUEUN's
 					</p>
-					<p ref={mainTitleRef} className="main-title md:whitespace-nowrap font-normal text-center text-[7rem] md:text-[10rem] lg:text-[12rem]">
+					<p ref={mainTitleRef} className="main-title whitespace-nowrap font-normal text-center text-[6rem] md:text-[10rem] lg:text-[12rem]">
 						The Pool
 					</p>
-					<div className="w-full text-xxxl text-white flex flex-row items-center justify-center gap-2">
-						of my floating ideas <Image src="/assets/flippers.png" width={50} height={50} alt="flippers" />
+					<div className="w-full text-md md:text-xxxl text-white flex flex-row items-center justify-center gap-2">
+						of my floating ideas <Image src="/assets/flippers.png" width={50} height={50} alt="flippers" className="w-12 h-12" />
 					</div>
 				</div>
 
-				<div className="w-full flex justify-center h-fit">
+				<div className="w-full flex justify-center h-fit mt-12">
 					<div ref={poolRef} className="pool">
 						<svg width="0" height="0">
 							<defs>
@@ -993,7 +993,7 @@ export default function Home() {
 				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
 				<section ref={shoreRef} className="w-full shore relative z-20">
-					<div className="float-left w-1/2 flex flex-col justify-start items-start shore-title">
+					<div className="md:float-left w-full md:w-1/2 flex flex-col justify-start items-start shore-title">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
 							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
@@ -1031,9 +1031,9 @@ export default function Home() {
 								</div>
 							</div>
 						</div>
-						<p className="description text-m max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
+						<p className="description text-m whitespace-pre-line">{textFile["001"]}</p>
 					</div>
-					<div ref={towelsRef} className="float-left towels-container spread w-1/2">
+					<div ref={towelsRef} className="float-left towels-container spread w-full md:w-1/2">
 						{CareerData &&
 							Object.entries(CareerData).map(([k, v], i) => (
 								<div className="towel-wrapper">
@@ -1051,12 +1051,12 @@ export default function Home() {
 									</svg>
 									<div
 										data-towel-index={i + 1}
-										className="towel w-full flex flex-col items-start justify-start p-10 px-12"
+										className="towel w-full flex flex-col items-start justify-start p-10 md:px-12"
 										style={{filter: `url(#wibble-${i + 1})`}}
 									>
 										<div className="flex flex-wrap items-center justify-start mb-2">
-											<p className="title mr-4 whitespace-nowrap">{v.position}</p>
-											<p>@ {k}</p>
+											<p className="title md:mr-4 md:whitespace-nowrap">{v.position}</p>
+											<p className="ml-auto md:ml-0">@ {k}</p>
 										</div>
 
 										<ul>{v.text_kr?.length > 0 && v.text_kr.map((t, i) => <li key={k + i}>{t}</li>)}</ul>
@@ -1080,8 +1080,11 @@ export default function Home() {
 						<label>{textFile["003"]}</label>
 					</div>
 				</div>
-				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full flex overflow-x-auto overflow-y-hidden min-h-screen md:min-h-[100vh]">
-					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-8 md:gap-24 md:py-40">
+				<div
+					ref={cartridgeCardsContainerRef}
+					className="gallery px-24 w-full flex items-center overflow-x-auto overflow-y-hidden min-h-[40rem] md:min-h-[100vh]"
+				>
+					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-16 md:gap-24 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
 							<div key={v.title} data-project={k} className={`card card-${k} w-fit`}>
 								<Cartridge project={v} />
