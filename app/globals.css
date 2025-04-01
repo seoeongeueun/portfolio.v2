@@ -147,8 +147,8 @@ section {
 
 @media screen and (max-width: 1024px) {
 	section {
-		padding-left: 6rem;
-		padding-right: 6rem;
+		padding-left: 5rem;
+		padding-right: 5rem;
 	}
 }
 

@@ -79,14 +79,39 @@ export default function Home() {
 		pseudoRectRef.current = getPseudoBounds(poolRef.current, "::before");
 	}
 
+	function resetCharAndShadowTransforms(container: HTMLElement) {
+		const allChars = container.querySelectorAll<HTMLElement>(".char");
+		allChars.forEach(char => {
+			gsap.set(char, {x: 0, y: 0, rotation: 0});
+		});
+
+		const allShadows = container.querySelectorAll<HTMLElement>(".shadow");
+		allShadows.forEach(shadow => {
+			gsap.set(shadow, {x: 0, y: 0});
+		});
+	}
+
+	function initializeCharPositions(container: HTMLElement, stacks: Record<string, any>) {
+		Object.keys(stacks).forEach(key => {
+			if (!charPositionsRef.current[key]) {
+				charPositionsRef.current[key] = {
+					x: getRandomInt(40),
+					y: getRandomInt(40),
+				};
+			}
+		});
+	}
+
 	useEffect(() => {
 		if (!poolRef.current) return;
 
-		//수영장 크기 첫 측정 후 리사이즈 경우에만 측정
-		measurePool();
-
 		const debouncedResize = debounce(() => {
 			measurePool();
+
+			// 모든 char 위치 초기화
+			if (!poolRef.current) return;
+			resetCharAndShadowTransforms(poolRef.current);
+			initializeCharPositions(poolRef.current, stacks);
 		}, 200);
 
 		window.addEventListener("resize", debouncedResize);
@@ -119,28 +144,11 @@ export default function Home() {
 			});
 		if (!poolRef.current) return;
 
-		const allChars = poolRef.current.querySelectorAll<HTMLElement>(".char");
-		allChars.forEach(char => {
-			gsap.set(char, {x: 0, y: 0, rotation: 0});
-		});
-
-		const allShadows = poolRef.current.querySelectorAll<HTMLElement>(".shadow");
-		allShadows.forEach(shadow => {
-			gsap.set(shadow, {x: 0, y: 0});
-		});
-
-		Object.keys(stacks).forEach(key => {
-			if (!charPositionsRef.current[key]) {
-				charPositionsRef.current[key] = {
-					x: getRandomInt(40),
-					y: getRandomInt(40),
-				};
-			}
-		});
+		measurePool();
+		resetCharAndShadowTransforms(poolRef.current);
+		initializeCharPositions(poolRef.current, stacks);
 
 		gsap.defaults({overwrite: true});
-
-		measurePool();
 
 		//과부화 방지용 쓰로틀 추가
 		let lastMoveTime = 0;
@@ -184,7 +192,7 @@ export default function Home() {
 				if (!poolRect || !pseudoRect) return;
 
 				if (newX < poolRect.left + xMargin) newX = poolRect.left + xMargin;
-				if (newX + width > pseudoRect.right - xMargin) newX = pseudoRect.right - xMargin - width / 2.5;
+				if (newX + width > pseudoRect.right - xMargin) newX = pseudoRect.right - xMargin - width;
 				if (newY < poolRect.top + yMargin) newY = poolRect.top + yMargin;
 				if (newY + height > poolRect.bottom - yMargin) newY = poolRect.bottom - height - yMargin;
 
@@ -290,8 +298,8 @@ export default function Home() {
 		const towelsHeight = towels[0].offsetHeight;
 		const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
 		const scrollPerTowel = towelsHeight + gap;
-		const totalTowelDistance = scrollPerTowel * totalTowels;
-		const totalScrollDistance = totalTowelDistance;
+		//const totalTowelDistance = scrollPerTowel * totalTowels;
+		const totalScrollDistance = towelsRef.current.offsetHeight;
 
 		let particles: any[] = [];
 		let dustCtx: CanvasRenderingContext2D | null = null;
@@ -993,7 +1001,7 @@ export default function Home() {
 				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
 				<section ref={shoreRef} className="w-full shore relative z-20">
-					<div className="float-left w-full md:w-1/2 flex flex-col justify-start items-start shore-title">
+					<div className="float-left w-full md:w-1/2 md:pr-16 lg:pr-40 flex flex-col justify-start items-start shore-title">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
 							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
@@ -1055,8 +1063,8 @@ export default function Home() {
 										style={{filter: `url(#wibble-${i + 1})`}}
 									>
 										<div className="flex flex-wrap items-center justify-start mb-2">
-											<p className="title md:mr-4 md:whitespace-nowrap">{v.position}</p>
-											<p className="ml-auto md:ml-0">@ {k}</p>
+											<p className="title lg:whitespace-nowrap">{v.position}</p>
+											<p className="ml-auto lg:ml-0">@ {k}</p>
 										</div>
 
 										<ul>{v.text_kr?.length > 0 && v.text_kr.map((t, i) => <li key={k + i}>{t}</li>)}</ul>
@@ -1082,7 +1090,7 @@ export default function Home() {
 				</div>
 				<div
 					ref={cartridgeCardsContainerRef}
-					className="gallery px-24 w-full flex items-center overflow-x-auto overflow-y-hidden min-h-[40rem] md:min-h-[100vh]"
+					className="gallery px-24 w-full flex items-end lg:items-center overflow-x-auto overflow-y-hidden min-h-[40rem]"
 				>
 					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-16 md:gap-24 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
@@ -1093,7 +1101,7 @@ export default function Home() {
 					</div>
 				</div>
 				<div
-					className={`relative mt-0 md:-mt-32 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} justify-self-center flex flex-col items-center justify-center`}
+					className={`relative mt-0 lg:-mt-32 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} justify-self-center flex flex-col items-center justify-center`}
 				>
 					<Gameboy project={selectedProject} />
 				</div>
@@ -1120,7 +1128,7 @@ export default function Home() {
 							</button>
 						</div>
 
-						<div className="project-detail flex flex-col md:flex-row w-full h-full items-start justify-start relative px-12 md:px-[15%] mt-16">
+						<div className="project-detail flex flex-col lg:flex-row w-full h-full items-start justify-start relative px-12 md:px-[8%] lg:px-[15%] mt-4">
 							<Swiper
 								modules={[Pagination, Autoplay]}
 								pagination={{clickable: true}}
@@ -1143,7 +1151,7 @@ export default function Home() {
 										setIsSpecialSlide(false);
 									}
 								}}
-								className={`projects-swiper max-w-full md:max-w-1/2 h-auto`}
+								className={`projects-swiper max-w-full lg:max-w-1/2 h-auto`}
 							>
 								<SwiperSlide>
 									<video src={"/projects/orgd/video1.mp4"} autoPlay muted loop playsInline />
@@ -1170,7 +1178,7 @@ export default function Home() {
 									<Image src={"/projects/orgd/orgd5.png"} alt="project" width={2000} height={2000} />
 								</SwiperSlide>
 							</Swiper>
-							<div className="project-description w-full md:max-w-1/2 h-full md:h-[70vh] flex flex-col gap-4 z-30 ml-0 md:ml-20 overflow-y-auto">
+							<div className="project-description w-full lg:max-w-1/2 h-fit lg:h-full flex flex-col gap-4 z-30 ml-0 mt-12 lg:mt-0 lg:ml-20 overflow-y-auto">
 								<div className="sub">
 									<p>프로젝트 소개</p>
 								</div>

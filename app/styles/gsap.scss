@@ -1,12 +1,6 @@
-// body {
-// 	display: grid;
-// 	grid-template-areas: "body";
-// 	place-items: center;
-// }
-
-// body > * {
-// 	grid-area: body;
-// }
+$breakpoint-mobile: 640px;
+$breakpoint-tablet-min: 641px;
+$breakpoint-tablet-max: 1024px;
 
 .tiles {
 	width: 90vmin;
@@ -74,6 +68,16 @@
 			width: 6rem;
 			filter: url(#turb) hue-rotate(20deg);
 		}
+
+		@media screen and (max-width: $breakpoint-mobile) {
+			width: 6rem;
+
+			&.ducky,
+			&.javascript {
+				width: 4rem;
+				filter: url(#turb) hue-rotate(20deg);
+			}
+		}
 	}
 
 	.shadow {
@@ -87,6 +91,11 @@
 		mix-blend-mode: darken;
 		pointer-events: none;
 		transform: perspective(500px) rotateX(30deg);
+
+		@media screen and (max-width: $breakpoint-mobile) {
+			width: 3rem;
+			height: 3rem;
+		}
 	}
 }
 
