@@ -18,6 +18,7 @@ export interface Project {
 	introduction_kr: string[];
 	ppl_count: number;
 	link: string[];
+	dark: boolean;
 }
 
 export default function Gameboy({project}: GameboyProps) {

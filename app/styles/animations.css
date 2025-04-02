@@ -32,11 +32,11 @@
 		opacity: 1;
 	}
 	90% {
-		transform: scale(var(--scale-factor)) translateY(calc(var(--y-distance) / 0.2));
+		transform: scale(var(--scale-factor)) translateY(calc(var(--y-distance) / var(--scale-factor)));
 		opacity: 1;
 	}
 	100% {
-		transform: scale(var(--scale-factor)) translateY(calc(calc(var(--y-distance) / 0.2 + 8rem)));
+		transform: scale(var(--scale-factor)) translateY(calc(calc(var(--y-distance) / var(--scale-factor) + 8rem)));
 		opacity: 1;
 	}
 }

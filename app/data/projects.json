@@ -23,7 +23,8 @@
 			"ORGD 2024 《굿 디자이너: 의문》은 그래픽 디자이너의 정체성에 관한 다양한 관점을 제시하는 전시입니다.",
 			"디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 유닛 Studio BATON의 개발자로 전시에 참여해 소켓 통신을 활용한 인터렉티브 작품을 개발하였습니다. 전체 개발 프로세스를 단독으로 담당하고 기획에도 참여했습니다."
 		],
-		"links": ["https://github.com/seoeongeueun/orgd.web"]
+		"links": ["https://github.com/seoeongeueun/orgd.web"],
+		"dark": true
 	},
 	"2": {
 		"title": "HeyMap",
@@ -37,7 +38,7 @@
 
 	"3": {
 		"title": "LocalStorage",
-		"subtitle": "Local Painting Storage for Artists",
+		"subtitle": "Meet Local Artists",
 		"thumbnail": "/images/localstorage_main.png",
 		"tags": ["WORK", "TEAM", "WEB"],
 		"theme": "#8bf337",
@@ -51,7 +52,8 @@
 		"tags": ["1 DEV", "PERSONAL", "WEB", "STANDALONE"],
 		"theme": "#4f5293",
 		"stacks": ["typescript", "nextjs2", "electron", "mongodb", "tailwindcss"],
-		"ppl_count": 1
+		"ppl_count": 1,
+		"dark": true
 	},
 	"5": {
 		"title": "Portfolio",

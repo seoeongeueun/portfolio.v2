@@ -1091,10 +1091,7 @@ export default function Home() {
 						<label>{textFile["003"]}</label>
 					</div>
 				</div>
-				<div
-					ref={cartridgeCardsContainerRef}
-					className="gallery px-24 w-full flex items-end lg:items-center overflow-x-auto overflow-y-hidden min-h-[40rem]"
-				>
+				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full flex items-center overflow-x-auto overflow-y-visible min-h-[40rem]">
 					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-16 md:gap-24 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
 							<div key={v.title} data-project={k} className={`card card-${k} w-fit`}>
@@ -1104,7 +1101,7 @@ export default function Home() {
 					</div>
 				</div>
 				<div
-					className={`relative mt-0 lg:-mt-32 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} justify-self-center flex flex-col items-center justify-center`}
+					className={`relative -mt-32 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} justify-self-center flex flex-col items-center justify-center`}
 				>
 					<Gameboy project={selectedProject} />
 				</div>
@@ -1113,13 +1110,17 @@ export default function Home() {
 						ref={projectDetailRef}
 						className={`project-section flex flex-col absolute bottom-0 left-0 z-40 py-6 md:py-8 text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
 					>
-						<div className="project-header tracking-widest text-m md:text-xl px-8 md:px-12 h-28 md:h-fit lg:px-24 pb-8 w-full flex flex-row items-start justify-between">
+						<div className="project-header tracking-widest text-m md:text-xl px-8 md:px-12 h-fit lg:px-24 pb-8 w-full flex flex-row items-start justify-between">
 							<div className="flex flex-col items-center justify-start">
 								<p>PERSON</p>
-								<p className="text-theme-yellow">X {selectedProject.ppl_count || 1}</p>
+								<p className={selectedProject.dark ? "dark" : "normal"} style={{color: selectedProject.theme}}>
+									X {selectedProject.ppl_count || 1}
+								</p>
 							</div>
 							<div className="flex flex-col items-center justify-start">
-								<p className="text-lg lg:text-xxxl text-theme-yellow">{selectedProject.title.toUpperCase()}</p>
+								<p className={`text-xxl lg:text-xxxl ${selectedProject.dark ? "dark" : "normal"}`} style={{color: selectedProject.theme}}>
+									{selectedProject.title.toUpperCase()}
+								</p>
 								<p>{selectedProject?.subtitle}</p>
 							</div>
 
@@ -1131,7 +1132,7 @@ export default function Home() {
 							</button>
 						</div>
 
-						<div className="project-detail flex flex-col lg:flex-row w-full h-[calc(100%-7rem)] items-start justify-start relative px-12 md:px-[8%] lg:px-[15%] lg:mt-4">
+						<div className="project-detail flex flex-col lg:flex-row w-full min-h-0 flex-1 items-start justify-start px-12 md:px-[8%] lg:px-[12%] lg:mt-4 z-20">
 							<Swiper
 								modules={[Pagination, Autoplay]}
 								pagination={{clickable: true}}
@@ -1154,7 +1155,7 @@ export default function Home() {
 										setIsSpecialSlide(false);
 									}
 								}}
-								className={`projects-swiper max-w-full lg:max-w-1/2 h-auto`}
+								className={`projects-swiper max-w-full lg:max-w-1/2`}
 							>
 								<SwiperSlide>
 									<video src={"/projects/orgd/video1.mp4"} autoPlay muted loop playsInline />
@@ -1181,7 +1182,7 @@ export default function Home() {
 									<Image src={"/projects/orgd/orgd5.png"} alt="project" width={2000} height={2000} />
 								</SwiperSlide>
 							</Swiper>
-							<div className="project-description w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-12 lg:mt-0 lg:ml-20 overflow-y-auto">
+							<div className="project-description w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-8 lg:mt-0 lg:ml-20 overflow-y-auto">
 								<div className="sub">
 									<p>프로젝트 소개</p>
 								</div>
@@ -1196,13 +1197,13 @@ export default function Home() {
 								<ul>{selectedProject.review_kr?.map((r, i) => <li key={"r" + i}>{r}</li>)}</ul>
 							</div>
 						</div>
-						{/* <div className="fish animate-float absolute">
+						<div className="fish animate-float absolute">
 							<Image src="/assets/fish0.gif" alt="fish" width={100} height={100} />
 						</div>
 						<div className="absolute bottom-28 left-[5%]">
 							<Image src="/assets/coral.png" alt="coral" width={100} height={100} />
 						</div>
-						<div className="floor absolute bottom-0 bg-theme-sand w-full h-32 z-10 border-t-2 border-black"></div> */}
+						<div className="floor absolute bottom-0 bg-theme-sand w-full h-32 z-10 border-t-2 border-black"></div>
 					</section>
 				)}
 			</section>
