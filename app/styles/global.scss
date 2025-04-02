@@ -622,19 +622,20 @@ $breakpoint-tablet-max: 1024px;
 	flex-shrink: 0;
 	filter: drop-shadow(2px 1px 7px rgba(66, 66, 66, 0.7));
 
+	@media screen and (min-width: $breakpoint-tablet-min) and (max-width: $breakpoint-tablet-max) {
+		width: 30rem;
+		height: calc(30rem * (22 / 18));
+		min-width: auto;
+		min-height: auto;
+		filter: drop-shadow(1px 1px 5px rgba(66, 66, 66, 0.5));
+	}
+
 	@media screen and (max-width: $breakpoint-mobile) {
 		width: 18rem;
 		height: calc(18rem * (22 / 18));
 		min-width: auto;
 		min-height: auto;
 		filter: drop-shadow(0px 1px 3px rgba(66, 66, 66, 0.5));
-	}
-
-	@media screen and (min-width: $breakpoint-tablet-min) and (max-width: $breakpoint-tablet-max) {
-		width: 30rem;
-		height: calc(30rem * (22 / 18));
-		min-width: auto;
-		min-height: auto;
 	}
 
 	> .head {
@@ -1920,6 +1921,9 @@ $transition: 0.5s ease-in-out;
 	}
 }
 .project-section {
+	height: 100vh;
+	height: 100svh;
+
 	* {
 		border-radius: 0.25rem;
 	}
@@ -1941,6 +1945,7 @@ $transition: 0.5s ease-in-out;
 			0px -2px black;
 		font-weight: 600;
 	}
+
 	.project-detail {
 		.project-description {
 			color: black;
@@ -1950,6 +1955,10 @@ $transition: 0.5s ease-in-out;
 			p,
 			span {
 				text-shadow: none;
+
+				@media screen and (max-width: $breakpoint-tablet-max) {
+					font-weight: 500;
+				}
 			}
 
 			ul {
@@ -2004,18 +2013,19 @@ $transition: 0.5s ease-in-out;
 	}
 
 	.projects-swiper {
+		flex-shrink: 0;
+		height: 70vh;
+
+		@media screen and (max-width: $breakpoint-tablet-max) {
+			height: 50%;
+		}
+
 		.swiper-slide {
-			height: 70vh;
+			height: 100%;
 			width: 100%;
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			flex-shrink: 0;
-
-			@media screen and (max-width: $breakpoint-tablet-max) {
-				height: 50vh;
-				align-items: start;
-			}
 		}
 
 		img {
@@ -2043,6 +2053,11 @@ $transition: 0.5s ease-in-out;
 
 	transition: none;
 	width: 0;
+
+	@media screen and (max-width: $breakpoint-tablet-max) {
+		left: 60%;
+		right: auto;
+	}
 
 	&.show {
 		width: 30rem;

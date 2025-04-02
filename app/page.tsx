@@ -19,7 +19,7 @@ import html2canvas from "html2canvas";
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination, Autoplay} from "swiper/modules";
 import {Swiper as SwiperClass} from "swiper/types";
-import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt, throttle, debounce} from "./lib/tools";
+import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt, throttle, debounce, preventScroll} from "./lib/tools";
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -835,15 +835,18 @@ export default function Home() {
 			handleCloseProject();
 		};
 
-		window.addEventListener("wheel", handleCloseOnScroll, {passive: false});
-		window.addEventListener("touchmove", handleCloseOnScroll, {passive: false});
-		window.addEventListener("keydown", handleCloseOnScroll);
+		//document.body.addEventListener("wheel", handleCloseOnScroll, {passive: false});
+		//document.body.addEventListener("touchmove", handleCloseOnScroll, {passive: false});
+		//document.body.addEventListener("keydown", handleCloseOnScroll);
+		//document.body.addEventListener("scroll", preventScroll);
+		document.documentElement.style.overflow = "hidden";
 
 		return () => {
 			clearTimeout(timeoutId);
-			window.removeEventListener("wheel", handleCloseOnScroll);
-			window.removeEventListener("touchmove", handleCloseOnScroll);
-			window.removeEventListener("keydown", handleCloseOnScroll);
+			document.documentElement.style.overflow = "";
+			//document.body.removeEventListener("wheel", handleCloseOnScroll);
+			//document.body.removeEventListener("touchmove", handleCloseOnScroll);
+			//document.body.removeEventListener("keydown", handleCloseOnScroll);
 		};
 	}, [isSectionReady]);
 
@@ -883,7 +886,7 @@ export default function Home() {
 	};
 
 	return (
-		<div ref={mainRef} className="main-page text-white w-full flex flex-col items-center justify-start">
+		<div ref={mainRef} className="main-page text-white w-full h-fit flex flex-col items-center justify-start">
 			<div className={`fixed top-0 h-fit main-header pointer-events-none w-full h-fit z-40 flex flex-row-reverse`}>
 				<button className="pointer-events-auto w-20 h-20 flex items-center justify-center float-right" onClick={() => openHeader()}>
 					<div className="lifebuoy mini hover:rotate-60 transition-transform duration-300"></div>
@@ -1108,15 +1111,15 @@ export default function Home() {
 				{selectedProject && (
 					<section
 						ref={projectDetailRef}
-						className={`project-section absolute bottom-0 left-0 z-40 h-screen text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
+						className={`project-section flex flex-col absolute bottom-0 left-0 z-40 py-6 md:py-8 text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
 					>
-						<div className="project-header tracking-widest text-xl py-8 px-24 pb-8 w-full sticky top-0 flex flex-row items-start justify-between">
+						<div className="project-header tracking-widest text-m md:text-xl px-8 md:px-12 h-28 md:h-fit lg:px-24 pb-8 w-full flex flex-row items-start justify-between">
 							<div className="flex flex-col items-center justify-start">
 								<p>PERSON</p>
 								<p className="text-theme-yellow">X {selectedProject.ppl_count || 1}</p>
 							</div>
 							<div className="flex flex-col items-center justify-start">
-								<p className="text-xxxl text-theme-yellow">{selectedProject.title.toUpperCase()}</p>
+								<p className="text-lg lg:text-xxxl text-theme-yellow">{selectedProject.title.toUpperCase()}</p>
 								<p>{selectedProject?.subtitle}</p>
 							</div>
 
@@ -1128,7 +1131,7 @@ export default function Home() {
 							</button>
 						</div>
 
-						<div className="project-detail flex flex-col lg:flex-row w-full h-full items-start justify-start relative px-12 md:px-[8%] lg:px-[15%] mt-4">
+						<div className="project-detail flex flex-col lg:flex-row w-full h-[calc(100%-7rem)] items-start justify-start relative px-12 md:px-[8%] lg:px-[15%] lg:mt-4">
 							<Swiper
 								modules={[Pagination, Autoplay]}
 								pagination={{clickable: true}}
@@ -1170,7 +1173,7 @@ export default function Home() {
 										className={`arrow-text flex flex-row items-center justify-start overflow-hidden h-fit ${isSpecialSlide ? "show" : ""}`}
 									>
 										<div className="arrow ml-2"></div>
-										<p className={`text-lg whitespace-nowrap opacity-0 ml-2 ${isSpecialSlide ? "opacity-100" : "opacity-0"}`}>that's me!</p>
+										<p className={`text-lg whitespace-nowrap opacity-0 ml-2 ${isSpecialSlide ? "opacity-100" : "opacity-0"}`}>me!</p>
 									</div>
 									<Image src={"/projects/orgd/orgd4.png"} alt="project" width={2000} height={2000} />
 								</SwiperSlide>
@@ -1178,7 +1181,7 @@ export default function Home() {
 									<Image src={"/projects/orgd/orgd5.png"} alt="project" width={2000} height={2000} />
 								</SwiperSlide>
 							</Swiper>
-							<div className="project-description w-full lg:max-w-1/2 h-fit lg:h-full flex flex-col gap-4 z-30 ml-0 mt-12 lg:mt-0 lg:ml-20 overflow-y-auto">
+							<div className="project-description w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-12 lg:mt-0 lg:ml-20 overflow-y-auto">
 								<div className="sub">
 									<p>프로젝트 소개</p>
 								</div>
@@ -1193,13 +1196,13 @@ export default function Home() {
 								<ul>{selectedProject.review_kr?.map((r, i) => <li key={"r" + i}>{r}</li>)}</ul>
 							</div>
 						</div>
-						<div className="fish animate-float absolute">
+						{/* <div className="fish animate-float absolute">
 							<Image src="/assets/fish0.gif" alt="fish" width={100} height={100} />
 						</div>
 						<div className="absolute bottom-28 left-[5%]">
 							<Image src="/assets/coral.png" alt="coral" width={100} height={100} />
 						</div>
-						<div className="floor absolute bottom-0 bg-theme-sand w-full h-32 z-10 border-t-2 border-black"></div>
+						<div className="floor absolute bottom-0 bg-theme-sand w-full h-32 z-10 border-t-2 border-black"></div> */}
 					</section>
 				)}
 			</section>
