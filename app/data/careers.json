@@ -1,7 +1,11 @@
 {
 	"BATON": {
 		"position": "Frontend Developer",
-		"text_en": [""],
+		"text_en": [
+			"Developed various web applications and admin dashboards using React.js, Next.js, TypeScript, jQuery and more, implementing responsive designs and animations.",
+			"Handled full-stack development, including API design and database schema/query creation with MySQL and PostgreSQL, ensuring seamless data integration between front and back.",
+			"Proactively tested and introduced new technologies to improve the team's development workflow and overall productivity."
+		],
 		"text_kr": [
 			"React.js, Next.js, Typescript, jQuery 등을 사용하여 다양한 클라이언트의 웹 애플리케이션과 관리자 페이지를 개발하고, 반응형 디자인과 최적화된 애니메이션을 구현했습니다.",
 			"필요에 따라 API 설계와 MySQL과 PostgreSQL 데이터베이스 설계 및 쿼리 작성 등 백엔드 작업을 포함한 통합 개발을 수행하여 프론트-백 간의 원활한 데이터 연동을 구현했습니다.",
@@ -11,22 +15,28 @@
 	},
 	"Market Stadium": {
 		"position": "Software Engineer Intern",
-		"text_en": [""],
-		"text_kr": [
-			"React.js, Next.js, Typescript, jQuery 등을 사용하여 다양한 클라이언트의 웹 애플리케이션과 관리자 페이지를 개발하고, 반응형 디자인과 최적화된 애니메이션을 구현했습니다.",
-			"필요에 따라 API 설계와 MySQL과 PostgreSQL 데이터베이스 설계 및 쿼리 작성 등 백엔드 작업을 포함한 통합 개발을 수행하여 프론트-백 간의 원활한 데이터 연동을 구현했습니다.",
-			"팀의 개발 효율성을 위해 적극적으로 새로운 스택을 테스트하고 도입하여 팀의 개발 시스템과 작업 생산성 향상에 기여했습니다."
+		"text_en": [
+			"Built dashboard features as a full-stack developer intern using React.js, Semantic UI, and Chart.js to visualize macroeconomic indicator data through interactive graphs.",
+			"Developed and integrated RESTful APIs to manage and retrieve relevant data from DynamoDB efficiently.",
+			"Enhanced data reliability by adding validation tests using Mocha and Chai."
 		],
-		"date": "08.2023 - 11.2024"
+		"text_kr": [
+			"React.js, Semantic UI, Chart.js를 사용하여 macroeconomics 지표 데이터를 그래프로 시각화하는 대시보드 기능을 구현했습니다.",
+			"DynamoDB와 연동된 RESTful API를 개발하여 관련 데이터를 관리하고 조회하는 기능을 만들었습니다. ",
+			"Mocha와 Chai를 이용해 데이터 유효성 검증 테스트를 추가하여 안정성을 높였습니다."
+		],
+		"date": "01.2022 - 04.2022"
 	},
 	"The State University of New York, Stony Brook": {
 		"position": "Bachelor's Degree in Computer Science",
-		"text_en": [""],
-		"text_kr": [
-			"React.js, Next.js, Typescript, jQuery 등을 사용하여 다양한 클라이언트의 웹 애플리케이션과 관리자 페이지를 개발하고, 반응형 디자인과 최적화된 애니메이션을 구현했습니다.",
-			"필요에 따라 API 설계와 MySQL과 PostgreSQL 데이터베이스 설계 및 쿼리 작성 등 백엔드 작업을 포함한 통합 개발을 수행하여 프론트-백 간의 원활한 데이터 연동을 구현했습니다.",
-			"팀의 개발 효율성을 위해 적극적으로 새로운 스택을 테스트하고 도입하여 팀의 개발 시스템과 작업 생산성 향상에 기여했습니다."
+		"text_en": [
+			"Majored in Computer Science at the State University of New York.",
+			"Held weekly office hours as a TA for CSE 215: Foundations of Computer Science for a semester."
 		],
-		"date": "08.2023 - 11.2024"
+		"text_kr": [
+			"뉴욕 주립 대학교에서 Computer Science를 전공했습니다.",
+			"CSE 215 Foundations of Computer Science 수업의 TA로 한 학기간 매주 office hour를 진행했습니다."
+		],
+		"date": "2017 - 2022"
 	}
 }

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
+import TextKr from "./data/text-kr.json" assert {type: "json"};
 import {Fragment, useEffect, useState, useRef, useCallback} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy, {Project} from "./components/gameboy";
@@ -34,6 +35,7 @@ interface Projects {
 }
 
 export default function Home() {
+	const [isEnglish, setIsEnglish] = useState<boolean>(true);
 	const [textFile, setTextFile] = useState<TextFileType>(TextEn);
 	const [projects, setProjects] = useState<Projects>(ProjectsData);
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
@@ -102,7 +104,11 @@ export default function Home() {
 		});
 	}
 
+	//첫 시작부터 필요한 함수들
 	useEffect(() => {
+		const isKorean = navigator.language.startsWith("ko");
+		setIsEnglish(!isKorean);
+
 		if (!poolRef.current) return;
 
 		const debouncedResize = debounce(() => {
@@ -120,6 +126,14 @@ export default function Home() {
 			window.removeEventListener("resize", debouncedResize);
 		};
 	}, []);
+
+	useEffect(() => {
+		if (isEnglish) {
+			setTextFile(TextEn);
+		} else {
+			setTextFile(TextKr);
+		}
+	}, [isEnglish]);
 
 	useEffect(() => {
 		const waveTl = gsap.timeline({repeat: 1, yoyo: true, ease: "power3.inOut"});
@@ -905,6 +919,20 @@ export default function Home() {
 							github.com/seoeongeueun
 						</Link>
 						<p className="text-[1rem]">seongeun9901@gmail.com</p>
+						<div className="flex flex-row items-center justify-end w-full space-x-4 mt-2">
+							<button
+								onClick={() => setIsEnglish(false)}
+								className={`cursor-pointer ${!isEnglish ? "underline" : ""} hover:underline underline-offset-2 decoration-white`}
+							>
+								KR
+							</button>
+							<button
+								onClick={() => setIsEnglish(true)}
+								className={`cursor-pointer ${isEnglish ? "underline" : ""} hover:underline underline-offset-2 decoration-white`}
+							>
+								EN
+							</button>
+						</div>
 					</div>
 				)}
 
@@ -1042,7 +1070,7 @@ export default function Home() {
 								</div>
 							</div>
 						</div>
-						<p className="description text-m whitespace-pre-line">{textFile["001"]}</p>
+						<p className="description text-m whitespace-pre-line break-keep">{textFile["001"]}</p>
 					</div>
 					<div ref={towelsRef} className="float-left towels-container spread w-full md:w-1/2">
 						{CareerData &&
@@ -1065,12 +1093,16 @@ export default function Home() {
 										className="towel w-full flex flex-col items-start justify-start p-10 md:px-12"
 										style={{filter: `url(#wibble-${i + 1})`}}
 									>
-										<div className="flex flex-wrap items-center justify-start mb-2">
+										<div className="flex flex-wrap items-center justify-start mb-2 lg:mb-4">
 											<p className="title lg:whitespace-nowrap">{v.position}</p>
-											<p className="ml-auto lg:ml-0">@ {k}</p>
+											<p className="ml-auto lg:ml-2">@ {k}</p>
 										</div>
 
-										<ul>{v.text_kr?.length > 0 && v.text_kr.map((t, i) => <li key={k + i}>{t}</li>)}</ul>
+										{isEnglish ? (
+											<ul>{v.text_en?.length > 0 && v.text_en.map((t, i) => <li key={k + i}>{t}</li>)}</ul>
+										) : (
+											<ul>{v.text_kr?.length > 0 && v.text_kr.map((t, i) => <li key={k + i}>{t}</li>)}</ul>
+										)}
 										<p className="tag mt-auto ml-auto">{v.date}</p>
 									</div>
 								</div>
@@ -1101,7 +1133,7 @@ export default function Home() {
 					</div>
 				</div>
 				<div
-					className={`relative -mt-32 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} justify-self-center flex flex-col items-center justify-center`}
+					className={`relative -mt-32 lg:mt-0 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} justify-self-center flex flex-col items-center justify-center`}
 				>
 					<Gameboy project={selectedProject} />
 				</div>
@@ -1182,17 +1214,19 @@ export default function Home() {
 									<Image src={"/projects/orgd/orgd5.png"} alt="project" width={2000} height={2000} />
 								</SwiperSlide>
 							</Swiper>
-							<div className="project-description w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-8 lg:mt-0 lg:ml-20 overflow-y-auto">
+							<div
+								className={`project-description ${isEnglish && "en"} w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-8 lg:mt-0 lg:ml-20 overflow-y-auto`}
+							>
 								<div className="sub">
-									<p>프로젝트 소개</p>
+									<p>{textFile["004"]}</p>
 								</div>
 								<ul>{selectedProject.introduction_kr?.map((intro, i) => <li key={"intro" + i}>{intro}</li>)}</ul>
 								<div className="sub">
-									<p>주요 성과 및 기여</p>
+									<p>{textFile["005"]}</p>
 								</div>
 								<ul>{selectedProject.contribution_kr?.map((c, i) => <li key={"c" + i}>{c}</li>)}</ul>
 								<div className="sub mt-4">
-									<p>회고</p>
+									<p>{textFile["006"]}</p>
 								</div>
 								<ul>{selectedProject.review_kr?.map((r, i) => <li key={"r" + i}>{r}</li>)}</ul>
 							</div>

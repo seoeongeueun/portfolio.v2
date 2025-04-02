@@ -1,7 +1,9 @@
 {
 	"000": "Scroll Down to View",
-	"001": "I'm a front-end developer dedicated to creating creative and reliable user interfaces.\n With my creative ideas and attention to subtle details, I hope to make the user interface visually appealing, intuitive, and interesting.",
+	"001": "I'm a front-end developer dedicated to creating creative and reliable user interfaces. With my creative ideas and attention to subtle details, I hope to make the user interface visually appealing, intuitive, and interesting.",
 	"002": "Personal",
 	"003": "Done At Work",
-	"004": "These are some of the projects I've worked on either for personal reasons, or at work. Uncheck the checkboxes to filter the projects."
+	"004": "Project Overview",
+	"005": "Key Contributions",
+	"006": "Reflections"
 }

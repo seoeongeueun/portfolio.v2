@@ -50,7 +50,7 @@
 		"subtitle": "Retro Music Player",
 		"thumbnail": "/images/workmate_main.png",
 		"tags": ["1 DEV", "PERSONAL", "WEB", "STANDALONE"],
-		"theme": "#4f5293",
+		"theme": "#404076",
 		"stacks": ["typescript", "nextjs2", "electron", "mongodb", "tailwindcss"],
 		"ppl_count": 1,
 		"dark": true

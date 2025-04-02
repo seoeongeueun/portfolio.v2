@@ -2007,6 +2007,12 @@ $transition: 0.5s ease-in-out;
 					padding: 0 1rem;
 				}
 			}
+
+			&.en {
+				p {
+					font-size: 1.9rem;
+				}
+			}
 		}
 	}
 
