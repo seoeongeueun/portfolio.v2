@@ -23,7 +23,7 @@ export interface Project {
 
 export default function Gameboy({project}: GameboyProps) {
 	return (
-		<div className="h-[40rem] w-full flex items-center justify-start md:justify-center">
+		<div className="h-[40rem] w-full flex items-center justify-start md:justify-center font-tenada">
 			<div className="gameboy-body w-[77rem] h-[30rem] flex items-center justify-center">
 				<div id="gameboy-head" className="gameboy-frames flex flex-row items-center position-center">
 					<div className="body-left">

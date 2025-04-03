@@ -327,7 +327,7 @@ export default function Home() {
 
 		function animateDust() {
 			rafId = requestAnimationFrame(animateDust);
-			smoothedDustProgress += (currentDustProgress - smoothedDustProgress) * 0.02;
+			smoothedDustProgress += (currentDustProgress - smoothedDustProgress) * 0.05;
 			if (dustReady) drawDust(smoothedDustProgress);
 		}
 
@@ -390,17 +390,19 @@ export default function Home() {
 			dustCanvas.style.display = "block";
 		};
 
-		const drawDust = (progress: number) => {
+		const drawDust = (dustProgress: number) => {
 			if (!dustCtx || !dustCanvas) return;
 
 			const {width, height} = dustCanvas;
 			dustCtx.clearRect(0, 0, width, height);
-			const dustProgress = gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY);
+			//const dustProgress = gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY);
+
+			const clampedDust = gsap.utils.clamp(0, 1, dustProgress);
 			//color를 칠하는 단계가 마무리 되었으면 원래 beachref div를 투명 처리
 			beachRef.current!.style.opacity = dustProgress >= FILL_END ? "0" : "1";
 
 			particles.forEach(p => {
-				const localProgress = gsap.utils.clamp(0, 1, (dustProgress - p.delay) / (1 - p.delay));
+				const localProgress = gsap.utils.clamp(0, 1, (clampedDust - p.delay) / (1 - p.delay));
 				const alpha = p.a * 1.7;
 
 				const fillStrength = Math.min(Math.max((localProgress - BORDER_END) / (FILL_END - BORDER_END), 0), 1);
@@ -436,7 +438,8 @@ export default function Home() {
 			onUpdate: self => {
 				const progress = self.progress;
 				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
-				currentDustProgress = gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY);
+				//power2.inOut로 초반~중반 천천히, 후반 빠르게
+				currentDustProgress = gsap.parseEase("power2.inOut")(gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY));
 
 				// towel 움직임
 				gsap.to(towelsRef.current, {
@@ -1094,7 +1097,7 @@ export default function Home() {
 										style={{filter: `url(#wibble-${i + 1})`}}
 									>
 										<div className="flex flex-wrap items-center justify-start mb-2 lg:mb-4">
-											<p className="title lg:whitespace-nowrap">{v.position}</p>
+											<p className="title">{v.position}</p>
 											<p className="ml-auto lg:ml-2">@ {k}</p>
 										</div>
 

@@ -297,6 +297,10 @@ $breakpoint-tablet-max: 1024px;
 			opacity: 100% !important;
 		}
 
+		&:last-child {
+			margin-bottom: 50rem;
+		}
+
 		// @media screen and (max-width: $breakpoint-mobile) {
 		// 	&:first-child {
 		// 		margin-top: 0;
@@ -313,9 +317,6 @@ $breakpoint-tablet-max: 1024px;
 	}
 
 	.towel {
-		transition:
-			transform 0.5s ease-out,
-			right 0.3s ease-in-out 0.2s;
 		min-height: 24rem;
 		position: relative;
 		box-shadow:
@@ -327,8 +328,16 @@ $breakpoint-tablet-max: 1024px;
 			filter 0.3s ease-in-out,
 			opacity 0.3s ease-in-out,
 			transform 0.4s ease-in-out,
-			right 0.5s ease-in-out;
+			right 0.5s ease-in-out 0.2s;
 		transform-origin: top;
+
+		&:hover {
+			transform: scaleX(0.97) rotate(1deg) translateX(-2rem);
+
+			@media screen and (max-width: $breakpoint-mobile) {
+				transform: scaleX(0.97) rotate(1deg) translateX(0.5rem);
+			}
+		}
 
 		&::before {
 			content: "";
@@ -338,7 +347,8 @@ $breakpoint-tablet-max: 1024px;
 			opacity: 0.6;
 			z-index: -1;
 
-			@media screen and (max-width: $breakpoint-mobile) {
+			//400px가로 까지는 세로 줄무늬
+			@media screen and (max-width: 400px) {
 				background: repeating-linear-gradient(to right, var(--towel-color) 0 20px, var(--towel-sub) 20px 40px);
 			}
 		}
@@ -394,15 +404,6 @@ $breakpoint-tablet-max: 1024px;
 
 			@media screen and (max-width: $breakpoint-mobile) {
 				font-size: 1rem;
-			}
-		}
-
-		&:hover {
-			transform: scaleX(0.97) rotate(1deg);
-			right: 3rem;
-
-			@media screen and (max-width: $breakpoint-mobile) {
-				right: -0.5rem;
 			}
 		}
 	}
@@ -1550,7 +1551,6 @@ $transition: 0.5s ease-in-out;
 			0px 1px 0px rgba(var(--body-light-rgb), 0.3),
 			0px -1px 0px var(--body-dark);
 		letter-spacing: 1.4px;
-		font-family: "GongGothicMedium";
 		vertical-align: top;
 	}
 }
@@ -1762,7 +1762,6 @@ $transition: 0.5s ease-in-out;
 			font-weight: 600;
 			margin-top: 0.2rem;
 			font-size: 0.9rem;
-			font-family: "GongGothicMedium";
 		}
 	}
 }
@@ -1800,8 +1799,7 @@ $transition: 0.5s ease-in-out;
 			margin-right: 0.5rem;
 			margin-top: 0.25rem;
 			text-shadow: 1px 1px 1px var(--button-light);
-			font-family: "GongGothicMedium";
-			font-size: 2rem;
+			font-size: 1.6rem;
 		}
 
 		&:first-child {
@@ -1897,7 +1895,6 @@ $transition: 0.5s ease-in-out;
 		letter-spacing: 0.5px;
 		margin-top: 0.4rem;
 		font-size: 0.9rem;
-		font-family: "GongGothicMedium";
 	}
 }
 

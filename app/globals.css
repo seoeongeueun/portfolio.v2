@@ -74,23 +74,23 @@
 	--frame: #242b29;
 	--frame-dark: rgb(3, 11, 8);
 
-	--body: rgb(79, 82, 147);
-	--body-shadow: rgb(117, 122, 179);
-	--body-shadow-rgb: 117, 122, 179;
-	--body-light: rgb(215, 218, 226);
-	--body-light-rgb: 215, 218, 226;
-	--body-dark: rgb(42, 40, 80);
-	--body-dark-rgb: 42, 40, 80;
-	--button: #c7cace;
-	--button-light: #dfe4e6;
-	--button-dark: rgb(146, 140, 137);
-	--button-dark-rgb: 146, 140, 137;
-	--button-shadow: rgb(151, 154, 172);
-	--button-shadow-rgb: 151, 154, 172;
-	--button-hole: rgb(38, 36, 70);
-	--button-hole-rgb: 38, 36, 70;
-	--darkest-point: rgb(3, 11, 8);
-	--darkest-point-rgb: 3, 11, 8;
+	--body: rgb(218, 166, 24);
+	--body-shadow: rgb(238, 206, 62);
+	--body-shadow-rgb: 238, 206, 62;
+	--body-light: rgb(250, 246, 48);
+	--body-light-rgb: 250, 246, 48;
+	--body-dark: rgb(150, 107, 15);
+	--body-dark-rgb: 150, 107, 15;
+	--button: #ddddd8;
+	--button-light: #e7ebec;
+	--button-dark: rgb(167, 162, 160);
+	--button-dark-rgb: 167, 162, 160;
+	--button-shadow: rgb(167, 169, 179);
+	--button-shadow-rgb: 167, 169, 179;
+	--button-hole: rgb(60, 31, 3);
+	--button-hole-rgb: 60, 31, 3;
+	--darkest-point: rgb(29, 16, 10);
+	--darkest-point-rgb: 29, 16, 10;
 
 	--main-bg: rgb(134, 211, 255);
 	--gray-1: #b0acb4;
@@ -124,6 +124,7 @@ html {
 	font-smooth: never;
 	-webkit-font-smoothing: none;
 	font-weight: 400;
+	scrollbar-width: none;
 }
 
 html {
@@ -132,9 +133,9 @@ html {
 	overflow-y: auto;
 }
 
-/* ::-webkit-scrollbar {
+::-webkit-scrollbar {
 	display: none;
-} */
+}
 
 section {
 	padding-left: 15rem;
