@@ -10,6 +10,7 @@ export interface Project {
 	title: string;
 	subtitle: string;
 	thumbnail: string;
+	route: string;
 	tags: string[];
 	theme: string;
 	stacks: string[];
@@ -19,6 +20,7 @@ export interface Project {
 	ppl_count: number;
 	link: string[];
 	dark: boolean;
+	images: string[];
 }
 
 export default function Gameboy({project}: GameboyProps) {

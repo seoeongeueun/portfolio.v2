@@ -1067,7 +1067,7 @@ export default function Home() {
 					<div ref={towelsRef} className="float-left towels-container spread w-full md:w-1/2">
 						{CareerData &&
 							Object.entries(CareerData).map(([k, v], i) => (
-								<div className="towel-wrapper">
+								<div key={"towel" + i} className="towel-wrapper">
 									<svg>
 										<filter id={`wibble-${i + 1}`}>
 											<feTurbulence
@@ -1163,7 +1163,7 @@ export default function Home() {
 								spaceBetween={20}
 								slidesPerView={1}
 								loop={true}
-								autoplay={{delay: 5000, disableOnInteraction: true}}
+								autoplay={{delay: 6000, disableOnInteraction: true}}
 								onSwiper={(swiper: SwiperClass) => {
 									if (swiper.isBeginning) {
 										swiperReadyRef.current?.resolve();
@@ -1181,30 +1181,40 @@ export default function Home() {
 								}}
 								className={`projects-swiper max-w-full lg:max-w-1/2`}
 							>
-								<SwiperSlide>
-									<video src={"/projects/orgd/video1.mp4"} autoPlay muted loop playsInline />
-								</SwiperSlide>
-								<SwiperSlide>
-									<Image src={"/projects/orgd/orgd0.jpg"} alt="project" width={2000} height={2000} />
-								</SwiperSlide>
-								<SwiperSlide>
-									<Image src={"/projects/orgd/orgd1.jpg"} alt="project" width={2000} height={2000} />
-								</SwiperSlide>
-								<SwiperSlide>
-									<Image src={"/projects/orgd/orgd3.png"} alt="project" width={2000} height={2000} />
-								</SwiperSlide>
-								<SwiperSlide data-id="special-slide">
-									<div
-										className={`arrow-text flex flex-row items-center justify-start overflow-hidden h-fit ${isSpecialSlide ? "show" : ""}`}
-									>
-										<div className="arrow ml-2"></div>
-										<p className={`text-lg whitespace-nowrap opacity-0 ml-2 ${isSpecialSlide ? "opacity-100" : "opacity-0"}`}>me!</p>
-									</div>
-									<Image src={"/projects/orgd/orgd4.png"} alt="project" width={2000} height={2000} />
-								</SwiperSlide>
-								<SwiperSlide>
-									<Image src={"/projects/orgd/orgd5.png"} alt="project" width={2000} height={2000} />
-								</SwiperSlide>
+								{selectedProject.images?.length > 0 &&
+									selectedProject.images.map((img, i) => {
+										const isSpecial = img.includes("special");
+										const isVideo = img.endsWith(".mp4") || img.endsWith(".mov");
+
+										return (
+											<SwiperSlide key={`${selectedProject.title}-${i}`} data-id={isSpecial ? "special-slide" : undefined}>
+												{isSpecial && (
+													<div
+														className={`arrow-text flex flex-row items-center justify-start overflow-hidden h-fit ${isSpecialSlide ? "show" : ""}`}
+													>
+														<div className="arrow ml-2"></div>
+														<p
+															className={`text-lg whitespace-nowrap opacity-0 ml-2 ${
+																isSpecialSlide ? "opacity-100" : "opacity-0"
+															}`}
+														>
+															me!
+														</p>
+													</div>
+												)}
+												{isVideo ? (
+													<video src={`/projects/${selectedProject.route}${img}`} autoPlay muted loop playsInline />
+												) : (
+													<Image
+														src={`/projects/${selectedProject.route}${img}`}
+														alt={`${selectedProject.title} image ${i}`}
+														width={2000}
+														height={2000}
+													/>
+												)}
+											</SwiperSlide>
+										);
+									})}
 							</Swiper>
 							<div
 								className={`project-description ${isEnglish && "en"} w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-8 lg:mt-0 lg:ml-20 overflow-y-auto`}
