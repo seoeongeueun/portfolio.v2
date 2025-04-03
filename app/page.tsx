@@ -163,8 +163,8 @@ export default function Home() {
 				scrollTrigger: {
 					trigger: ".main-page",
 					start: "top top",
-					end: "bottom bottom",
-					scrub: 1,
+					end: "bottom top",
+					scrub: 0.3,
 				},
 			})
 			.to("#turbShore", {
@@ -172,8 +172,8 @@ export default function Home() {
 				scrollTrigger: {
 					trigger: ".main-page",
 					start: "top top",
-					end: "bottom bottom",
-					scrub: 1,
+					end: "bottom top",
+					scrub: 0.3,
 				},
 			});
 		if (!poolRef.current) return;
@@ -503,6 +503,10 @@ export default function Home() {
 				//power2.inOut로 초반~중반 천천히, 후반 빠르게
 				currentDustProgress = gsap.parseEase("power2.inOut")(gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY));
 
+				if (ds.dustReady) {
+					drawDust(currentDustProgress);
+				}
+
 				// dust 캔버스 생성 예약 (부하 줄이기 위해 setTimeout)
 				if (progress >= DUST_TIMING && !ds.dustReady && !ds.dustTriggered) {
 					ds.dustTriggered = true;
@@ -515,7 +519,7 @@ export default function Home() {
 					});
 				}
 
-				if (smoothedDustProgress === 0 && !ds.dustRemoved) {
+				if (currentDustProgress === 0 && !ds.dustRemoved) {
 					ds.dustCanvas?.remove();
 					ds.dustCanvas = null;
 					ds.dustCtx = null;
@@ -544,7 +548,7 @@ export default function Home() {
 
 		ds.scrollTriggers.push(st);
 
-		ds.rafId = requestAnimationFrame(animateDust);
+		//ds.rafId = requestAnimationFrame(animateDust);
 	}, [cleanupDustEffect]);
 
 	useEffect(() => {
@@ -871,7 +875,6 @@ export default function Home() {
 		} else {
 			setIsGameboyOn(false);
 			setIsSectionReady(false);
-			projectDetailRef.current?.classList.remove("clear", "ready");
 		}
 	}, [selectedProject]);
 
@@ -896,18 +899,6 @@ export default function Home() {
 		cards.forEach(card => {
 			card.classList.remove("forbid-click", "moveY", "clicked");
 		});
-		section.classList.add("clear");
-
-		const clearProjectPage = () => {
-			setTimeout(() => {
-				section.classList.remove("clear", "ready");
-			}, 300);
-		};
-		section.addEventListener("animationend", clearProjectPage);
-
-		return () => {
-			section.removeEventListener("animationend", clearProjectPage);
-		};
 	}, []);
 
 	const usePerformanceMonitor = (label: string) => {
@@ -960,30 +951,6 @@ export default function Home() {
 						</div>
 					</div>
 				)}
-
-				{/* <div className="h-full w-full">
-						<div className="flex flex-row items-start justify-around w-full">
-							<div className="flex flex-row rope-container z-20">
-								<div className="rope"></div>
-								<div className="rope two"></div>
-								<div className="rope two"></div>
-								<div className="rope two"></div>
-							</div>
-							<div className="lifebuoy pointer-events-auto rotate-40 hover:rotate-180 transition-transform duration-1000"></div>
-							<div className="lifebuoy pointer-events-auto rotate-20 hover:rotate-180 transition-transform duration-1000"></div>
-							<div className="window"></div>
-							<div className="window">
-								<Image src="/icons/github.png" alt="github" width={100} height={100} />
-							</div>
-							<div className="window"></div>
-						</div>
-						<div className="flex flex-row items-center absolute bottom-32 left-20">
-							<p className="text-[4rem] mr-4 mt-4">CONTACTS</p>
-							<Image src="/assets/anchor.svg" alt="anchor" width={30} height={30} />
-						</div>
-						<div className="header-base w-full h-[8rem]"></div>
-					</div> */}
-				{/* <div className="h-full w-full flex flex-row bg-blue-100"></div> */}
 			</div>
 			<section className="pool-section w-full flex flex-col items-center pt-52">
 				<div className="flex flex-col justify-center items-center">
@@ -1158,7 +1125,7 @@ export default function Home() {
 					</div>
 				</div>
 				<div
-					className={`relative -mt-32 lg:mt-0 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} justify-self-center flex flex-col items-center justify-center`}
+					className={`relative -mt-32 lg:mt-0 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} left-1/2 -translate-x-1/2 flex flex-col items-center justify-center`}
 				>
 					<Gameboy project={selectedProject} />
 				</div>

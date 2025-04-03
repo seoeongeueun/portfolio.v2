@@ -291,6 +291,7 @@ $breakpoint-tablet-max: 1024px;
 	.towel-wrapper {
 		margin-top: 14rem;
 		transition: opacity 0.2s ease-in-out;
+		will-change: transform;
 
 		> svg {
 			position: absolute;
@@ -303,13 +304,11 @@ $breakpoint-tablet-max: 1024px;
 
 		&:last-child {
 			margin-bottom: 50rem;
-		}
 
-		// @media screen and (max-width: $breakpoint-mobile) {
-		// 	&:first-child {
-		// 		margin-top: 0;
-		// 	}
-		// }
+			@media screen and (max-width: $breakpoint-tablet-max) {
+				margin-bottom: 0rem;
+			}
+		}
 	}
 
 	& > div:nth-child(2n + 1) {
