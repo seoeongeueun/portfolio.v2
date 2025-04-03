@@ -412,135 +412,6 @@ $breakpoint-tablet-max: 1024px;
 	}
 }
 
-// .cartridge-cards {
-// 	--stack-width: 30rem;
-// 	--card-width: 50rem;
-// 	--gap: 10rem;
-
-// 	height: 30rem;
-// 	gap: 3rem;
-// 	display: flex;
-// 	flex-direction: row;
-// 	justify-content: center;
-// 	align-items: center;
-// 	position: relative;
-// 	transform-origin: center;
-// 	box-sizing: border-box;
-// 	overflow: visible;
-// 	top: var(--gap);
-// 	width: var(--stack-width);
-
-// 	//클릭 이벤트 진행 중에는 모든 카드의 마우스 이벤트를 차단
-// 	&:has(.clicked) {
-// 		.card:not(.clicked) {
-// 			pointer-events: none !important;
-// 		}
-
-// 		&.spread {
-// 			transition: left 0.3s ease-out 0.1s;
-// 		}
-// 	}
-
-// 	&.spread {
-// 		// width: calc(var(--stack-width) * 2);
-// 		// left: calc(var(--stack-width) + var(--gap));
-// 		width: 100%;
-
-// 		justify-content: center;
-
-// 		> .card {
-// 			filter: brightness(100%);
-
-// 			$card-width: var(--card-width);
-// 			$gap: var(--gap);
-// 			//프로젝트 개수가 바뀌면 바꿔주기
-// 			$total-cards: 7;
-
-// 			@for $i from 1 through $total-cards {
-// 				&:nth-child(#{$i}) {
-// 					@if $i % 2 == 1 {
-// 						$random-offset: if($i % 3 == 0, 0rem, if($i % 3 == 1, 1rem, 2rem));
-// 						left: calc(-100% + (#{$card-width} * 2) - ((#{$card-width} / 2) * #{$i}) + #{$random-offset});
-// 					} @else {
-// 						$random-offset: if($i % 3 == 0, 0rem, if($i % 3 == 1, 1rem, 4rem));
-// 						left: calc(-100% + (#{$card-width} / 2) + ((#{$card-width} / 2) * (#{$i} + 1)) + #{$random-offset});
-// 					}
-// 				}
-// 			}
-
-// 			&:first-child {
-// 				left: calc(-100% + calc(var(--card-width) / 1.5 + calc(var(--gap)) * 2.5));
-// 				top: -3rem;
-// 			}
-// 		}
-// 	}
-
-// 	> .card {
-// 		cursor: pointer;
-// 		transition:
-// 			left 0.5s ease-in-out,
-// 			filter 0.3s ease 0.1s;
-// 		position: absolute;
-// 		filter: brightness(80%);
-
-// 		&:nth-child(2n) {
-// 			transform: rotate(-1deg);
-// 		}
-// 		&:nth-child(2n + 1) {
-// 			transform: rotate(1deg);
-// 			top: 1rem;
-// 		}
-
-// 		&.card-4 {
-// 			transform: rotate(1deg);
-// 			left: -2rem;
-// 			top: 1rem;
-// 		}
-
-// 		&.card-3 {
-// 			transform: rotate(2deg);
-// 			left: 2rem;
-// 			top: -1rem;
-// 		}
-
-// 		/* 킥을 위해 2번째 카드는 강한 회전값 */
-// 		&.card-2 {
-// 			transform: rotate(-4deg);
-// 			left: 3rem;
-// 			top: -2rem;
-// 		}
-
-// 		/* 첫번째 카드는 음영 효과 x */
-// 		&.card-1 {
-// 			transform: rotate(-1deg);
-// 			left: 1rem;
-// 			top: 0rem;
-// 			filter: brightness(100%);
-// 		}
-
-// 		&:hover {
-// 			transition:
-// 				top 0.5s ease-in-out,
-// 				transform 0.3s ease-in-out 0.1s;
-// 			top: -7rem !important;
-// 			transform: rotate(0deg);
-// 		}
-
-// 		&.clicked {
-// 			filter: brightness(100%);
-// 			transition:
-// 				transform 0.8s ease-in-out 0.5s,
-// 				top 0.5s ease-in-out;
-// 			transform: scale(0.2);
-// 			top: -7rem !important;
-
-// 			&.moveY {
-// 				animation: insert 1.5s ease-in-out forwards;
-// 			}
-// 		}
-// 	}
-// }
-
 .cartridge-loop {
 	display: flex;
 	flex-direction: row;
@@ -548,7 +419,7 @@ $breakpoint-tablet-max: 1024px;
 	will-change: left;
 	position: relative;
 	left: 0;
-	transition: left 0.6s ease-in-out 0.3s;
+	transition: left 0.7s ease-in-out 0.2s;
 
 	&:has(.forbid-click) {
 		.card {
@@ -624,14 +495,13 @@ $breakpoint-tablet-max: 1024px;
 	min-height: calc(30rem * (22 / 18));
 	max-height: calc(40rem * (22 / 18));
 	flex-shrink: 0;
-	filter: drop-shadow(2px 1px 7px rgba(66, 66, 66, 0.7));
+	box-shadow: 25px 25px 10px -15px rgba(0, 0, 0, 0.2);
 
 	@media screen and (min-width: $breakpoint-tablet-min) and (max-width: $breakpoint-tablet-max) {
 		width: 30rem;
 		height: calc(30rem * (22 / 18));
 		min-width: auto;
 		min-height: auto;
-		filter: drop-shadow(1px 1px 5px rgba(66, 66, 66, 0.5));
 	}
 
 	@media screen and (max-width: $breakpoint-mobile) {
@@ -639,7 +509,7 @@ $breakpoint-tablet-max: 1024px;
 		height: calc(18rem * (22 / 18));
 		min-width: auto;
 		min-height: auto;
-		filter: drop-shadow(0px 1px 3px rgba(66, 66, 66, 0.5));
+		box-shadow: 15px 20px 5px -10px rgba(0, 0, 0, 0.2);
 	}
 
 	> .head {
