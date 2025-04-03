@@ -684,6 +684,15 @@ export default function Home() {
 		};
 	}, []);
 
+	//선택된 카트리지를 돌려보내기
+	const handleClearChanges = () => {
+		const cardsDiv = cartridgeCardsRef.current;
+		if (!cardsDiv) return;
+
+		cardsDiv.style.left = "";
+		cardsDiv.style.transition = "";
+	};
+
 	/* 카트리지 (=통칭 카드) 호버 & 선택 이벤트 관리 */
 	useEffect(() => {
 		const parentContainer = cartridgeCardsContainerRef.current;
@@ -692,11 +701,6 @@ export default function Home() {
 
 		const cards = cardsDiv.querySelectorAll<HTMLElement>(".card");
 		const timeouts: ReturnType<typeof setTimeout>[] = [];
-
-		const handleClearChanges = () => {
-			cardsDiv.style.left = "";
-			cardsDiv.style.transition = "";
-		};
 
 		function onCardClick(event: MouseEvent) {
 			const clickedCard = event.currentTarget as HTMLElement;
@@ -779,6 +783,14 @@ export default function Home() {
 						const distance = referencePosition - cardPosition - clickedCard.offsetHeight * 0.4;
 						clickedCard.style.setProperty("--y-distance", `${distance + 20}px`);
 						clickedCard.classList.add("moveY");
+
+						//프로젝트가 선택되면 카트리지 장착 애니메이션 이후 게임기를 켠다
+						const handleAnimationEnd = () => {
+							setIsGameboyOn(true);
+							clickedCard.removeEventListener("animationend", handleAnimationEnd);
+						};
+						clickedCard.addEventListener("animationend", handleAnimationEnd);
+
 						const t2 = setTimeout(() => {
 							window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
 						}, 300);
@@ -838,14 +850,7 @@ export default function Home() {
 	}, [tags]);
 
 	useEffect(() => {
-		let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
 		if (selectedProject) {
-			//프로젝트가 선택되면 카트리지 장착 애니메이션 이후 게임기를 켠다
-			timeoutId = setTimeout(() => {
-				setIsGameboyOn(true);
-			}, 2000);
-
 			const section = projectDetailRef.current;
 			if (!section) return;
 
@@ -868,62 +873,33 @@ export default function Home() {
 			setIsSectionReady(false);
 			projectDetailRef.current?.classList.remove("clear", "ready");
 		}
-
-		return () => {
-			if (timeoutId) clearTimeout(timeoutId);
-		};
 	}, [selectedProject]);
 
 	useEffect(() => {
-		if (!isSectionReady) return;
-
-		const cardsDiv = cartridgeCardsRef.current;
-		if (!cardsDiv) return;
-
-		const cards = cardsDiv.querySelectorAll<HTMLElement>(".card");
-
-		const timeoutId = setTimeout(() => {
-			cardsDiv.style.left = "";
-			cardsDiv.style.transition = "";
-			unlockScroll();
-
-			cards.forEach(card => {
-				card.classList.remove("forbid-click", "moveY", "clicked");
-			});
-		}, 3000);
-
-		const handleCloseOnScroll = (e: Event) => {
-			e.preventDefault();
-			e.stopPropagation();
-			handleCloseProject();
-		};
-
-		//document.body.addEventListener("wheel", handleCloseOnScroll, {passive: false});
-		//document.body.addEventListener("touchmove", handleCloseOnScroll, {passive: false});
-		//document.body.addEventListener("keydown", handleCloseOnScroll);
-		//document.body.addEventListener("scroll", preventScroll);
-		document.documentElement.style.overflow = "hidden";
-
-		return () => {
-			clearTimeout(timeoutId);
+		//프로젝트 상세 페이지가 보여질때 뒷 배경 스크롤 막고 내부 스크롤은 허용
+		if (!isSectionReady) {
 			document.documentElement.style.overflow = "";
-			//document.body.removeEventListener("wheel", handleCloseOnScroll);
-			//document.body.removeEventListener("touchmove", handleCloseOnScroll);
-			//document.body.removeEventListener("keydown", handleCloseOnScroll);
-		};
+		} else {
+			document.documentElement.style.overflow = "hidden";
+			unlockScroll();
+		}
 	}, [isSectionReady]);
 
 	const handleCloseProject = useCallback(() => {
 		const section = projectDetailRef.current;
-		if (!section) return;
+		const cardsDiv = cartridgeCardsRef.current;
+		if (!section || !cardsDiv) return;
 
+		handleClearChanges();
+		setSelectedProject(undefined);
+		const cards = cardsDiv.querySelectorAll<HTMLElement>(":scope > .card");
+		cards.forEach(card => {
+			card.classList.remove("forbid-click", "moveY", "clicked");
+		});
 		section.classList.add("clear");
 
 		const clearProjectPage = () => {
 			setTimeout(() => {
-				setIsGameboyOn(false);
-				setSelectedProject(undefined);
-				unlockScroll();
 				section.classList.remove("clear", "ready");
 			}, 300);
 		};
@@ -1172,7 +1148,7 @@ export default function Home() {
 						<label>{textFile["003"]}</label>
 					</div>
 				</div>
-				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full flex items-center overflow-x-auto overflow-y-visible min-h-[40rem]">
+				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full flex items-center overflow-x-auto overflow-y-hidden min-h-[40rem]">
 					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-16 md:gap-24 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
 							<div key={v.title} data-project={k} className={`card card-${k} w-fit`}>
@@ -1290,16 +1266,6 @@ export default function Home() {
 					</section>
 				)}
 			</section>
-
-			{/* <div className="h-screen">Top content</div>
-			<div className="h-screen">Top content</div> */}
-
-			{/* <section className="flex-col bg-red-100 opacity-50 mt-[150vh] fade-up-section">
-				<div className="flex flex-col justify-start items-center mb-auto">
-					<p className="subtitle">CONTACTS</p>
-					<p className="text-s max-w-1/2 whitespace-pre-line">{textFile["001"]}</p>
-				</div>
-			</section> */}
 		</div>
 	);
 }
