@@ -1009,7 +1009,7 @@ export default function Home() {
 					</div> */}
 				{/* <div className="h-full w-full flex flex-row bg-blue-100"></div> */}
 			</div>
-			<section className="w-full flex flex-col items-center pt-52">
+			<section className="pool-section w-full flex flex-col items-center pt-52">
 				<div className="flex flex-col justify-center items-center">
 					<p ref={miniTitleRef} className="underline-text opacity-0 ml-[90%] text-white text-s lg:text-xl rotate-10 -mb-6 md:-mb-[3rem] z-30">
 						SEOEONGEUEUN's

@@ -274,6 +274,10 @@ $breakpoint-tablet-max: 1024px;
 	}
 }
 
+.pool-section {
+	background: linear-gradient(180deg, var(--main-bg) 0%, var(--main-bg) 80%, rgb(83, 215, 255) 100%);
+}
+
 .towels-container {
 	display: flex;
 	flex-direction: column;

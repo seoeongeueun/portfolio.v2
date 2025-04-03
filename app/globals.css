@@ -74,21 +74,21 @@
 	--frame: #242b29;
 	--frame-dark: rgb(3, 11, 8);
 
-	--body: rgb(218, 166, 24);
-	--body-shadow: rgb(238, 206, 62);
-	--body-shadow-rgb: 238, 206, 62;
-	--body-light: rgb(250, 246, 48);
-	--body-light-rgb: 250, 246, 48;
-	--body-dark: rgb(150, 107, 15);
-	--body-dark-rgb: 150, 107, 15;
+	--body: rgb(230, 98, 22);
+	--body-shadow: rgb(252, 146, 47);
+	--body-shadow-rgb: 252, 146, 47;
+	--body-light: rgb(255, 206, 100);
+	--body-light-rgb: 255, 206, 100;
+	--body-dark: rgb(158, 64, 20);
+	--body-dark-rgb: 158, 64, 20;
 	--button: #ddddd8;
 	--button-light: #e7ebec;
 	--button-dark: rgb(167, 162, 160);
 	--button-dark-rgb: 167, 162, 160;
 	--button-shadow: rgb(167, 169, 179);
 	--button-shadow-rgb: 167, 169, 179;
-	--button-hole: rgb(60, 31, 3);
-	--button-hole-rgb: 60, 31, 3;
+	--button-hole: rgb(71, 29, 10);
+	--button-hole-rgb: 71, 29, 10;
 	--darkest-point: rgb(29, 16, 10);
 	--darkest-point-rgb: 29, 16, 10;
 
