@@ -435,7 +435,8 @@ $breakpoint-tablet-max: 1024px;
 		top: 0;
 		transition:
 			transform 0.7s ease-in-out 0.2s,
-			top 0.3s ease-in-out;
+			top 0.3s ease-in-out,
+			margin-top 0.3s ease-in-out;
 		--scale-factor: 0.2;
 
 		@media screen and (max-width: $breakpoint-mobile) {
@@ -455,8 +456,7 @@ $breakpoint-tablet-max: 1024px;
 		}
 
 		&:hover {
-			top: -7rem;
-			transform: none;
+			margin-top: -7rem;
 		}
 
 		&.clicked {
@@ -1832,15 +1832,17 @@ $transition: 0.5s ease-in-out;
 
 			ul {
 				list-style: none;
-				padding-left: 1.5rem;
 				background-color: rgba(255, 255, 255, 0.6);
 				color: black;
+				padding: 0.5rem;
+				padding-left: 1.5rem;
 
 				li {
 					position: relative;
 					padding-left: 1.5rem;
 					font-size: 1.4rem;
 					font-weight: 500;
+					margin-bottom: 0.5rem;
 					text-shadow:
 						-2px 0px white,
 						0px 2px white,
@@ -1859,13 +1861,11 @@ $transition: 0.5s ease-in-out;
 						border: 1px solid black;
 						border-radius: 50%;
 						color: black;
-						font-size: 0.9rem;
-						font-weight: bold;
+						font-size: 1.1rem;
 						display: flex;
 						align-items: center;
 						justify-content: center;
 						line-height: 1;
-						text-align: center;
 					}
 				}
 			}

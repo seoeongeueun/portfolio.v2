@@ -44,6 +44,7 @@ export default function Home() {
 	const [isSpecialSlide, setIsSpecialSlide] = useState<boolean>(false);
 	const [isSectionReady, setIsSectionReady] = useState<boolean>(false);
 	const [headerOpen, setHeaderOpen] = useState<boolean>(false);
+	const [showMessage, setShowMessage] = useState<boolean>(true);
 
 	const poolRef = useRef<HTMLDivElement | null>(null);
 	const poolRectRef = useRef<DOMRect | null>(null);
@@ -146,6 +147,48 @@ export default function Home() {
 			window.removeEventListener("resize", debouncedResize);
 		};
 	}, []);
+
+	useEffect(() => {
+		let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+		const checkScrollIdle = () => {
+			const scrollTop = window.scrollY || document.documentElement.scrollTop;
+			const scrollHeight = document.documentElement.scrollHeight;
+			const windowHeight = window.innerHeight;
+
+			const isAtTop = scrollTop === 0;
+			const isNotAtBottom = scrollTop < scrollHeight - windowHeight;
+
+			if ((isAtTop || isNotAtBottom) && !showMessage) {
+				setShowMessage(true);
+			}
+		};
+
+		const handleScroll = debounce(() => {
+			const scrollTop = window.scrollY || document.documentElement.scrollTop;
+			const scrollHeight = document.documentElement.scrollHeight;
+			const windowHeight = window.innerHeight;
+
+			const isNotAtTop = scrollTop > 0;
+			const isAtBottom = scrollTop >= scrollHeight - windowHeight;
+
+			if ((isNotAtTop || isAtBottom) && showMessage) {
+				setShowMessage(false);
+			}
+
+			if (timeoutId) clearTimeout(timeoutId);
+			timeoutId = setTimeout(checkScrollIdle, 4000); //4초간 모션 없는 경우
+		}, 200);
+
+		timeoutId = setTimeout(checkScrollIdle, 4000);
+
+		window.addEventListener("scroll", handleScroll);
+
+		return () => {
+			window.removeEventListener("scroll", handleScroll);
+			if (timeoutId) clearTimeout(timeoutId);
+		};
+	}, [showMessage]);
 
 	useEffect(() => {
 		if (isEnglish) {
@@ -1005,7 +1048,7 @@ export default function Home() {
 					</div>
 				</div>
 
-				<div className="fixed w-full bottom-0 p-20 pointer-events-none z-[99]">
+				<div className={`fixed w-full bottom-0 p-20 pointer-events-none z-[99] transition-opacity ${showMessage ? "opacity-100" : "opacity-0"}`}>
 					<div className="flex flex-col items-center justify-center text-white text-xl">
 						<span className="drop-shadow-md">{textFile["000"]}</span>
 						<MdKeyboardDoubleArrowDown color="white" size="3rem" className="animate-slide-down drop-shadow-lg"></MdKeyboardDoubleArrowDown>
@@ -1227,10 +1270,19 @@ export default function Home() {
 									<p>{textFile["005"]}</p>
 								</div>
 								<ul>{selectedProject.contribution_kr?.map((c, i) => <li key={"c" + i}>{c}</li>)}</ul>
-								<div className="sub mt-4">
-									<p>{textFile["006"]}</p>
-								</div>
-								<ul>{selectedProject.review_kr?.map((r, i) => <li key={"r" + i}>{r}</li>)}</ul>
+								{selectedProject.review_kr?.length > 0 && (
+									<>
+										<div className="sub mt-4">
+											<p>{textFile["006"]}</p>
+										</div>
+
+										<ul>
+											{selectedProject.review_kr.map((r, i) => (
+												<li key={"r" + i}>{r}</li>
+											))}
+										</ul>
+									</>
+								)}
 							</div>
 						</div>
 						<div className="fish animate-float absolute">
