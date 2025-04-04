@@ -140,11 +140,11 @@
 		"subtitle": "Other Projects",
 		"thumbnail": "other_main.png",
 		"route": "etc/",
-		"tags": ["1 DEV", "WORK", "WEB"],
+		"tags": ["TEAM", "WORK", "WEB"],
 		"links": [{"baton": "https://ba-ton.kr", "josun": "https://josuntns.josunhotel.com/", "impact": "https://impact.career"}],
 		"theme": "#4b212a",
 		"stacks": ["typescript", "js", "nextjs2", "reactjs", "playwright", "cypress", "css3", "html5", "mysql", "docker"],
-		"introduction_kr": ["그 외 작업한 프로젝트로 임팩트 닷 커리어, 조선 테이스트 & 스타일, 자이요가, 바톤 홈페이지 등이 있습니다."],
+		"introduction_kr": ["그 외 작업한 프로젝트로 임팩트 닷 커리어, 조선 테이스트 & 스타일, 바톤 홈페이지 등이 있습니다."],
 		"contribution_kr": [
 			"[바톤 홈페이지] 단독으로 담당한 Next.js 기반 회사 웹사이트로 기획 단계부터 참여해 최종 사이트부터 프로토타입까지 다양한 버전을 구현했습니다. Mouse parallax 효과로 페이지를 이동하고 자연스러운 이동과 페이지 전환 효과 구현에 중점을 두고 e2e 테스트를 도입하여 완성도를 높였습니다.",
 			"[조선 테이스트 & 스타일] Cafe24 기반 조선 호텔 쇼핑몰의 메인 페이지와 마이페이지를 작업했습니다. Next.js 기반 관리자 사이트의 이미지 등록 기능과 유저 정보 암호화 / 복호화 백엔드를 담당했습니다.",

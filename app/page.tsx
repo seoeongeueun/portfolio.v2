@@ -873,7 +873,7 @@ export default function Home() {
 			});
 			timeouts.forEach(t => clearTimeout(t));
 		};
-	}, []);
+	}, [projects]);
 
 	/* 메인 페이지 타이틀에 애니메이션 추가 */
 	useEffect(() => {

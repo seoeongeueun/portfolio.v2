@@ -306,7 +306,7 @@ $breakpoint-tablet-max: 1024px;
 			margin-bottom: 50rem;
 
 			@media screen and (max-width: $breakpoint-tablet-max) {
-				margin-bottom: 0rem;
+				margin-bottom: -10rem;
 			}
 		}
 	}

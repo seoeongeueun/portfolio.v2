@@ -125,3 +125,8 @@ $breakpoint-tablet-max: 1024px;
 	pointer-events: none;
 	transform: rotate(3deg);
 }
+
+.dragging {
+	cursor: grabbing;
+	user-select: none;
+}
