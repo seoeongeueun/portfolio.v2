@@ -6,7 +6,7 @@ import TextEn from "./data/text-en.json" assert {type: "json"};
 import TextKr from "./data/text-kr.json" assert {type: "json"};
 import {Fragment, useEffect, useState, useRef, useCallback} from "react";
 import Cartridge from "./components/cartridge";
-import Gameboy, {Project} from "./components/gameboy";
+import Gameboy from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
 import CareerData from "./data/careers.json" assert {type: "json"};
 import "./styles/global.scss";
@@ -29,6 +29,22 @@ gsap.registerPlugin(ScrollTrigger);
 gsap.registerPlugin(Draggable);
 
 type TextFileType = Record<string, string>;
+export interface Project {
+	title: string;
+	subtitle: string;
+	thumbnail: string;
+	route: string;
+	tags: string[];
+	theme: string;
+	stacks: string[];
+	contribution_kr: string[];
+	review_kr: string[];
+	introduction_kr: string[];
+	ppl_count: number;
+	link: string[];
+	dark: boolean;
+	images: string[];
+}
 
 interface Projects {
 	[key: string]: Project;
@@ -1170,7 +1186,7 @@ export default function Home() {
 				<div
 					className={`relative -mt-32 lg:mt-0 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} left-1/2 -translate-x-1/2 flex flex-col items-center justify-center`}
 				>
-					<Gameboy project={selectedProject} />
+					<Gameboy title={selectedProject?.title} />
 				</div>
 				{selectedProject && (
 					<section

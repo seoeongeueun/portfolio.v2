@@ -1,29 +1,10 @@
-import Cartridge from "./cartridge";
-import {stacks} from "../lib/constants";
 import Image from "next/image";
 
 type GameboyProps = {
-	project: Project | undefined;
+	title: string | undefined;
 };
 
-export interface Project {
-	title: string;
-	subtitle: string;
-	thumbnail: string;
-	route: string;
-	tags: string[];
-	theme: string;
-	stacks: string[];
-	contribution_kr: string[];
-	review_kr: string[];
-	introduction_kr: string[];
-	ppl_count: number;
-	link: string[];
-	dark: boolean;
-	images: string[];
-}
-
-export default function Gameboy({project}: GameboyProps) {
+export default function Gameboy({title}: GameboyProps) {
 	return (
 		<div className="h-[40rem] w-full flex items-center justify-start md:justify-center font-tenada">
 			<div className="gameboy-body w-[77rem] h-[30rem] flex items-center justify-center">
@@ -121,7 +102,7 @@ export default function Gameboy({project}: GameboyProps) {
 						<div className="w-[32rem] h-[20rem] bg-off-screen">
 							<div className="gameboy-screen w-full h-full">
 								<div className="contents w-full h-full flex flex-col justify-center items-center text-black font-dunggeunmo font-normal gap-2">
-									<p className="text-xxl">{project?.title.toUpperCase()}</p>
+									<p className="text-xxl">{title?.toUpperCase()}</p>
 									<p className="text-m">loading</p>
 									<Image src="/assets/spinner.svg" alt="loading spinner" width={40} height={40} className="animate-spin" />
 								</div>

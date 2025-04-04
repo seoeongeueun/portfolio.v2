@@ -1,17 +1,10 @@
 import Image from "next/image";
 import {useState, useEffect} from "react";
+import {Project} from "@/app/page";
 
 type CartridgePropsType = {
 	project: Project;
 };
-
-interface Project {
-	title: string;
-	subtitle: string;
-	thumbnail: string;
-	tags: string[];
-	theme: string;
-}
 
 export default function Cartridge({project}: CartridgePropsType) {
 	return (
@@ -37,7 +30,7 @@ export default function Cartridge({project}: CartridgePropsType) {
 					<div className="edge"></div>
 
 					<div className="image-frame">
-						<div className="thumbnail" style={{backgroundImage: `url(${project.thumbnail})`}}></div>
+						<div className="thumbnail" style={{backgroundImage: `url(/projects/${project.route}${project.thumbnail})`}}></div>
 					</div>
 					<div className="edge right"></div>
 				</div>

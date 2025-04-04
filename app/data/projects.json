@@ -3,7 +3,7 @@
 		"title": "Minor Questions",
 		"subtitle": "ORGD 2024",
 		"route": "orgd/",
-		"thumbnail": "/images/orgd_main.JPG",
+		"thumbnail": "orgd_main.jpg",
 		"tags": ["1 DEV", "PERSONAL", "EXHIBITION"],
 		"theme": "#2e2e2e",
 		"stacks": ["js", "nextjs2", "socket", "express", "mongodb", "tailwindcss"],
@@ -32,7 +32,7 @@
 		"title": "HeyMap",
 		"subtitle": "Map for Popups",
 		"route": "heymap/",
-		"thumbnail": "/images/heymap_main.png",
+		"thumbnail": "heymap_main.png",
 		"tags": ["WORK", "TEAM", "WEB"],
 		"theme": "#f9804c",
 		"stacks": ["js", "nextjs2", "express", "postgresql", "tailwindcss"],
@@ -60,7 +60,7 @@
 	"3": {
 		"title": "LocalStorage",
 		"subtitle": "Meet Local Artists",
-		"thumbnail": "/images/localstorage_main.png",
+		"thumbnail": "ls_main.png",
 		"route": "localstorage/",
 		"introduction_kr": [
 			"동네수장고는 아티스트가 작품을 보관할 수 있는 공간 지원을 매개로 신진 작가를 소개하고 연결하는 플랫폼입니다.",
@@ -83,7 +83,7 @@
 	"4": {
 		"title": "Workmate",
 		"subtitle": "Retro Music Player",
-		"thumbnail": "/images/workmate_main.png",
+		"thumbnail": "workmate_main.png",
 		"route": "workmate/",
 		"tags": ["1 DEV", "PERSONAL", "WEB", "STANDALONE"],
 		"theme": "#404076",
@@ -110,7 +110,7 @@
 	"5": {
 		"title": "Portfolio",
 		"subtitle": "Portfolio Renewal",
-		"thumbnail": "/images/portfolio_main.png",
+		"thumbnail": "portfolio_main.png",
 		"tags": ["1 DEV", "PERSONAL", "WEB"],
 		"route": "po/",
 		"theme": "#2febf1",
@@ -132,10 +132,10 @@
 	"6": {
 		"title": "...And More!",
 		"subtitle": "Other Projects",
-		"thumbnail": "/images/other_main.png",
+		"thumbnail": "other_main.png",
 		"route": "etc/",
 		"tags": ["1 DEV", "WORK", "WEB"],
-		"theme": "#2febf1",
+		"theme": "#4b212a",
 		"stacks": ["typescript", "js", "nextjs2", "reactjs", "playwright", "cypress", "css3", "html5", "mysql", "docker"],
 		"introduction_kr": ["그 외 작업한 프로젝트로 임팩트 닷 커리어, 조선 테이스트 & 스타일, 자이요가, 바톤 홈페이지 등이 있습니다."],
 		"contribution_kr": [
@@ -144,6 +144,7 @@
 			"[임팩트 닷 커리어] Php와 jQuery 기반 메인 페이지, 커뮤니티 페이지, 그리고 소개 페이지의 일부 영역을 작업했습니다. IntersectionObserver와 RequestAnimaionFrame을 사용해 스크롤 위치에 따라 진행되는 다양한 애니메이션 구현과 최적화를 담당했습니다."
 		],
 		"images": ["etc0.png", "etc6.png", "etc3.png", "etc4.png", "etc2.png", "etc5.png"],
-		"ppl_count": 5
+		"ppl_count": 5,
+		"dark": true
 	}
 }
