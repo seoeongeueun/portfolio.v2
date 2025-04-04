@@ -4,7 +4,7 @@ import Link from "next/link";
 import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
 import TextKr from "./data/text-kr.json" assert {type: "json"};
-import {Fragment, useEffect, useState, useRef, useCallback} from "react";
+import {Fragment, useEffect, useState, useRef, useCallback, useLayoutEffect} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
@@ -779,6 +779,11 @@ export default function Home() {
 			const projectData = ProjectsData[projectKey as keyof typeof ProjectsData];
 			if (projectData) setSelectedProject(projectData as Project);
 
+			//프로젝트 새로 클릭시 스와이퍼가 새로 생성되기 때문에
+			let resolve!: () => void;
+			const promise = new Promise<void>(r => (resolve = r));
+			swiperReadyRef.current = {promise, resolve};
+
 			lockScroll();
 			clickedCard.classList.add("forbid-click");
 			cards.forEach(card => card.classList.remove("clicked"));
@@ -915,42 +920,6 @@ export default function Home() {
 		}
 	}, [tags]);
 
-	// useEffect(() => {
-	// 	if (selectedProject) {
-	// 		const section = projectDetailRef.current;
-	// 		if (!section) return;
-
-	// 		//바뀐 스와이퍼에 새로운 ready promise를 연결
-	// 		let resolve: () => void;
-	// 		const promise = new Promise<void>(r => (resolve = r));
-	// 		swiperReadyRef.current = {promise, resolve: resolve!};
-
-	// 		const run = async () => {
-	// 			//section 내부 이미지와 swiper가 모두 로딩 되면 준비 완료로 변경
-	// 			//최소로 3초는 기다리기
-	// 			await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current!.promise, sleep(3000)]);
-
-	// 			setIsSectionReady(true);
-	// 		};
-
-	// 		run();
-	// 	} else {
-	// 		setIsGameboyOn(false);
-	// 		setIsSectionReady(false);
-	// 	}
-	// }, [selectedProject]);
-
-	//프로젝트가 바뀔 때마다 새로운 스와이퍼가 생성되기 때문에 새로 연결
-	useEffect(() => {
-		if (selectedProject) {
-			let resolve: () => void;
-			const promise = new Promise<void>(r => (resolve = r));
-			swiperReadyRef.current = {promise, resolve: resolve!};
-
-			setIsSectionReady(false);
-		}
-	}, [selectedProject]);
-
 	useEffect(() => {
 		if (!selectedProject) {
 			swiperReadyRef.current = null;
@@ -964,7 +933,7 @@ export default function Home() {
 
 		const run = async () => {
 			//section 내부 이미지와 swiper가 모두 로딩 되면 준비 완료로 변경 + 최소로 3초는 기다리기
-			await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current!.promise, sleep(3000)]);
+			await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current?.promise, sleep(3000)]);
 
 			setIsSectionReady(true);
 		};
@@ -1008,6 +977,10 @@ export default function Home() {
 	const openHeader = () => {
 		setHeaderOpen(prev => !prev);
 	};
+
+	useEffect(() => {
+		console.log(swiperReadyRef.current);
+	}, [swiperReadyRef.current]);
 
 	return (
 		<div ref={mainRef} className="main-page text-white w-full h-fit flex flex-col items-center justify-start">
@@ -1197,7 +1170,7 @@ export default function Home() {
 				</section>
 			</div>
 
-			<section className="w-full full-section text-center font-dunggeunmo projects-section relative -mt-32 md:-mt-0">
+			<section className="w-full full-section text-center font-dunggeunmo projects-section relative -mt-[20vh] md:-mt-0">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
@@ -1223,7 +1196,7 @@ export default function Home() {
 				>
 					<Gameboy title={selectedProject?.title} />
 				</div>
-				{selectedProject && (
+				{selectedProject && swiperReadyRef.current && (
 					<section
 						ref={projectDetailRef}
 						className={`project-section flex flex-col absolute bottom-0 left-0 z-40 py-6 md:py-8 text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
@@ -1255,11 +1228,27 @@ export default function Home() {
 								loop={true}
 								autoplay={{delay: 6000, disableOnInteraction: true}}
 								onSwiper={(swiper: SwiperClass) => {
-									if (swiperReadyRef.current?.resolve) {
-										swiperReadyRef.current?.resolve();
-										console.log("Swiper is ready");
+									console.log("🔥 onSwiper fired");
+									console.log("🧪 swiperReadyRef in onSwiper", swiperReadyRef.current);
+									const firstSlide = swiper.slides[swiper.activeIndex] as HTMLElement;
+									if (!firstSlide) return;
+
+									const img = firstSlide.querySelector("img");
+									if (!img) return;
+
+									if (img.complete) {
+										console.log("Swiper first slide is already ready");
+										swiperReadyRef.current?.resolve?.();
 									} else {
-										console.warn("Swiper mounted but no resolve registered");
+										//아직 로딩 중인 경우
+										img.onload = () => {
+											console.log("First slide image finished loading");
+											swiperReadyRef.current?.resolve?.();
+										};
+										img.onerror = () => {
+											//로드 실패 => 프로젝트 선택을 초기화
+											setSelectedProject(undefined);
+										};
 									}
 								}}
 								onSlideChange={(swiper: SwiperClass) => {
@@ -1360,7 +1349,7 @@ export default function Home() {
 							</div>
 						</div>
 						<div className="fish animate-float absolute">
-							<Image src="/assets/fish0.gif" alt="fish" width={100} height={100} />
+							<Image src="/assets/fish0.gif" alt="fish" width={100} height={100} unoptimized />
 						</div>
 						<div className="absolute bottom-28 left-[5%]">
 							<Image src="/assets/coral.png" alt="coral" width={100} height={100} />
