@@ -306,7 +306,7 @@ $breakpoint-tablet-max: 1024px;
 			margin-bottom: 50rem;
 
 			@media screen and (max-width: $breakpoint-tablet-max) {
-				margin-bottom: -10rem;
+				margin-bottom: 0rem;
 			}
 		}
 	}
@@ -783,7 +783,7 @@ $breakpoint-tablet-max: 1024px;
 }
 .beach-container {
 	//background-color: var(--theme-sand);
-	transition: opacity 0.5s ease;
+	transition: opacity 0.3s ease;
 	background: linear-gradient(179deg, var(--theme-sand-dark) 0%, var(--theme-sand) 13%, var(--theme-sand) 100%);
 
 	@media screen and (max-width: $breakpoint-mobile) {

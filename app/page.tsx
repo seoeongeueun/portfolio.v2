@@ -531,7 +531,7 @@ export default function Home() {
 			end: `+=${totalScrollDistance}`,
 			pin: true,
 			pinSpacing: false,
-			scrub: true,
+			toggleActions: "play reverse play reverse",
 			onUpdate: self => {
 				const progress = self.progress;
 				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
@@ -569,12 +569,14 @@ export default function Home() {
 				if (progress >= DUST_TIMING && !ds.dustReady && !ds.dustTriggered) {
 					ds.dustTriggered = true;
 
-					requestAnimationFrame(() => {
-						setTimeout(() => {
-							const targetY = -towelProgress * scrollPerTowel * totalTowels;
-							createDust(targetY);
-						}, 320);
-					});
+					// requestAnimationFrame(() => {
+					// 	setTimeout(() => {
+					// 		const targetY = -towelProgress * scrollPerTowel * totalTowels;
+					// 		createDust(targetY);
+					// 	}, 320);
+					// });
+					const targetY = -towelProgress * scrollPerTowel * totalTowels;
+					createDust(targetY);
 				}
 
 				if (currentDustProgress === 0 && !ds.dustRemoved) {
@@ -591,9 +593,8 @@ export default function Home() {
 					ds.dustTriggered = false;
 				}
 			},
-
 			onLeaveBack: () => {
-				beachRef.current!.style.opacity = "1";
+				//beachRef.current!.style.opacity = "1";
 				ds.dustCanvas?.remove();
 				ds.dustCanvas = null;
 				ds.dustCtx = null;
@@ -601,6 +602,9 @@ export default function Home() {
 				ds.dustRemoved = true;
 				ds.dustTriggered = false;
 				ds.particles = [];
+			},
+			onLeave: () => {
+				beachRef.current!.style.opacity = "0";
 			},
 		});
 
@@ -1082,7 +1086,7 @@ export default function Home() {
 				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
 				<section ref={shoreRef} className="w-full shore relative z-20">
-					<div className="float-left w-full md:w-1/2 md:pr-16 lg:pr-40 flex flex-col justify-start items-start shore-title">
+					<div className="float-left w-full py-32 lg:py-0 md:w-1/2 md:pr-16 lg:pr-40 flex flex-col justify-start items-start shore-title">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
 							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
