@@ -41,7 +41,7 @@ export interface Project {
 	review_kr: string[];
 	introduction_kr: string[];
 	ppl_count: number;
-	link: string[];
+	links: Record<string, string>[];
 	dark: boolean;
 	images: string[];
 }
@@ -74,7 +74,6 @@ export default function Home() {
 	const cartridgeCardsRef = useRef<HTMLDivElement>(null);
 	const mainTitleRef = useRef<HTMLParagraphElement>(null);
 	const miniTitleRef = useRef<HTMLParagraphElement>(null);
-	const gameboyHeadRef = useRef<HTMLDivElement>(null);
 	const beachRef = useRef<HTMLDivElement>(null);
 	//해변의 dust 단계를 저장
 	const dustState = useRef<{
@@ -1206,10 +1205,6 @@ export default function Home() {
 								</p>
 								<p>{selectedProject?.subtitle}</p>
 							</div>
-
-							{/* <div className="stacks-box flex flex-row p-4 outline-2 outline-black">
-							<Image src="/icons/mysql.png" alt="stack" width={200} height={200} />
-						</div> */}
 							<button className="text-xxxl cursor-pointer" onClick={() => handleCloseProject()}>
 								<p className="pointer-events-none">X</p>
 							</button>
@@ -1278,8 +1273,34 @@ export default function Home() {
 							<div
 								className={`project-description ${isEnglish && "en"} w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-8 lg:mt-0 lg:ml-20 overflow-y-auto`}
 							>
-								<div className="sub">
+								<div className="sub flex flex-row items-end justify-between">
 									<p>{textFile["004"]}</p>
+									{selectedProject.links && (
+										<div
+											className={`stacks-box shrink-0 flex flex-row items-center justify-center space-x-5 mr-2 ${selectedProject.dark ? "dark" : "normal"}`}
+											style={{borderColor: selectedProject.theme}}
+										>
+											{selectedProject.links.flatMap((linkObj, i) =>
+												Object.entries(linkObj).map(([k, v]) => {
+													const isGithub = v.includes("github");
+													const icon = isGithub ? "/icons/github.svg" : "/icons/link.svg";
+													const alt = isGithub ? "github" : "link";
+
+													return (
+														<Link
+															key={`${i}-${k}`}
+															href={v}
+															target="__blank"
+															className="flex flex-col items-center justify-center w-fit"
+														>
+															<Image src={icon} alt={alt} width={50} height={50} />
+															<p>{k}</p>
+														</Link>
+													);
+												})
+											)}
+										</div>
+									)}
 								</div>
 								<ul>{selectedProject.introduction_kr?.map((intro, i) => <li key={"intro" + i}>{intro}</li>)}</ul>
 								<div className="sub">
