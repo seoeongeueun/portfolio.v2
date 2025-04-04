@@ -130,7 +130,7 @@ html {
 	padding: 0;
 	/* font-smooth: never;
 	-webkit-font-smoothing: none; */
-	/*scrollbar-width: none;*/
+	scrollbar-width: none;
 }
 
 html {
@@ -139,9 +139,9 @@ html {
 	overflow-y: auto;
 }
 
-/* ::-webkit-scrollbar {
+::-webkit-scrollbar {
 	display: none;
-} */
+}
 
 section {
 	padding-left: 15rem;

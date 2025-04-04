@@ -915,29 +915,61 @@ export default function Home() {
 		}
 	}, [tags]);
 
+	// useEffect(() => {
+	// 	if (selectedProject) {
+	// 		const section = projectDetailRef.current;
+	// 		if (!section) return;
+
+	// 		//바뀐 스와이퍼에 새로운 ready promise를 연결
+	// 		let resolve: () => void;
+	// 		const promise = new Promise<void>(r => (resolve = r));
+	// 		swiperReadyRef.current = {promise, resolve: resolve!};
+
+	// 		const run = async () => {
+	// 			//section 내부 이미지와 swiper가 모두 로딩 되면 준비 완료로 변경
+	// 			//최소로 3초는 기다리기
+	// 			await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current!.promise, sleep(3000)]);
+
+	// 			setIsSectionReady(true);
+	// 		};
+
+	// 		run();
+	// 	} else {
+	// 		setIsGameboyOn(false);
+	// 		setIsSectionReady(false);
+	// 	}
+	// }, [selectedProject]);
+
+	//프로젝트가 바뀔 때마다 새로운 스와이퍼가 생성되기 때문에 새로 연결
 	useEffect(() => {
 		if (selectedProject) {
-			const section = projectDetailRef.current;
-			if (!section) return;
-
-			//바뀐 스와이퍼에 새로운 ready promise를 연결
 			let resolve: () => void;
 			const promise = new Promise<void>(r => (resolve = r));
 			swiperReadyRef.current = {promise, resolve: resolve!};
 
-			const run = async () => {
-				//section 내부 이미지와 swiper가 모두 로딩 되면 준비 완료로 변경
-				//최소로 3초는 기다리기
-				await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current!.promise, sleep(3000)]);
-
-				setIsSectionReady(true);
-			};
-
-			run();
-		} else {
-			setIsGameboyOn(false);
 			setIsSectionReady(false);
 		}
+	}, [selectedProject]);
+
+	useEffect(() => {
+		if (!selectedProject) {
+			swiperReadyRef.current = null;
+			setIsGameboyOn(false);
+			setIsSectionReady(false);
+			return;
+		}
+
+		const section = projectDetailRef.current;
+		if (!section) return;
+
+		const run = async () => {
+			//section 내부 이미지와 swiper가 모두 로딩 되면 준비 완료로 변경 + 최소로 3초는 기다리기
+			await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current!.promise, sleep(3000)]);
+
+			setIsSectionReady(true);
+		};
+
+		run();
 	}, [selectedProject]);
 
 	useEffect(() => {
@@ -1223,10 +1255,11 @@ export default function Home() {
 								loop={true}
 								autoplay={{delay: 6000, disableOnInteraction: true}}
 								onSwiper={(swiper: SwiperClass) => {
-									if (swiper.isBeginning) {
+									if (swiperReadyRef.current?.resolve) {
 										swiperReadyRef.current?.resolve();
+										console.log("Swiper is ready");
 									} else {
-										swiper.on("init", () => swiperReadyRef.current?.resolve());
+										console.warn("Swiper mounted but no resolve registered");
 									}
 								}}
 								onSlideChange={(swiper: SwiperClass) => {
