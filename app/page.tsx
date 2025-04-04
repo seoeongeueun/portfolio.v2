@@ -37,13 +37,13 @@ export interface Project {
 	tags: string[];
 	theme: string;
 	stacks: string[];
+	images: string[];
 	contribution_kr: string[];
-	review_kr: string[];
 	introduction_kr: string[];
 	ppl_count: number;
 	links: Record<string, string>[];
-	dark: boolean;
-	images: string[];
+	dark?: boolean;
+	review_kr?: string[];
 }
 
 interface Projects {
@@ -1307,7 +1307,7 @@ export default function Home() {
 									<p>{textFile["005"]}</p>
 								</div>
 								<ul>{selectedProject.contribution_kr?.map((c, i) => <li key={"c" + i}>{c}</li>)}</ul>
-								{selectedProject.review_kr?.length > 0 && (
+								{selectedProject.review_kr && (
 									<>
 										<div className="sub mt-4">
 											<p>{textFile["006"]}</p>
