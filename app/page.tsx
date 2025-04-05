@@ -100,6 +100,7 @@ export default function Home() {
 		promise: Promise<void>;
 		resolve: () => void;
 	} | null>(null);
+	const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
 	//pseudo element의 너비를 계산하는 함수
 	const getPseudoBounds = (element: HTMLElement, pseudo: "::before" | "::after") => {
@@ -160,6 +161,8 @@ export default function Home() {
 
 		return () => {
 			window.removeEventListener("resize", debouncedResize);
+			timeoutsRef.current.forEach(t => clearTimeout(t));
+			timeoutsRef.current = [];
 		};
 	}, []);
 
@@ -751,47 +754,43 @@ export default function Home() {
 	}, []);
 
 	//선택된 카트리지를 돌려보내기
-	const handleClearChanges = () => {
+	const handleClearChanges = useCallback(() => {
 		const cardsDiv = cartridgeCardsRef.current;
 		if (!cardsDiv) return;
 
 		cardsDiv.style.left = "";
 		cardsDiv.style.transition = "";
-	};
+	}, []);
 
 	/* 카트리지 (=통칭 카드) 호버 & 선택 이벤트 관리 */
-	useEffect(() => {
-		const parentContainer = cartridgeCardsContainerRef.current;
-		const cardsDiv = cartridgeCardsRef.current;
-		if (!cardsDiv || !parentContainer) return;
+	const handleCardClick = useCallback(
+		(event: React.MouseEvent<HTMLDivElement>, projectKey: string) => {
+			const parentContainer = cartridgeCardsContainerRef.current;
+			const cardsDiv = cartridgeCardsRef.current;
+			const clickedCard = event.currentTarget as HTMLDivElement;
+			if (!parentContainer || !cardsDiv) return;
 
-		const cards = cardsDiv.querySelectorAll<HTMLElement>(".card");
-		const timeouts: ReturnType<typeof setTimeout>[] = [];
-
-		function onCardClick(event: MouseEvent) {
-			const clickedCard = event.currentTarget as HTMLElement;
 			const rect = clickedCard.getBoundingClientRect();
-			//선택한 프로젝트의 키를 카드 데이터에서 가져옴
-			const projectKey = clickedCard.dataset.project;
+			if (!rect || !projectKey) return;
 
-			if (!rect || !cardsDiv || !parentContainer || !projectKey) return;
-
+			// 선택한 프로젝트 정보 가져오기
 			const projectData = ProjectsData[projectKey as keyof typeof ProjectsData];
-			if (projectData) setSelectedProject(projectData as Project);
+			if (projectData) setSelectedProject(projectData);
 
-			//프로젝트 새로 클릭시 스와이퍼가 새로 생성되기 때문에
-			let resolve!: () => void;
-			const promise = new Promise<void>(r => (resolve = r));
-			swiperReadyRef.current = {promise, resolve};
+			// swiperReadyRef 갱신
+			let resolveFn!: () => void;
+			const promise = new Promise<void>(r => (resolveFn = r));
+			swiperReadyRef.current = {promise, resolve: resolveFn};
 
 			lockScroll();
+			// 이 카드만 더블 클릭 등을 방지
 			clickedCard.classList.add("forbid-click");
-			cards.forEach(card => card.classList.remove("clicked"));
 
-			/* 
-				선택된 카드를 중앙으로 위치하게 스크롤 하는 로직 + 자동으로 필요한 만큼 여백 추가
-				어떤 디자인을 택할지에 따라 사용하지 않을 수도 있음
-			*/
+			// 이미 클릭된 다른 카드들의 "clicked" 클래스 제거
+			const allCards = parentContainer.querySelectorAll<HTMLDivElement>(".card");
+			allCards.forEach(card => card.classList.remove("clicked"));
+
+			// 선택된 카드를 중앙으로 스크롤하기
 			const parentRect = parentContainer.getBoundingClientRect();
 			const cardRect = clickedCard.getBoundingClientRect();
 
@@ -811,10 +810,10 @@ export default function Home() {
 				behavior: "smooth",
 			});
 
+			// 스크롤이 끝났는지 감시하는 함수
 			const waitForScrollEnd = () => {
 				if (Math.abs(parentContainer.scrollLeft - targetScroll) <= 1) {
 					const actualDelta = currentScroll + desiredDelta - targetScroll;
-
 					if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
 						const computedLeft = getComputedStyle(cardsDiv).left || "0";
 						const currentLeft = parseFloat(computedLeft);
@@ -832,57 +831,51 @@ export default function Home() {
 				}
 			};
 
-			if (desiredDelta > maxScroll) {
-				cardsDiv.style.left = `${-1 * desiredDelta}px`;
-				const t = setTimeout(() => {
-					clickedCard.classList.add("clicked");
-					moveGameboyHead();
-				}, 500);
-				timeouts.push(t);
-			} else {
-				clickedCard.classList.add("clicked");
-				requestAnimationFrame(waitForScrollEnd);
-			}
-
-			//게임기로 이동하기 위해 필요한 거리 계산
+			// 게임보이 위치로 카드가 움직이는 애니메이션
 			const moveGameboyHead = () => {
-				const gameboyHead = document.querySelector("#gameboy-head");
+				const gameboyHead = document.querySelector<HTMLDivElement>("#gameboy-head");
 				if (gameboyHead) {
 					const t = setTimeout(() => {
+						clickedCard.classList.add("clicked");
+						// .top 계산
 						const referencePosition = gameboyHead.getBoundingClientRect().top;
 						const cardPosition = rect.top;
 						const distance = referencePosition - cardPosition - clickedCard.offsetHeight * 0.4;
 						clickedCard.style.setProperty("--y-distance", `${distance + 20}px`);
 						clickedCard.classList.add("moveY");
 
-						//프로젝트가 선택되면 카트리지 장착 애니메이션 이후 게임기를 켠다
+						// 카드 애니메이션 끝나면 게임보이 켜기
 						const handleAnimationEnd = () => {
 							setIsGameboyOn(true);
 							clickedCard.removeEventListener("animationend", handleAnimationEnd);
 						};
 						clickedCard.addEventListener("animationend", handleAnimationEnd);
 
+						// 0.3초 뒤 스크롤을 화면 맨 아래로
 						const t2 = setTimeout(() => {
 							window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
 						}, 300);
-						timeouts.push(t2);
+						timeoutsRef.current.push(t2);
 					}, 800);
-					timeouts.push(t);
+					timeoutsRef.current.push(t);
 				}
 			};
-		}
 
-		cards.forEach(card => {
-			card.addEventListener("click", onCardClick);
-		});
-
-		return () => {
-			cards.forEach(card => {
-				card.removeEventListener("click", onCardClick);
-			});
-			timeouts.forEach(t => clearTimeout(t));
-		};
-	}, [projects]);
+			// 만약 delta > maxScroll이면 바로 left를 세팅 + 약간 텀을 두고 애니메이션
+			if (desiredDelta > maxScroll) {
+				cardsDiv.style.left = `${-1 * desiredDelta}px`;
+				const t = setTimeout(() => {
+					clickedCard.classList.add("clicked");
+					moveGameboyHead();
+				}, 500);
+				timeoutsRef.current.push(t);
+			} else {
+				clickedCard.classList.add("clicked");
+				requestAnimationFrame(waitForScrollEnd);
+			}
+		},
+		[handleClearChanges]
+	);
 
 	/* 메인 페이지 타이틀에 애니메이션 추가 */
 	useEffect(() => {
@@ -1185,9 +1178,7 @@ export default function Home() {
 				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full flex items-center overflow-x-auto overflow-y-hidden min-h-[40rem]">
 					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-16 md:gap-24 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
-							<div key={v.title} data-project={k} className={`card card-${k} w-fit`}>
-								<Cartridge project={v} />
-							</div>
+							<Cartridge key={v.title} projectKey={k} project={v} onSelectProject={handleCardClick} />
 						))}
 					</div>
 				</div>
