@@ -28,18 +28,30 @@
 
 @keyframes insert {
 	0% {
+		transform: scale(1) translateY(0);
+	}
+	40% {
 		transform: scale(var(--scale-factor)) translateY(0);
-		opacity: 1;
 	}
 	90% {
 		transform: scale(var(--scale-factor)) translateY(calc(var(--y-distance) / var(--scale-factor)));
-		opacity: 1;
 	}
 	100% {
-		transform: scale(var(--scale-factor)) translateY(calc(calc(var(--y-distance) / var(--scale-factor) + 8rem)));
-		opacity: 1;
+		transform: scale(var(--scale-factor)) translateY(calc(calc(var(--y-distance) / var(--scale-factor) + 15rem)));
 	}
 }
+
+/* @keyframes insert {
+	0% {
+		transform: scale(var(--scale-factor)) translateY(0);
+	}
+	90% {
+		transform: scale(var(--scale-factor)) translateY(calc(var(--y-distance) / var(--scale-factor)));
+	}
+	100% {
+		transform: scale(var(--scale-factor)) translateY(calc(calc(var(--y-distance) / var(--scale-factor) + 15rem)));
+	}
+} */
 
 @keyframes bounce-in-top {
 	0% {

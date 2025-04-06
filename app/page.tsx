@@ -758,7 +758,7 @@ export default function Home() {
 		const cardsDiv = cartridgeCardsRef.current;
 		if (!cardsDiv) return;
 
-		cardsDiv.style.left = "";
+		cardsDiv.style.transform = "";
 		cardsDiv.style.transition = "";
 	}, []);
 
@@ -793,6 +793,14 @@ export default function Home() {
 			// 선택된 카드를 중앙으로 스크롤하기
 			const parentRect = parentContainer.getBoundingClientRect();
 			const cardRect = clickedCard.getBoundingClientRect();
+			const cardHeight = cardRect.height;
+
+			//이동해야하는 게임보이 위치를 계산
+			const gameboyHead = document.querySelector<HTMLDivElement>("#gameboy-head");
+			const referencePosition = gameboyHead?.getBoundingClientRect().top || window.scrollY + window.innerHeight;
+			const cardPosition = rect.top;
+			const distance = referencePosition - cardPosition - cardHeight / 2;
+			clickedCard.style.setProperty("--y-distance", `${distance}px`);
 
 			const cardCenterInParentViewport = cardRect.left - parentRect.left + cardRect.width / 2;
 			const cardCenterInParentScrollCoords = parentContainer.scrollLeft + cardCenterInParentViewport;
@@ -805,23 +813,34 @@ export default function Home() {
 			if (targetScroll < 0) targetScroll = 0;
 			if (targetScroll > maxScroll) targetScroll = maxScroll;
 
-			parentContainer.scrollTo({
-				left: targetScroll,
-				behavior: "smooth",
-			});
-
 			// 스크롤이 끝났는지 감시하는 함수
 			const waitForScrollEnd = () => {
 				if (Math.abs(parentContainer.scrollLeft - targetScroll) <= 1) {
 					const actualDelta = currentScroll + desiredDelta - targetScroll;
 					if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
+						// const computedTransform = getComputedStyle(cardsDiv).transform;
+						// let currentTranslateX = 0;
+
+						// if (computedTransform && computedTransform !== "none") {
+						// 	const match = computedTransform.match(/matrix\((.+)\)/);
+						// 	if (match) {
+						// 		const parts = match[1].split(", ");
+						// 		currentTranslateX = parseFloat(parts[4]);
+						// 	}
+						// }
+
+						// const newTranslateX = desiredDelta < 0 ? currentTranslateX + Math.abs(desiredDelta) : currentTranslateX - actualDelta;
+
 						const computedLeft = getComputedStyle(cardsDiv).left || "0";
 						const currentLeft = parseFloat(computedLeft);
 
 						const newLeft = desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : currentLeft - actualDelta;
 
-						cardsDiv.style.transition = "left 1s ease-in-out 0.2s";
+						//cardsDiv.style.transition = "left 1s ease-in-out 0.2s";
 						cardsDiv.style.left = `${newLeft}px`;
+
+						// cardsDiv.style.transition = "transform 1s ease-in-out 0.2s";
+						// cardsDiv.style.transform = `translateX(${newTranslateX}px)`;
 					} else {
 						handleClearChanges();
 					}
@@ -835,42 +854,36 @@ export default function Home() {
 			const moveGameboyHead = () => {
 				const gameboyHead = document.querySelector<HTMLDivElement>("#gameboy-head");
 				if (gameboyHead) {
-					const t = setTimeout(() => {
-						clickedCard.classList.add("clicked");
-						// .top 계산
-						const referencePosition = gameboyHead.getBoundingClientRect().top;
-						const cardPosition = rect.top;
-						const distance = referencePosition - cardPosition - clickedCard.offsetHeight * 0.4;
-						clickedCard.style.setProperty("--y-distance", `${distance + 20}px`);
-						clickedCard.classList.add("moveY");
-
-						// 카드 애니메이션 끝나면 게임보이 켜기
-						const handleAnimationEnd = () => {
-							setIsGameboyOn(true);
-							clickedCard.removeEventListener("animationend", handleAnimationEnd);
-						};
-						clickedCard.addEventListener("animationend", handleAnimationEnd);
-
-						// 0.3초 뒤 스크롤을 화면 맨 아래로
-						const t2 = setTimeout(() => {
-							window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
-						}, 300);
-						timeoutsRef.current.push(t2);
-					}, 800);
-					timeoutsRef.current.push(t);
+					const handleAnimationEnd = () => {
+						setIsGameboyOn(true);
+						clickedCard.removeEventListener("animationend", handleAnimationEnd);
+					};
+					clickedCard.classList.add("moveY");
+					window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+					clickedCard.addEventListener("animationend", handleAnimationEnd);
 				}
 			};
 
-			// 만약 delta > maxScroll이면 바로 left를 세팅 + 약간 텀을 두고 애니메이션
+			// 만약 delta > maxScroll이면 바로 translateX를 세팅 + 약간 텀을 두고 애니메이션
 			if (desiredDelta > maxScroll) {
-				cardsDiv.style.left = `${-1 * desiredDelta}px`;
-				const t = setTimeout(() => {
-					clickedCard.classList.add("clicked");
+				const handleTransitionEnd = () => {
 					moveGameboyHead();
-				}, 500);
-				timeoutsRef.current.push(t);
+					cardsDiv.removeEventListener("transitionend", handleTransitionEnd);
+				};
+				cardsDiv.addEventListener("transitionend", handleTransitionEnd);
+
+				console.log("oh");
+				void cardsDiv.offsetHeight; //reflow 트리거해서 이동 위치 기억
+				//스크롤만으로 이동할 수 없는 경우
+				//const newX = -1 * (desiredDelta - currentScroll);
+				//cardsDiv.style.transform = `translateX(${newX}px)`;
+				//parentContainer.scrollLeft += parentContainer.scrollWidth;
+				cardsDiv.style.left = `${-1 * desiredDelta}px`;
 			} else {
-				clickedCard.classList.add("clicked");
+				parentContainer.scrollTo({
+					left: targetScroll,
+					behavior: "smooth",
+				});
 				requestAnimationFrame(waitForScrollEnd);
 			}
 		},
@@ -1175,7 +1188,7 @@ export default function Home() {
 						<label>{textFile["003"]}</label>
 					</div>
 				</div>
-				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full flex items-center overflow-x-auto overflow-y-hidden min-h-[40rem]">
+				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full overflow-x-auto overflow-y-hidden min-h-[40rem]">
 					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-16 md:gap-24 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
 							<Cartridge key={v.title} projectKey={k} project={v} onSelectProject={handleCardClick} />
@@ -1187,7 +1200,7 @@ export default function Home() {
 				>
 					<Gameboy title={selectedProject?.title} />
 				</div>
-				{selectedProject && swiperReadyRef.current && (
+				{false && selectedProject && swiperReadyRef.current && (
 					<section
 						ref={projectDetailRef}
 						className={`project-section flex flex-col absolute bottom-0 left-0 z-40 py-6 md:py-8 text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}

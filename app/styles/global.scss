@@ -417,13 +417,13 @@ $breakpoint-tablet-max: 1024px;
 }
 
 .cartridge-loop {
-	display: flex;
-	flex-direction: row;
-	justify-content: start;
-	will-change: left;
 	position: relative;
 	left: 0;
-	transition: left 0.7s ease-in-out 0.2s;
+	will-change: left;
+	// transform: translateZ(0); //사파리용 transform을 강제로 GPU에 올리기
+	// backface-visibility: hidden;
+	// transition: transform 0.7s ease-in-out 0.5s;
+	transition: left 0.7s ease-in-out 0s;
 
 	&:has(.forbid-click) {
 		.card {
@@ -439,8 +439,7 @@ $breakpoint-tablet-max: 1024px;
 		top: 0;
 		transition:
 			transform 0.7s ease-in-out 0.2s,
-			top 0.3s ease-in-out,
-			margin-top 0.3s ease-in-out;
+			margin-top 0.3s ease-in-out 0.1s;
 		--scale-factor: 0.2;
 
 		@media screen and (max-width: $breakpoint-mobile) {
@@ -459,18 +458,20 @@ $breakpoint-tablet-max: 1024px;
 			transform: rotate(-2deg);
 		}
 
-		&:hover {
-			margin-top: -7rem;
-		}
+		// &:hover {
+		// 	margin-top: -7rem;
+		// }
 
 		&.clicked {
 			transform: scale(var(--scale-factor));
-			top: -8rem;
 		}
 
 		&.moveY {
-			top: -8rem;
-			animation: insert 1s ease-in-out 0.1s forwards;
+			animation: insert 1.5s ease-in-out 0.8s forwards;
+			//transform: scale(var(--scale-factor));
+
+			//top: var(--y-distance);
+			//transform: translateY(var(--y-distance));
 		}
 	}
 }
