@@ -1200,7 +1200,7 @@ export default function Home() {
 				>
 					<Gameboy title={selectedProject?.title} />
 				</div>
-				{false && selectedProject && swiperReadyRef.current && (
+				{selectedProject && swiperReadyRef.current && (
 					<section
 						ref={projectDetailRef}
 						className={`project-section flex flex-col absolute bottom-0 left-0 z-40 py-6 md:py-8 text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
@@ -1301,13 +1301,13 @@ export default function Home() {
 									})}
 							</Swiper>
 							<div
-								className={`project-description ${isEnglish && "en"} w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-8 lg:mt-0 lg:ml-20 overflow-y-auto`}
+								className={`project-description ${isEnglish && "en"} w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-8 lg:mt-0 lg:ml-20 overflow-y-auto overflow-x-hidden`}
 							>
-								<div className="sub flex flex-row items-end justify-between">
+								<div className="sub flex flex-row items-end justify-between min-h-16">
 									<p>{textFile["004"]}</p>
 									{selectedProject.links && (
 										<div
-											className={`stacks-box shrink-0 flex flex-row items-center justify-center space-x-5 mr-2 ${selectedProject.dark ? "dark" : "normal"}`}
+											className={`stacks-box shrink-0 flex flex-row items-center justify-center space-x-5 mr-5 ${selectedProject.dark ? "dark" : "normal"}`}
 											style={{borderColor: selectedProject.theme}}
 										>
 											{selectedProject.links.flatMap((linkObj, i) =>
