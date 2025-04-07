@@ -27,7 +27,7 @@
 		"links": [
 			{"web": "https://github.com/seoeongeueun/orgd.web", "server": "https://github.com/seoeongeueun/orgd.server", "info": "http://orgd.org/2024/"}
 		],
-		"images": ["video2.mp4", "orgd0.jpg", "orgd1.jpg", "orgd3.png", "special.png", "orgd5.png", "video1.mp4"],
+		"images": ["orgd0.jpg", "orgd1.jpg", "video2.mp4", "orgd3.png", "orgd5.png", "special.png", "video1.mp4"],
 		"dark": true
 	},
 	"2": {

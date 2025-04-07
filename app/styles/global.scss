@@ -419,13 +419,16 @@ $breakpoint-tablet-max: 1024px;
 }
 
 .cartridge-loop {
+	--x-distance: 0px;
 	position: relative;
 	left: 0;
 	will-change: left;
-	// transform: translateZ(0); //사파리용 transform을 강제로 GPU에 올리기
-	// backface-visibility: hidden;
 	// transition: transform 0.7s ease-in-out 0.5s;
-	transition: left 0.7s ease-in-out 0s;
+	transition: left 0.5s linear 0.2s;
+
+	&.move-left {
+		left: var(--x-distance);
+	}
 
 	&:has(.forbid-click) {
 		.card {
@@ -469,7 +472,7 @@ $breakpoint-tablet-max: 1024px;
 		}
 
 		&.moveY {
-			animation: insert 1.5s ease-in-out 0.8s forwards;
+			animation: insert 1.5s ease-in-out 0.7s forwards;
 			//transform: scale(var(--scale-factor));
 
 			//top: var(--y-distance);
@@ -1798,7 +1801,6 @@ $transition: 0.5s ease-in-out;
 }
 .project-section {
 	height: 100vh;
-	height: 100svh;
 
 	* {
 		border-radius: 0.25rem;

@@ -37,7 +37,7 @@
 		transform: scale(var(--scale-factor)) translateY(calc(var(--y-distance) / var(--scale-factor)));
 	}
 	100% {
-		transform: scale(var(--scale-factor)) translateY(calc(calc(var(--y-distance) / var(--scale-factor) + 20rem)));
+		transform: scale(var(--scale-factor)) translateY(calc(calc(var(--y-distance) / var(--scale-factor) + 10vh)));
 	}
 }
 

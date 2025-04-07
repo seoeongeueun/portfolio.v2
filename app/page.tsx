@@ -778,7 +778,7 @@ export default function Home() {
 		const cardsDiv = cartridgeCardsRef.current;
 		if (!cardsDiv) return;
 
-		cardsDiv.style.transform = "";
+		cardsDiv.style.left = "";
 		cardsDiv.style.transition = "";
 	}, []);
 
@@ -819,7 +819,7 @@ export default function Home() {
 			const gameboyHead = document.querySelector<HTMLDivElement>("#gameboy-head");
 			const referencePosition = gameboyHead?.getBoundingClientRect().top || window.scrollY + window.innerHeight;
 			const cardPosition = rect.top;
-			const distance = referencePosition - cardPosition - cardHeight / 2;
+			const distance = referencePosition - cardPosition - cardHeight / 2.5;
 			clickedCard.style.setProperty("--y-distance", `${distance}px`);
 
 			const cardCenterInParentViewport = cardRect.left - parentRect.left + cardRect.width / 2;
@@ -835,34 +835,16 @@ export default function Home() {
 
 			// 스크롤이 끝났는지 감시하는 함수
 			const waitForScrollEnd = () => {
-				if (Math.abs(parentContainer.scrollLeft - targetScroll) <= 1) {
+				if (Math.abs(parentContainer.scrollLeft - targetScroll) <= 3) {
 					const actualDelta = currentScroll + desiredDelta - targetScroll;
 					if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
-						// const computedTransform = getComputedStyle(cardsDiv).transform;
-						// let currentTranslateX = 0;
-
-						// if (computedTransform && computedTransform !== "none") {
-						// 	const match = computedTransform.match(/matrix\((.+)\)/);
-						// 	if (match) {
-						// 		const parts = match[1].split(", ");
-						// 		currentTranslateX = parseFloat(parts[4]);
-						// 	}
-						// }
-
-						// const newTranslateX = desiredDelta < 0 ? currentTranslateX + Math.abs(desiredDelta) : currentTranslateX - actualDelta;
-
 						const computedLeft = getComputedStyle(cardsDiv).left || "0";
 						const currentLeft = parseFloat(computedLeft);
 
-						const newLeft = desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : currentLeft - actualDelta;
+						const newLeft =
+							desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : desiredDelta > maxScroll ? -1 * desiredDelta : currentLeft - actualDelta;
 
-						//cardsDiv.style.transition = "left 1s ease-in-out 0.2s";
 						cardsDiv.style.left = `${newLeft}px`;
-
-						// cardsDiv.style.transition = "transform 1s ease-in-out 0.2s";
-						// cardsDiv.style.transform = `translateX(${newTranslateX}px)`;
-					} else {
-						handleClearChanges();
 					}
 					moveGameboyHead();
 				} else {
@@ -878,38 +860,24 @@ export default function Home() {
 						setIsGameboyOn(true);
 						clickedCard.removeEventListener("animationend", handleAnimationEnd);
 					};
+					const handleAnimationStart = () => {
+						window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+						clickedCard.removeEventListener("animationstart", handleAnimationStart);
+					};
+					clickedCard.addEventListener("animationstart", handleAnimationStart);
 					clickedCard.classList.add("moveY");
 					clickedCard.addEventListener("animationend", handleAnimationEnd);
 
-					const t = setTimeout(() => {
-						window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
-					}, 600);
+					const t = setTimeout(() => {}, 700);
 					timeoutsRef.current.push(t);
 				}
 			};
 
-			// 만약 delta > maxScroll이면 바로 translateX를 세팅 + 약간 텀을 두고 애니메이션
-			if (desiredDelta > maxScroll) {
-				const handleTransitionEnd = () => {
-					moveGameboyHead();
-					cardsDiv.removeEventListener("transitionend", handleTransitionEnd);
-				};
-				cardsDiv.addEventListener("transitionend", handleTransitionEnd);
-
-				console.log("oh");
-				void cardsDiv.offsetHeight; //reflow 트리거해서 이동 위치 기억
-				//스크롤만으로 이동할 수 없는 경우
-				//const newX = -1 * (desiredDelta - currentScroll);
-				//cardsDiv.style.transform = `translateX(${newX}px)`;
-				//parentContainer.scrollLeft += parentContainer.scrollWidth;
-				cardsDiv.style.left = `${-1 * desiredDelta}px`;
-			} else {
-				parentContainer.scrollTo({
-					left: targetScroll,
-					behavior: "smooth",
-				});
-				requestAnimationFrame(waitForScrollEnd);
-			}
+			parentContainer.scrollTo({
+				left: targetScroll,
+				behavior: "smooth",
+			});
+			requestAnimationFrame(waitForScrollEnd);
 		},
 		[handleClearChanges]
 	);
@@ -1008,18 +976,14 @@ export default function Home() {
 		setHeaderOpen(prev => !prev);
 	};
 
-	useEffect(() => {
-		console.log(swiperReadyRef.current);
-	}, [swiperReadyRef.current]);
-
 	return (
-		<div ref={mainRef} className="main-page text-white w-full h-fit flex flex-col items-center justify-start">
+		<div ref={mainRef} className="main-page font-medium text-white w-full h-fit flex flex-col items-center justify-start">
 			<div className={`fixed top-0 h-fit main-header pointer-events-none w-full h-fit z-40 flex flex-row-reverse`}>
 				<button className="pointer-events-auto w-20 h-20 flex items-center justify-center float-right" onClick={() => openHeader()}>
 					<div className="lifebuoy mini hover:rotate-60 transition-transform duration-300"></div>
 				</button>
 				{headerOpen && (
-					<div className="pointer-events-auto contact-box opacity-90 drop-shadow-sm mt-4 bg-theme-orange p-4 w-fit h-fit rounded-sm border border-4 border-white text-white outline-4 outline-theme-orange">
+					<div className="pointer-events-auto font-normal contact-box opacity-90 drop-shadow-sm mt-4 bg-theme-orange p-4 w-fit h-fit rounded-sm border border-4 border-white text-white outline-4 outline-theme-orange">
 						<div className="flex flex-row items-center mb-1">
 							<p className="text-md mr-2 mt-2">CONTACTS</p>
 							<Image src="/assets/anchor.svg" alt="anchor" width={15} height={15} />
@@ -1212,7 +1176,7 @@ export default function Home() {
 						<label>{textFile["003"]}</label>
 					</div>
 				</div>
-				<div ref={cartridgeCardsContainerRef} className="gallery px-24 w-full overflow-x-auto overflow-y-hidden min-h-[40rem]">
+				<div ref={cartridgeCardsContainerRef} className="gallery px-24 flex items-center w-full overflow-x-auto overflow-y-hidden min-h-[40rem]">
 					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-16 md:gap-24 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
 							<Cartridge key={v.title} projectKey={k} project={v} onSelectProject={handleCardClick} />
@@ -1229,14 +1193,14 @@ export default function Home() {
 						ref={projectDetailRef}
 						className={`project-section flex flex-col absolute bottom-0 left-0 z-40 py-6 md:py-8 text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
 					>
-						<div className="project-header tracking-widest text-m md:text-xl px-8 md:px-12 h-fit lg:px-24 pb-8 w-full flex flex-row items-start justify-between">
+						<div className="project-header relative tracking-widest text-m md:text-xl px-8 md:px-12 h-fit lg:px-24 pb-8 w-full flex flex-row items-start justify-between">
 							<div className="flex flex-col items-center justify-start">
 								<p>PERSON</p>
 								<p className={selectedProject.dark ? "dark" : "normal"} style={{color: selectedProject.theme}}>
 									X {selectedProject.ppl_count || 1}
 								</p>
 							</div>
-							<div className="flex flex-col items-center justify-start">
+							<div className="flex flex-col items-center text-center justify-center absolute -translate-x-1/2 left-1/2 w-fit whitespace-nowrap ml-4">
 								<p className={`text-xxl lg:text-xxxl ${selectedProject.dark ? "dark" : "normal"}`} style={{color: selectedProject.theme}}>
 									{selectedProject.title.toUpperCase()}
 								</p>
@@ -1256,27 +1220,40 @@ export default function Home() {
 								loop={true}
 								autoplay={{delay: 6000, disableOnInteraction: true}}
 								onSwiper={(swiper: SwiperClass) => {
-									console.log("🔥 onSwiper fired");
-									console.log("🧪 swiperReadyRef in onSwiper", swiperReadyRef.current);
 									const firstSlide = swiper.slides[swiper.activeIndex] as HTMLElement;
 									if (!firstSlide) return;
 
 									const img = firstSlide.querySelector("img");
-									if (!img) return;
+									const video = firstSlide.querySelector("video");
 
-									if (img.complete) {
-										console.log("Swiper first slide is already ready");
-										swiperReadyRef.current?.resolve?.();
-									} else {
-										//아직 로딩 중인 경우
-										img.onload = () => {
-											console.log("First slide image finished loading");
+									if (img) {
+										if (img.complete) {
+											console.log("Swiper first slide is already ready");
 											swiperReadyRef.current?.resolve?.();
-										};
-										img.onerror = () => {
-											//로드 실패 => 프로젝트 선택을 초기화
-											setSelectedProject(undefined);
-										};
+										} else {
+											//아직 로딩 중인 경우
+											img.onload = () => {
+												console.log("First slide image finished loading");
+												swiperReadyRef.current?.resolve?.();
+											};
+											img.onerror = () => {
+												//로드 실패 => 프로젝트 선택을 초기화
+												setSelectedProject(undefined);
+											};
+										}
+									} else if (video) {
+										if (video.readyState >= 2) {
+											swiperReadyRef.current?.resolve?.();
+										} else {
+											video.onloadeddata = () => {
+												swiperReadyRef.current?.resolve?.();
+											};
+											video.onerror = () => {
+												setSelectedProject(undefined);
+											};
+										}
+									} else {
+										setSelectedProject(undefined);
 									}
 								}}
 								onSlideChange={(swiper: SwiperClass) => {
