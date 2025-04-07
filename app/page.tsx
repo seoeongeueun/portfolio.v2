@@ -194,17 +194,24 @@ export default function Home() {
 				setShowMessage(false);
 			}
 
-			if (timeoutId) clearTimeout(timeoutId);
-			timeoutId = setTimeout(checkScrollIdle, 4000); //4초간 모션 없는 경우
+			// if (timeoutId) clearTimeout(timeoutId);
+			// timeoutId = setTimeout(checkScrollIdle, 4000); //4초간 모션 없는 경우
+
+			timeoutsRef.current.forEach(clearTimeout);
+			timeoutsRef.current = [];
+			const t = setTimeout(checkScrollIdle, 4000);
+			timeoutsRef.current.push(t);
 		}, 200);
 
-		timeoutId = setTimeout(checkScrollIdle, 4000);
+		//timeoutId = setTimeout(checkScrollIdle, 4000);
+		const t0 = setTimeout(checkScrollIdle, 4000);
+		timeoutsRef.current.push(t0);
 
 		window.addEventListener("scroll", handleScroll);
 
 		return () => {
 			window.removeEventListener("scroll", handleScroll);
-			if (timeoutId) clearTimeout(timeoutId);
+			// if (timeoutId) clearTimeout(timeoutId);
 		};
 	}, [showMessage]);
 
@@ -425,11 +432,16 @@ export default function Home() {
 		let currentDustProgress = 0;
 		let smoothedDustProgress = 0;
 
-		function animateDust() {
-			ds.rafId = requestAnimationFrame(animateDust);
-			smoothedDustProgress += (currentDustProgress - smoothedDustProgress) * 0.05;
-			if (ds.dustReady) drawDust(smoothedDustProgress);
-		}
+		let scrollRafId: number | null = null;
+		const towelStyles = towels.map(() => ({opacity: 0, y: 0}));
+
+		const applyTowelStyles = () => {
+			towels.forEach((towel, i) => {
+				towel.style.transform = `translateY(${towelStyles[i].y}px)`;
+				towel.style.opacity = towelStyles[i].opacity.toString();
+			});
+			scrollRafId = null;
+		};
 
 		const createDust = async (currentY: number) => {
 			if (!beachRef.current) return;
@@ -452,15 +464,18 @@ export default function Home() {
 			ds.dustCanvas = document.createElement("canvas");
 			ds.dustCanvas.width = width;
 			ds.dustCanvas.height = height;
-			ds.dustCanvas.style.position = "fixed";
-			ds.dustCanvas.style.top = `${beachRef.current.offsetTop}px`;
-			ds.dustCanvas.style.left = `${beachRef.current.offsetLeft}px`;
-			ds.dustCanvas.style.width = `${beachRef.current.offsetWidth}px`;
-			ds.dustCanvas.style.height = `${beachRef.current.offsetHeight}px`;
-			ds.dustCanvas.style.zIndex = "99";
-			ds.dustCanvas.style.pointerEvents = "none";
-			beachRef.current.parentElement!.insertBefore(ds.dustCanvas, beachRef.current);
+			Object.assign(ds.dustCanvas.style, {
+				position: "fixed",
+				top: `${beachRef.current.offsetTop}px`,
+				left: `${beachRef.current.offsetLeft}px`,
+				width: `${beachRef.current.offsetWidth}px`,
+				height: `${beachRef.current.offsetHeight}px`,
+				zIndex: "99",
+				pointerEvents: "none",
+				display: "block",
+			});
 
+			beachRef.current.parentElement!.insertBefore(ds.dustCanvas, beachRef.current);
 			ds.dustCtx = ds.dustCanvas.getContext("2d") || null;
 
 			for (let y = 0; y < height; y += PARTICLE_SIZE) {
@@ -487,7 +502,6 @@ export default function Home() {
 			}
 			ds.dustReady = true;
 			ds.dustRemoved = false;
-			ds.dustCanvas.style.display = "block";
 		};
 
 		const drawDust = (dustProgress: number) => {
@@ -530,36 +544,39 @@ export default function Home() {
 
 		const st = ScrollTrigger.create({
 			trigger: beachRef.current,
-			start: "top top",
+			start: "top+=1 top",
 			end: `+=${totalScrollDistance}`,
 			pin: true,
 			pinSpacing: false,
+			anticipatePin: 1,
 			toggleActions: "play reverse play reverse",
 			onUpdate: self => {
 				const progress = self.progress;
 				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
 
-				// towel 움직임
-				gsap.to(towelsRef.current, {
-					y: -towelProgress * scrollPerTowel * totalTowels,
-					overwrite: true,
-					ease: "none",
-				});
+				towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
+
+				const dynamicOffset = 1 / totalTowels / 2; // 전체 개수에 따라 자동 조정
+				const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
 
 				towels.forEach((towel, i) => {
 					const revealStart = i / totalTowels;
 					const revealEnd = (i + 1) / totalTowels;
 					let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
 					fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
+					towelStyles[i].opacity = fadeProgress + 0.3;
+					towelStyles[i].y = 50 - 50 * fadeProgress;
 
-					gsap.to(towel, {
-						autoAlpha: fadeProgress + 0.3,
-						y: 50 - 50 * fadeProgress,
-						overwrite: true,
-						ease: "power2.out",
-						duration: 0.1,
-					});
+					if (i === currentTowelIndex) {
+						towel.classList.add("highlighted");
+					} else {
+						towel.classList.remove("highlighted");
+					}
 				});
+
+				if (!scrollRafId) {
+					scrollRafId = requestAnimationFrame(applyTowelStyles);
+				}
 
 				//power2.inOut로 초반~중반 천천히, 후반 빠르게
 				currentDustProgress = gsap.parseEase("power2.inOut")(gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY));
@@ -589,7 +606,10 @@ export default function Home() {
 					ds.dustReady = false;
 					ds.dustRemoved = true;
 					ds.particles = [];
-					towelsRef.current!.style.transform = "";
+					//towelsRef.current!.style.transform = "";
+					console.log("ya");
+					const newY = -towelProgress * scrollPerTowel * totalTowels;
+					towelsRef.current!.style.transform = `translateY(${newY}px)`;
 				}
 
 				if (progress < DUST_TIMING && ds.dustTriggered) {
@@ -859,8 +879,12 @@ export default function Home() {
 						clickedCard.removeEventListener("animationend", handleAnimationEnd);
 					};
 					clickedCard.classList.add("moveY");
-					window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
 					clickedCard.addEventListener("animationend", handleAnimationEnd);
+
+					const t = setTimeout(() => {
+						window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+					}, 600);
+					timeoutsRef.current.push(t);
 				}
 			};
 
