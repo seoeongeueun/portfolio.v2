@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import {MdKeyboardDoubleArrowDown} from "react-icons/md";
 import TextEn from "./data/text-en.json" assert {type: "json"};
 import TextKr from "./data/text-kr.json" assert {type: "json"};
 import {Fragment, useEffect, useState, useRef, useCallback, useLayoutEffect} from "react";
@@ -1072,7 +1071,7 @@ export default function Home() {
 				<div className={`fixed w-full bottom-0 p-20 pointer-events-none z-[99] transition-opacity ${showMessage ? "opacity-100" : "opacity-0"}`}>
 					<div className="flex flex-col items-center justify-center text-white text-xl">
 						<span className="drop-shadow-md">{textFile["000"]}</span>
-						<MdKeyboardDoubleArrowDown color="white" size="3rem" className="animate-slide-down drop-shadow-lg"></MdKeyboardDoubleArrowDown>
+						<Image src="/assets/arrow-down.svg" alt="arrow" className="animate-slide-down drop-shadow-lg" width={20} height={20}></Image>
 					</div>
 				</div>
 			</section>
