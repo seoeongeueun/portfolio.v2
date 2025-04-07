@@ -423,8 +423,7 @@ $breakpoint-tablet-max: 1024px;
 	position: relative;
 	left: 0;
 	will-change: left;
-	// transition: transform 0.7s ease-in-out 0.5s;
-	transition: left 0.5s linear 0.2s;
+	//transition: left 0.5s linear 0.2s;
 
 	&.move-left {
 		left: var(--x-distance);

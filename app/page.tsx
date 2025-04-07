@@ -835,7 +835,7 @@ export default function Home() {
 
 			// 스크롤이 끝났는지 감시하는 함수
 			const waitForScrollEnd = () => {
-				if (Math.abs(parentContainer.scrollLeft - targetScroll) <= 3) {
+				if (Math.abs(parentContainer.scrollLeft - targetScroll) <= 1) {
 					const actualDelta = currentScroll + desiredDelta - targetScroll;
 					if (actualDelta !== 0 && Math.round(targetScroll) !== Math.round(desiredDelta)) {
 						const computedLeft = getComputedStyle(cardsDiv).left || "0";
@@ -844,6 +844,7 @@ export default function Home() {
 						const newLeft =
 							desiredDelta < 0 ? currentLeft + Math.abs(desiredDelta) : desiredDelta > maxScroll ? -1 * desiredDelta : currentLeft - actualDelta;
 
+						cardsDiv.style.transition = "left 0.6s linear";
 						cardsDiv.style.left = `${newLeft}px`;
 					}
 					moveGameboyHead();
@@ -972,14 +973,12 @@ export default function Home() {
 		}, [label]);
 	};
 
-	const openHeader = () => {
-		setHeaderOpen(prev => !prev);
-	};
+	const toggleHeader = () => setHeaderOpen(prev => !prev);
 
 	return (
 		<div ref={mainRef} className="main-page font-medium text-white w-full h-fit flex flex-col items-center justify-start">
 			<div className={`fixed top-0 h-fit main-header pointer-events-none w-full h-fit z-40 flex flex-row-reverse`}>
-				<button className="pointer-events-auto w-20 h-20 flex items-center justify-center float-right" onClick={() => openHeader()}>
+				<button className="pointer-events-auto w-20 h-20 flex items-center justify-center float-right" onClick={toggleHeader}>
 					<div className="lifebuoy mini hover:rotate-60 transition-transform duration-300"></div>
 				</button>
 				{headerOpen && (
