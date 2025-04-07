@@ -39,10 +39,13 @@ export interface Project {
 	stacks: string[];
 	images: string[];
 	contribution_kr: string[];
+	contribution_en: string[];
 	introduction_kr: string[];
+	introduction_en: string[];
 	ppl_count: number;
 	links: Record<string, string>[];
 	dark?: boolean;
+	review_en?: string[];
 	review_kr?: string[];
 }
 
@@ -556,7 +559,8 @@ export default function Home() {
 
 				towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
 
-				const dynamicOffset = 1 / totalTowels / 2; // 전체 개수에 따라 자동 조정
+				//const dynamicOffset = 1 / totalTowels / 2; // 전체 개수에 따라 자동 조정
+				const dynamicOffset = 0.2;
 				const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
 
 				towels.forEach((towel, i) => {
@@ -568,9 +572,9 @@ export default function Home() {
 					towelStyles[i].y = 50 - 50 * fadeProgress;
 
 					if (i === currentTowelIndex) {
-						towel.classList.add("highlighted");
-					} else {
 						towel.classList.remove("highlighted");
+					} else {
+						towel.classList.add("highlighted");
 					}
 				});
 
@@ -669,7 +673,7 @@ export default function Home() {
 
 			function animateWiggle() {
 				if (!animating) return;
-				frame += 0.03;
+				frame += 0.06;
 
 				const x = 0.002 + Math.sin(frame) * 0.001;
 				const y = 0.003 + Math.cos(frame) * 0.001;
@@ -1332,21 +1336,28 @@ export default function Home() {
 										</div>
 									)}
 								</div>
-								<ul>{selectedProject.introduction_kr?.map((intro, i) => <li key={"intro" + i}>{intro}</li>)}</ul>
+								<ul>
+									{(isEnglish ? selectedProject.introduction_en : selectedProject.introduction_kr)?.map((intro, i) => (
+										<li key={`intro-${i}`}>{intro}</li>
+									))}
+								</ul>
+
 								<div className="sub">
 									<p>{textFile["005"]}</p>
 								</div>
-								<ul>{selectedProject.contribution_kr?.map((c, i) => <li key={"c" + i}>{c}</li>)}</ul>
-								{selectedProject.review_kr && (
+								<ul>
+									{(isEnglish ? selectedProject.contribution_en : selectedProject.contribution_kr)?.map((c, i) => (
+										<li key={`contribution-${i}`}>{c}</li>
+									))}
+								</ul>
+								{(isEnglish ? selectedProject.review_en : selectedProject.review_kr) && (
 									<>
 										<div className="sub mt-4">
 											<p>{textFile["006"]}</p>
 										</div>
 
 										<ul>
-											{selectedProject.review_kr.map((r, i) => (
-												<li key={"r" + i}>{r}</li>
-											))}
+											{(isEnglish ? selectedProject.review_en : selectedProject.review_kr)?.map((r, i) => <li key={`r-${i}`}>{r}</li>)}
 										</ul>
 									</>
 								)}

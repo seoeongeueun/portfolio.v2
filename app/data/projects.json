@@ -24,6 +24,22 @@
 			"ORGD 2024 《굿 디자이너: 의문》은 그래픽 디자이너의 정체성에 관한 다양한 관점을 제시하는 전시입니다.",
 			"디자이너 2명, 기획자 1명, 개발자 1명으로 구성된 유닛 Studio BATON의 개발자로 전시에 참여해 소켓 통신을 활용한 인터렉티브 작품을 개발하였습니다. 전체 개발 프로세스를 단독으로 담당하고 기획에도 참여했습니다."
 		],
+		"introduction_en": [
+			"ORGD 2024 《Good Designer: Query》 is an exhibition that explores various perspectives on the identity of graphic designers.",
+			"As the sole developer of the ad-hoc team Studio BATON (2 designers, 1 planner, and 1 developer), I developed a socket-based interactive installation, and also contributed to the planning process as well."
+		],
+		"contribution_en": [
+			"Built a custom admin panel allowing the designers to tweak font sizes, colors, and text positions in real time. Implemented a draggable and rotatable text feature for flexible design control. Designed the data structure using MongoDB and developed related APIs via Next.js API routes.",
+			"Set up a real-time socket environment using Socket.io to sync user actions across connected devices. The main device runs in fullscreen mode, while secondary devices get a 6x zoomed-in view. Calculated each device’s scroll position and zoom ratio, sending the data via socket events to be reflected live on the main display.",
+			"Created a real-time progress tracker for the site that auto-switched to the loading screen after periods of inactivity or reset the experience as needed. Also implemented a socket-triggered animation and sound event that fired on all devices once the viewer reached 100% progress, encouraging active participation.",
+			"Developed an Express.js based server to handle socket connections and events. Added device connection status management and admin-level APIs to disconnect devices, improving both system efficiency and control.",
+			"Implemented a JWT-based login system and set up middleware to validate tokens for admin page access. Sensitive requests like connection management and resets were protected through token verification to enhance security.",
+			"Collaborated on planning to design user interactions that would keep visitors engaged and involved. Also created admin guides and management tools to help on-site staff easily operate the system."
+		],
+		"review_en": [
+			"Given the paid nature of the exhibition, I focused on building a reliable and engaging system. It was a meaningful experience to explore performance tuning and interactive features that kept visitors interested.",
+			"Working through the needs of visitors, designers, and admins helped me understand the value of thinking from different angles and taking a creative approach to problem-solving."
+		],
 		"links": [
 			{"web": "https://github.com/seoeongeueun/orgd.web", "server": "https://github.com/seoeongeueun/orgd.server", "info": "http://orgd.org/2024/"}
 		],
@@ -56,6 +72,23 @@
 			"단순한 반응형 사이즈 조절을 넘어, PC와 모바일 환경에서 서로 다른 구조로 콘텐츠를 노출해야 했던 복잡한 작업이었습니다. 특히, 지도와 바텀시트처럼 유저의 조작감이 중요한 기능이 많아 자연스럽고 일관된 사용 경험을 제공하는 것이 핵심이었고, 이를 위해 다양한 운영체제와 기기에서 테스트를 진행했습니다. 테스트 과정에서 발생한 문제들을 해결하기 위해 폴리필을 추가하고, 브라우저 별 호환성을 고려해 개선했습니다. 다양한 환경에서의 테스트와 디버깅의 중요성을 깊이 깨닫게 된 프로젝트입니다.",
 			"관리자 사이트 개발을 혼자 담당하게 되면서 시간적 제약으로 인해 충분한 리서치 없이 Admin.js를 선택하게 되었습니다. 개발 중, 당시 기준 공식 문서가 부실하고 아웃데이트 되었다는 점을 알게되어 러닝커브가 예상보다 높아 구조 분석에 시간을 많이 쓰게 되었습니다. 결과적으로 PostgreSQL 쿼리를 직접 작성하고 최적화하면서 쿼리 작성 능력을 향상시킬 수 있었던 프로젝트였지만, 기술 스택 선정 시 충분한 리서치와 검토가 필수적임을 다시 느끼게 되었습니다."
 		],
+		"introduction_en": [
+			"HeyMap is a popup curation service provided by Heypop, featuring a map-based interface to introduce popups.",
+			"I was in charge of the frontend for the main site and both frontend and backend for the admin panel."
+		],
+		"contribution_en": [
+			"Built a reusable bottom sheet component based on react-modal-sheet that works seamlessly across desktop and mobile. The sheet responds to touch direction and velocity, supporting three height levels and fullscreen mode to improve UX. I also fine-tuned the sheet’s behavior to ensure smooth transitions during page navigation.",
+			"Integrated Kakao Maps API to display custom popup markers based on admin input. Clicking a marker reveals dynamic popup details, while clicks outside the modal dismiss it—except during active map interaction, which is detected through flexible touch/click handling.",
+			"Designed the page structure from the ground up to minimize layout differences between mobile and desktop, ensuring consistent user interactions across devices. Added skeleton UIs across pages to maintain a polished experience during loading states.",
+			"Developed a filter modal that lets users search popups by date and region, along with an API that processes user selections and dynamically updates the bottom sheet with results.",
+			"Built a feature for users to filter bookmarked popups by keyword and reorder them via drag-and-drop. Carefully managed drag state and visual feedback to enhance usability.",
+			"Solely developed the admin site using Admin.js. Integrated Kakao Maps API for address search and live map preview, automatically syncing address details with related fields to streamline the registration process.",
+			"Enabled admins to manage popup listings and control their visibility on the main site. Added features like user content moderation and publish state toggling, and wrote raw PostgreSQL queries to reflect data changes in real time, improving management efficiency."
+		],
+		"review_en": [
+			"This project required presenting different content structures depending on device type. Since many core features like maps and bottom sheets depended heavily on interaction, I focused on delivering a consistent and natural UX. I ran extensive testing across operating systems and browsers, resolving compatibility issues by adding polyfills and optimizing behavior for each environment. It taught me the value of thorough cross-device debugging.",
+			"As the sole developer on the admin site, I chose Admin.js under tight deadlines without enough initial research. I later realized the documentation was outdated and lacking, which led to a steep learning curve and extra time spent analyzing its structure. However, writing and optimizing raw PostgreSQL queries greatly improved my querying skills, and the experience reinforced the importance of proper tech stack evaluation."
+		],
 		"images": ["heymap0.png", "heymap4.png", "heymap1.png", "heymap2.png", "heymap3.png"],
 		"ppl_count": 3
 	},
@@ -77,6 +110,18 @@
 		],
 		"review_kr": [
 			"독특한 웹사이트 디자인이 흥미로워 직접 구현해보고 싶어 가장 기능이 많은 메인 화면을 담당했습니다. 넓은 그리드 위에 배치된 캐릭터와 반응형으로 변하는 뷰포트를 정교하게 매핑하는 미니맵 기능을 구현하기 위해 수식 계산과 최적화에 많은 시간을 투자했습니다. 높은 책임감으로 프로젝트를 주도한 경험이 값진 프로젝트였습니다."
+		],
+		"introduction_en": [
+			"Local Storage is a platform that supports emerging local artists by providing storage space for their works and creating opportunities for connection and exposure.",
+			"I was responsible for developing the main page, minimap, board and introduction pages, as well as a custom admin dashboard plugin."
+		],
+		"contribution_en": [
+			"Built a grid map for the main page and developed a minimap to show character and user positions. Characters registered by the admin were rendered on the grid, and their coordinates were dynamically calculated and displayed on the minimap based on scale.",
+			"Reflected the user’s current screen size by dynamically displaying their viewport frame and scroll position on the minimap. Implemented a drag-to-navigate feature where moving the frame on the minimap adjusts the actual screen position accordingly, improving usability.",
+			"Developed a custom WordPress admin plugin using Vue.js. Built a map management page where admins could select grid areas to place characters and re-select to remove them. Saved character data and position info to the database using WordPress actions and custom MySQL queries."
+		],
+		"review_en": [
+			"I was drawn to the unique web design of the project and asked to be in charge of the main page, which essentially represented the identity of the website and contained the most complex features. Mapping responsive viewports and grid-based characters onto a precise, interactive minimap required detailed calculations and optimization. Taking full ownership of the main interaction flow made this a deeply rewarding project."
 		],
 		"tags": ["WORK", "TEAM", "WEB"],
 		"images": ["ls3.png", "ls0.png", "ls1.png", "lsvid1.mp4"],
@@ -110,6 +155,21 @@
 			"웹 & 데스크톱 통합을 위해 Next.js 기반 프로젝트를 Electron 으로 패킹하면서 ",
 			"복잡하고 디테일한 게임기의 완성도 높은 구현을 위해 다양한 css 설정을 탐구하고 적용해볼 수 있었습니다."
 		],
+		"introduction_en": [
+			"Workmate is a Youtube based custom music player with a retro game console UI built entirely with pure CSS.",
+			"It’s a solo project that supports both web and standalone desktop versions."
+		],
+		"contribution_en": [
+			"Implemented a playlist feature where users can input YouTube URLs, which are validated and embedded using the YouTube API. The implementation follows YouTube’s policy guidelines, ensuring that restricted features are avoided and required functionalities are included.",
+			"Fetched video metadata to auto-fill song titles, and implemented core playlist features like play, pause, skip, mute, and shuffle.",
+			"Recreated a Nintendo Gameboy-style interface using only SCSS and Tailwind CSS. Simulated physical interactions such as powering on the screen and clickable buttons with hover effects, replicating the tactile feel of a real console.",
+			"Used Iron Session to manage login and session persistence. Each user's playlist is stored and synced to the database in real time. Added a fun touch: after logging in, users are greeted by an NPC dialogue box and given a choice-based interaction that triggers a special song.",
+			"Packaged the Next.js-based web app as a standalone desktop application using Electron (dmg/exe), with IPC-based communication. Ran an internal Express.js server and added desktop-friendly features like 'always-on-top' window mode."
+		],
+		"review_en": [
+			"To support both web and desktop, I packaged the Next.js app with Electron, learning how to manage IPC and desktop-specific features in the process.",
+			"Recreating the detailed look and feel of a retro game console with pure CSS challenged me to explore and apply a variety of advanced styling techniques. It pushed my attention to design detail and gave me a chance to polish small interactions that made the UI feel alive."
+		],
 		"dark": true
 	},
 	"5": {
@@ -132,6 +192,19 @@
 			"오래된 포트폴리오를 수정하는 것으로 시작했지만, 전반적인 아키텍처와 성능, 사용자 경험을 고려해 결과적으로 새롭게 재설계한 프로젝트가 되었습니다.",
 			"추가하고 싶은 기능이 많았지만 덜어내고 핵심 기능에 집중하는 방향을 선택했고, GSAP과 Canvas를 활용한 애니메이션, 렌더링 최적화 등 과거에는 적용하지 않았던 기능을 구현하면서 그 동안의 성장 과정을 돌아볼 수 있었던 작업이었습니다."
 		],
+		"introduction_en": [
+			"This is a renewed version of my portfolio, rebuilt with a focus on user experience and readability, while retaining elements of the original game-inspired concept I created three years ago."
+		],
+		"contribution_en": [
+			"Removed the old Redux-based score system and mini-games, and replaced them with section-specific scroll animations built using GSAP. Focused on performance optimization through browser-native APIs and utility methods.",
+			"In the Career section, I captured the current DOM into a Canvas, broke it down into pixel units, and applied a GSAP-powered pixel dispersion effect synced with scroll timing—blending naturally into the retro aesthetic.",
+			"For the project selection section, I implemented a scroll-and-snap animation that calculates the scroll position and cartridge alignment in real-time to ensure perfect centering across all cases. Addressed layout timing issues and transform conflicts by using reflow strategies and animation event-based flow control.",
+			"On the project detail page, I added logic to detect whether the first Swiper slide has loaded before triggering a page transition. If loading fails, a fallback ensures a smooth transition experience."
+		],
+		"review_en": [
+			"It started as a simple update to my old portfolio, but I ended up completely redesigning it, considering architecture, performance, and user experience from the ground up.",
+			"Although I had many ideas I wanted to add, I chose to strip things down and focus on the core. By implementing features like GSAP + Canvas animations and render optimization techniques I hadn’t used before, this project became a reflection of how much I’ve grown as a developer."
+		],
 		"ppl_count": 1,
 		"images": ["po0.png", "po1.png", "po3.png", "po2.png", "po4.png"]
 	},
@@ -144,11 +217,17 @@
 		"links": [{"baton": "https://ba-ton.kr", "josun": "https://josuntns.josunhotel.com/", "impact": "https://impact.career"}],
 		"theme": "#4b212a",
 		"stacks": ["typescript", "js", "nextjs2", "reactjs", "playwright", "cypress", "css3", "html5", "mysql", "docker"],
-		"introduction_kr": ["그 외 작업한 프로젝트로 임팩트 닷 커리어, 조선 테이스트 & 스타일, 바톤 홈페이지 등이 있습니다."],
+		"introduction_kr": ["이 외에도 임팩트 닷 커리어, 조선 테이스트 & 스타일, 바톤 홈페이지 등 다양한 프로젝트에 참여했습니다."],
 		"contribution_kr": [
-			"[바톤 홈페이지] 단독으로 담당한 Next.js 기반 회사 웹사이트로 기획 단계부터 참여해 최종 사이트부터 프로토타입까지 다양한 버전을 구현했습니다. Mouse parallax 효과로 페이지를 이동하고 자연스러운 이동과 페이지 전환 효과 구현에 중점을 두고 e2e 테스트를 도입하여 완성도를 높였습니다.",
-			"[조선 테이스트 & 스타일] Cafe24 기반 조선 호텔 쇼핑몰의 메인 페이지와 마이페이지를 작업했습니다. Next.js 기반 관리자 사이트의 이미지 등록 기능과 유저 정보 암호화 / 복호화 백엔드를 담당했습니다.",
-			"[임팩트 닷 커리어] Php와 jQuery 기반 메인 페이지, 커뮤니티 페이지, 그리고 소개 페이지의 일부 영역을 작업했습니다. IntersectionObserver와 RequestAnimaionFrame을 사용해 스크롤 위치에 따라 진행되는 다양한 애니메이션 구현과 최적화를 담당했습니다."
+			"[바톤 홈페이지] Next.js 기반 회사 웹사이트를 단독으로 개발했습니다. 기획 단계부터 참여해 프로토타입부터 최종 사이트까지 다양한 버전을 구현했으며, 마우스 패럴럭스 효과와 자연스러운 페이지 전환에 중점을 두고 e2e 테스트를 도입해 완성도를 높였습니다.",
+			"[조선 테이스트 & 스타일] Cafe24 기반 조선 호텔 쇼핑몰의 메인 페이지와 마이페이지를 작업했습니다. Next.js 기반 관리자 사이트의 이미지 연동 기능과 유저 정보 암호화/복호화 백엔드 로직을 구현했습니다.",
+			"[임팩트 닷 커리어] Php와 jQuery 기반 메인 페이지, 커뮤니티 페이지, 그리고 소개 페이지의 일부 영역을 작업했습니다. IntersectionObserver를 사용해 스크롤 위치에 따라 진행되는 다양한 애니메이션 구현하고 성능 최적화를 진행했습니다."
+		],
+		"introduction_en": ["Other projects I’ve contributed to include Impact.Career, Josun Taste & Style, and the official website for BATON."],
+		"contribution_en": [
+			"[BATON Website] Developed the company website independently using Next.js. I was involved from the planning stage and built multiple versions, from prototype to final release. Focused on smooth page transitions and mouse-based parallax effects, and added e2e testing to improve reliability.",
+			"[Josun Taste & Style] Worked on the main and My Page sections of Josun Hotel's shopping site built with Cafe24. On the separately built Next.js admin panel, I implemented image integration features and backend logic for encrypting and decrypting user information.",
+			"[Impact.Career] Contributed to parts of the main, community, and about pages on a PHP and jQuery-based platform. Used IntersectionObserver to build scroll-triggered animations and focused on performance optimization."
 		],
 		"images": ["etc0.png", "etc6.png", "etc3.png", "etc4.png", "etc2.png", "etc5.png"],
 		"ppl_count": 5,
