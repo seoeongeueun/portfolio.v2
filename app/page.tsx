@@ -657,6 +657,10 @@ export default function Home() {
 
 	//호버 중인 비치타올에 turbulence 지정
 	useEffect(() => {
+		//모바일에는 사양상 미적용
+		if (typeof window !== "undefined" && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+			return;
+		}
 		const allTowels = document.querySelectorAll<HTMLDivElement>(".towel");
 
 		allTowels.forEach(towel => {
@@ -672,7 +676,7 @@ export default function Home() {
 
 			function animateWiggle() {
 				if (!animating) return;
-				frame += 0.06;
+				frame += 0.03;
 
 				const x = 0.002 + Math.sin(frame) * 0.001;
 				const y = 0.003 + Math.cos(frame) * 0.001;
@@ -1033,8 +1037,8 @@ export default function Home() {
 						<svg width="0" height="0">
 							<defs>
 								<filter id="turb">
-									<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.01 0.08" numOctaves="1" result="turbulence" />
-									<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale="5" />
+									<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.03 0.08" numOctaves="1" result="turbulence" />
+									<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale="10" />
 								</filter>
 							</defs>
 						</svg>

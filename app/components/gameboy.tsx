@@ -11,7 +11,14 @@ export default function Gameboy({title}: GameboyProps) {
 				<div id="gameboy-head" className="gameboy-frames flex flex-row items-center position-center">
 					<div className="body-left">
 						<div className="body-wing left">
-							<div className="wing"></div>
+							<div className="wing">
+								<div className="layer layer-3"></div>
+								<div className="layer layer-4"></div>
+								<div className="layer layer-5"></div>
+								<div className="layer layer-6"></div>
+								<div className="layer layer-7"></div>
+								<div className="layer layer-8"></div>
+							</div>
 							<div className="corner"></div>
 						</div>
 						<div className="body-side left">
@@ -60,7 +67,14 @@ export default function Gameboy({title}: GameboyProps) {
 							<div className="corner"></div>
 						</div>
 						<div className="body-wing right">
-							<div className="wing"></div>
+							<div className="wing">
+								<div className="layer layer-3"></div>
+								<div className="layer layer-4"></div>
+								<div className="layer layer-5"></div>
+								<div className="layer layer-6"></div>
+								<div className="layer layer-7"></div>
+								<div className="layer layer-8"></div>
+							</div>
 							<div className="shadow"></div>
 							<div className="corner"></div>
 						</div>
@@ -88,7 +102,9 @@ export default function Gameboy({title}: GameboyProps) {
 				<div className="relative pointer-events-none top-[4rem] w-fit h-fit flex flex-col justify-center items-center">
 					<div className="frame-top">
 						<div className="top">
-							<div></div>
+							<div>
+								<div className="top-layer"></div>
+							</div>
 						</div>
 						<div className="base">
 							<div></div>
@@ -118,7 +134,9 @@ export default function Gameboy({title}: GameboyProps) {
 							<span className="playlist-title text-nowrap">PROJECTS</span>
 						</div>
 						<div className="top">
-							<div></div>
+							<div>
+								<div className="top-layer"></div>
+							</div>
 						</div>
 					</div>
 				</div>
