@@ -64,6 +64,9 @@ export default function Home() {
 	const [headerOpen, setHeaderOpen] = useState<boolean>(false);
 	const [showMessage, setShowMessage] = useState<boolean>(true);
 
+	//사양 문제로 두가지 애니메이션 버전 중 저사양 버전으로 노출하려는 경우 (다양한 os 확인 전까지는 디폴트로 저사양 모드)
+	const [minimalMode, setMinimalMode] = useState<boolean>(true);
+
 	const poolRef = useRef<HTMLDivElement | null>(null);
 	const poolRectRef = useRef<DOMRect | null>(null);
 	const pseudoRectRef = useRef<{left: number; right: number; top: number; bottom: number} | null>(null);
@@ -147,6 +150,8 @@ export default function Home() {
 	useEffect(() => {
 		const isKorean = navigator.language.startsWith("ko");
 		setIsEnglish(!isKorean);
+		//const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+		//setIsMobile(isMobileDevice);
 
 		if (!poolRef.current) return;
 
@@ -556,29 +561,52 @@ export default function Home() {
 				const progress = self.progress;
 				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
 
-				towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
+				//고사양과 저사양 애니메이션을 분리
+				// 현재까지 확인 결과로 pc 크롬을 제외하고는 저사양 애니메이션이 맞다
+				if (!minimalMode) {
+					if (!scrollRafId) {
+						scrollRafId = requestAnimationFrame(() => {
+							scrollRafId = null;
 
-				//const dynamicOffset = 1 / totalTowels / 2; // 전체 개수에 따라 자동 조정
-				const dynamicOffset = 0.2;
-				const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
+							towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
 
-				towels.forEach((towel, i) => {
-					const revealStart = i / totalTowels;
-					const revealEnd = (i + 1) / totalTowels;
-					let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
-					fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
-					towelStyles[i].opacity = fadeProgress + 0.3;
-					towelStyles[i].y = 50 - 50 * fadeProgress;
+							const dynamicOffset = 0.2;
+							const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
 
-					if (i === currentTowelIndex) {
-						towel.classList.remove("highlighted");
-					} else {
-						towel.classList.add("highlighted");
+							towels.forEach((towel, i) => {
+								const revealStart = i / totalTowels;
+								const revealEnd = (i + 1) / totalTowels;
+								let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
+								fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
+								towelStyles[i].opacity = fadeProgress + 0.3;
+								towelStyles[i].y = 50 - 50 * fadeProgress;
+
+								if (i === currentTowelIndex) {
+									towel.classList.remove("highlighted");
+								} else {
+									towel.classList.add("highlighted");
+								}
+							});
+						});
+						applyTowelStyles();
 					}
-				});
+				} else {
+					//dust가 일이나기 전 단계를 전체 towel의 개수로 나누어서 각 towel의 단계를 계산
+					const stepSize = (DUST_TIMING - 0) / totalTowels;
+					const currentStep = Math.floor(progress / stepSize);
 
-				if (!scrollRafId) {
-					scrollRafId = requestAnimationFrame(applyTowelStyles);
+					if (currentStep <= totalTowels) towelsRef.current!.style.transform = `translateY(${-1 * scrollPerTowel * currentStep}px)`;
+					towels.forEach((towel, i) => {
+						if (i < currentStep) {
+							towel.style.opacity = "0.5";
+							towel.classList.add("highlighted");
+						} else if (i === currentStep) {
+							towel.style.opacity = "1";
+							towel.classList.remove("highlighted");
+						} else {
+							towel.style.opacity = "0";
+						}
+					});
 				}
 
 				//power2.inOut로 초반~중반 천천히, 후반 빠르게
@@ -609,10 +637,9 @@ export default function Home() {
 					ds.dustReady = false;
 					ds.dustRemoved = true;
 					ds.particles = [];
-					//towelsRef.current!.style.transform = "";
-					console.log("ya");
-					const newY = -towelProgress * scrollPerTowel * totalTowels;
-					towelsRef.current!.style.transform = `translateY(${newY}px)`;
+					towelsRef.current!.style.transform = "";
+					// const newY = -towelProgress * scrollPerTowel * totalTowels;
+					// towelsRef.current!.style.transform = `translateY(${newY}px)`;
 				}
 
 				if (progress < DUST_TIMING && ds.dustTriggered) {
@@ -637,7 +664,7 @@ export default function Home() {
 		ds.scrollTriggers.push(st);
 
 		//ds.rafId = requestAnimationFrame(animateDust);
-	}, [cleanupDustEffect]);
+	}, [cleanupDustEffect, minimalMode]);
 
 	useEffect(() => {
 		initDustEffect();
@@ -689,7 +716,7 @@ export default function Home() {
 				if (animating) return;
 				animating = true;
 				animateWiggle();
-				disp?.setAttribute("scale", "50");
+				disp?.setAttribute("scale", "30");
 			}
 
 			function stopWibble() {
@@ -1131,7 +1158,10 @@ export default function Home() {
 						</div>
 						<p className="description text-m whitespace-pre-line break-keep">{textFile["001"]}</p>
 					</div>
-					<div ref={towelsRef} className="float-left towels-container spread w-full md:w-1/2">
+					<div
+						ref={towelsRef}
+						className={`float-left towels-container spread w-full md:w-1/2 ${minimalMode ? "transition-transform duration-300 ease-in-out" : ""}`}
+					>
 						{CareerData &&
 							Object.entries(CareerData).map(([k, v], i) => (
 								<div key={"towel" + i} className="towel-wrapper">
@@ -1197,7 +1227,7 @@ export default function Home() {
 				{selectedProject && swiperReadyRef.current && (
 					<section
 						ref={projectDetailRef}
-						className={`project-section flex flex-col absolute bottom-0 left-0 z-40 py-6 md:py-8 text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
+						className={`project-section flex flex-col fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-sm z-40 py-6 md:py-8 text-start opacity-0 ${isSectionReady ? "ready" : ""} full-section font-dunggeunmo w-full flex flex-col items-center justify-start bg-blue-400`}
 					>
 						<div className="project-header relative tracking-widest text-m md:text-xl px-8 md:px-12 h-fit lg:px-24 pb-8 w-full flex flex-row items-start justify-between">
 							<div className="flex flex-col items-center justify-start">

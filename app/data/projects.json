@@ -141,7 +141,7 @@
 		"ppl_count": 1,
 		"images": ["workmate6.png", "workmate1.png", "workmate2.png", "workmate3.png", "workmate4.png", "workmate5.png"],
 		"introduction_kr": [
-			"Workmate는 순수 CSS로 구현한 실제같은 게임기 UI의 커스텀 뮤직 플레이어입니다.",
+			"Workmate는 순수 CSS로 구현한 실제같은 게임기 UI의 유튜브 기반 커스텀 뮤직 플레이어입니다.",
 			"혼자 작업한 프로젝트이며 웹 서비스와 데스크톱 애플리케이션을 모두 지원합니다."
 		],
 		"contribution_kr": [

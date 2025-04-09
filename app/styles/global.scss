@@ -281,6 +281,7 @@ $breakpoint-tablet-max: 1024px;
 .towels-container {
 	display: flex;
 	flex-direction: column;
+	will-change: transform;
 
 	--towel-color: var(--theme-orange);
 	--towel-color-dark: rgb(230, 165, 91);
@@ -290,10 +291,9 @@ $breakpoint-tablet-max: 1024px;
 
 	.towel-wrapper {
 		margin-top: 14rem;
-		transition: opacity 0.2s ease-in-out;
 		will-change: transform, opacity;
 		opacity: 0;
-		transition: opacity 0.1s ease-in-out;
+		transition: opacity 0.2s ease-in-out;
 
 		> svg {
 			position: absolute;
@@ -793,10 +793,10 @@ $breakpoint-tablet-max: 1024px;
 .beach-container {
 	//background-color: var(--theme-sand);
 	transition: opacity 0.5s ease;
-	background: linear-gradient(179deg, var(--theme-sand-dark) 0%, var(--theme-sand) 13%, var(--theme-sand) 100%);
+	background: linear-gradient(179deg, var(--theme-sand-dark) 0%, var(--theme-sand) 13%, var(--theme-sand) 80%, var(--main-bg) 100%);
 
 	@media screen and (max-width: $breakpoint-mobile) {
-		background: linear-gradient(179deg, var(--theme-sand-dark) 0%, var(--theme-sand) 8%, var(--theme-sand) 100%);
+		background: linear-gradient(179deg, var(--theme-sand-dark) 0%, var(--theme-sand) 8%, var(--theme-sand) 80%, var(--main-bg) 100%);
 	}
 }
 
