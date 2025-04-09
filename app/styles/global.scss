@@ -312,10 +312,11 @@ $breakpoint-tablet-max: 1024px;
 
 		@media screen and (max-width: $breakpoint-tablet-max) {
 			margin-top: 20rem;
+			margin-bottom: -10rem;
 
-			&:last-child {
-				margin-bottom: 0rem;
-			}
+			// &:last-child {
+			// 	margin-bottom: 0rem;
+			// }
 		}
 	}
 

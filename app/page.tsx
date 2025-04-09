@@ -433,6 +433,39 @@ export default function Home() {
 		const towels = Array.from(towelsRef.current.querySelectorAll<HTMLElement>(".towel-wrapper"));
 		if (towels.length === 0) return;
 
+		//모바일은 기존 towel gsap 대신 fade-up 효과만 부여
+		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+		const visibleMap = new WeakMap<Element, boolean>();
+		const observer = new IntersectionObserver(
+			entries => {
+				entries.forEach(entry => {
+					const el = entry.target;
+					const isVisible = visibleMap.get(el) || false;
+
+					// 처음 교차하는 경우에만 추가
+					if (entry.isIntersecting && !isVisible && entry.intersectionRatio > 0.6) {
+						el.classList.add("fade-up");
+						visibleMap.set(el, true);
+					}
+
+					// 완전히 사라지면 fade-up 삭제
+					if (!entry.isIntersecting && isVisible && entry.intersectionRatio < 0.1) {
+						el.classList.remove("fade-up");
+						visibleMap.set(el, false);
+					}
+				});
+			},
+			{
+				root: null,
+				threshold: [0, 0.1, 0.6, 1],
+			}
+		);
+
+		if (isMobile) {
+			towels.forEach(towel => observer.observe(towel));
+		}
+
 		const ds = dustState.current;
 
 		const totalTowels = Object.keys(CareerData).length;
@@ -440,7 +473,7 @@ export default function Home() {
 		const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
 		const scrollPerTowel = towelsHeight + gap;
 		//const totalTowelDistance = scrollPerTowel * totalTowels;
-		const totalScrollDistance = towelsRef.current.offsetHeight;
+		const totalScrollDistance = isMobile ? towelsRef.current.offsetHeight + towelsHeight : towelsRef.current.offsetHeight;
 
 		let currentDustProgress = 0;
 		let smoothedDustProgress = 0;
@@ -459,7 +492,7 @@ export default function Home() {
 		const createDust = async (currentY: number) => {
 			if (!beachRef.current) return;
 			//towel이 이동한 값을 가져와서 반영 20은 미세 보정
-			towelsRef.current!.style.transform = `translateY(${currentY - gap - 20}px)`;
+			if (!isMobile) towelsRef.current!.style.transform = `translateY(${currentY - gap - 20}px)`;
 
 			const canvas = await html2canvas(beachRef.current!, {
 				backgroundColor: null,
@@ -479,7 +512,7 @@ export default function Home() {
 			ds.dustCanvas.height = height;
 			Object.assign(ds.dustCanvas.style, {
 				position: "fixed",
-				top: `${beachRef.current.offsetTop}px`,
+				top: `${isMobile ? -1 * (towelsRef.current!.offsetTop + scrollPerTowel) : beachRef.current.offsetTop}px`,
 				left: `${beachRef.current.offsetLeft}px`,
 				width: `${beachRef.current.offsetWidth}px`,
 				height: `${beachRef.current.offsetHeight}px`,
@@ -559,7 +592,7 @@ export default function Home() {
 			trigger: beachRef.current,
 			start: "top+=1 top",
 			end: `+=${totalScrollDistance}`,
-			pin: true,
+			pin: !isMobile,
 			pinSpacing: false,
 			anticipatePin: 1,
 			toggleActions: "play reverse play reverse",
@@ -567,52 +600,53 @@ export default function Home() {
 				const progress = self.progress;
 				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
 
-				//고사양과 저사양 애니메이션을 분리
-				// 현재까지 확인 결과로 pc 크롬을 제외하고는 저사양 애니메이션이 맞다
-				if (!minimalMode) {
-					if (!scrollRafId) {
-						scrollRafId = requestAnimationFrame(() => {
-							scrollRafId = null;
+				if (!isMobile) {
+					//고사양과 저사양 애니메이션을 분리
+					// 현재까지 확인 결과로 pc 크롬을 제외하고는 저사양 애니메이션이 맞다
+					if (!minimalMode) {
+						if (!scrollRafId) {
+							scrollRafId = requestAnimationFrame(() => {
+								scrollRafId = null;
 
-							towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
+								towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
 
-							const dynamicOffset = 0.2;
-							const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
+								const dynamicOffset = 0.2;
+								const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
 
-							towels.forEach((towel, i) => {
-								const revealStart = i / totalTowels;
-								const revealEnd = (i + 1) / totalTowels;
-								let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
-								fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
-								towelStyles[i].opacity = fadeProgress + 0.3;
-								towelStyles[i].y = 50 - 50 * fadeProgress;
+								towels.forEach((towel, i) => {
+									const revealStart = i / totalTowels;
+									const revealEnd = (i + 1) / totalTowels;
+									let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
+									fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
+									towelStyles[i].opacity = fadeProgress + 0.3;
+									towelStyles[i].y = 50 - 50 * fadeProgress;
 
-								if (i === currentTowelIndex) {
-									towel.classList.remove("highlighted");
-								} else {
-									towel.classList.add("highlighted");
-								}
+									if (i === currentTowelIndex) {
+										towel.classList.remove("highlighted");
+									} else {
+										towel.classList.add("highlighted");
+									}
+								});
 							});
-						});
-						applyTowelStyles();
-					}
-				} else {
-					//dust가 일이나기 전 단계를 전체 towel의 개수로 나누어서 각 towel의 단계를 계산
-					const stepSize = (DUST_TIMING - 0) / totalTowels;
-					const currentStep = Math.floor(progress / stepSize);
-
-					if (currentStep <= totalTowels) towelsRef.current!.style.transform = `translateY(${-1 * scrollPerTowel * currentStep}px)`;
-					towels.forEach((towel, i) => {
-						if (i < currentStep) {
-							towel.style.opacity = "0.5";
-							towel.classList.add("highlighted");
-						} else if (i === currentStep) {
-							towel.style.opacity = "1";
-							towel.classList.remove("highlighted");
-						} else {
-							towel.style.opacity = "0";
+							applyTowelStyles();
 						}
-					});
+					} else {
+						//dust가 일이나기 전 단계를 전체 towel의 개수로 나누어서 각 towel의 단계를 계산
+						const stepSize = (DUST_TIMING - 0) / totalTowels;
+						const currentStep = Math.floor(progress / stepSize);
+						if (currentStep <= totalTowels) towelsRef.current!.style.transform = `translateY(${-1 * scrollPerTowel * currentStep}px)`;
+						towels.forEach((towel, i) => {
+							if (i < currentStep) {
+								towel.style.opacity = "0.5";
+								towel.classList.add("highlighted");
+							} else if (i === currentStep) {
+								towel.style.opacity = "1";
+								towel.classList.remove("highlighted");
+							} else {
+								towel.style.opacity = "0";
+							}
+						});
+					}
 				}
 
 				//power2.inOut로 초반~중반 천천히, 후반 빠르게
@@ -668,6 +702,8 @@ export default function Home() {
 		});
 
 		ds.scrollTriggers.push(st);
+
+		return () => observer.disconnect();
 
 		//ds.rafId = requestAnimationFrame(animateDust);
 	}, [cleanupDustEffect, minimalMode]);
