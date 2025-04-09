@@ -265,7 +265,7 @@ export default function Home() {
 
 		let moveCharsFrameId: number | null = null;
 
-		function moveChars({event, deltaX, deltaY}: {event: MouseEvent; deltaX: number; deltaY: number}) {
+		function moveChars({event, deltaX, deltaY}: {event: PointerEvent; deltaX: number; deltaY: number}) {
 			if (moveCharsFrameId) return;
 			measurePool();
 			const poolRect = poolRectRef.current;
@@ -330,13 +330,15 @@ export default function Home() {
 		//마우스 드래그
 		const observer = Observer.create({
 			target: poolRef.current,
+			type: "pointer,touch,mouse",
 			onMove: self => {
-				const mouseEvent = self.event as MouseEvent;
-				if (self.event instanceof MouseEvent && self.event.target instanceof HTMLElement && self.event.target.matches(".char")) {
+				const e = self.event as PointerEvent;
+				if (self.event instanceof PointerEvent && self.event.target instanceof HTMLElement && self.event.target.matches(".char")) {
+					const boost = e.pointerType === "touch" ? 3 : 1; //모바일은 이동량을 추가해줘야 비슷하게 움직임
 					moveChars({
-						event: mouseEvent,
-						deltaX: self.deltaX,
-						deltaY: self.deltaY,
+						event: e,
+						deltaX: self.deltaX * boost,
+						deltaY: self.deltaY * boost,
 					});
 				}
 			},
@@ -349,7 +351,7 @@ export default function Home() {
 		const turbWave = document.querySelector("#turbwave");
 		const dispMap = document.querySelector("#dispMap");
 
-		const handleMouseMove = (e: MouseEvent) => {
+		const handleMouseMove = (e: PointerEvent) => {
 			//과부화 방지
 			if (Date.now() - lastWaveTime < waveThrottle) return;
 			lastWaveTime = Date.now();
@@ -383,14 +385,19 @@ export default function Home() {
 			dispMap?.setAttribute("scale", "2");
 		};
 
-		poolRef.current.addEventListener("mousemove", handleMouseMove);
-		poolRef.current.addEventListener("mouseleave", handleMouseLeave);
+		// poolRef.current.addEventListener("mousemove", handleMouseMove);
+		// poolRef.current.addEventListener("mouseleave", handleMouseLeave);
+
+		poolRef.current.addEventListener("pointermove", handleMouseMove);
+		poolRef.current.addEventListener("pointerleave", handleMouseLeave);
 
 		return () => {
 			observer.kill();
 			waveTl.kill();
-			poolRef.current?.removeEventListener("mousemove", handleMouseMove);
-			poolRef.current?.removeEventListener("mouseleave", handleMouseLeave);
+			// poolRef.current?.removeEventListener("mousemove", handleMouseMove);
+			// poolRef.current?.removeEventListener("mouseleave", handleMouseLeave);
+			poolRef.current?.removeEventListener("pointermove", handleMouseMove);
+			poolRef.current?.removeEventListener("pointerleave", handleMouseLeave);
 			if (moveCharsFrameId) cancelAnimationFrame(moveCharsFrameId);
 			if (rippleFrameId) cancelAnimationFrame(rippleFrameId);
 		};

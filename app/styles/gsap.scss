@@ -54,6 +54,7 @@ $breakpoint-tablet-max: 1024px;
 	}
 
 	.char {
+		touch-action: none;
 		position: relative;
 		transform: perspective(500px) rotateZ(30deg);
 		flex-shrink: 0;

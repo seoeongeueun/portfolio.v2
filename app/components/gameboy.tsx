@@ -23,7 +23,9 @@ export default function Gameboy({title}: GameboyProps) {
 						</div>
 						<div className="body-side left">
 							<div className="inner"></div>
-							<div className="shadow"></div>
+							<div className="shadow">
+								<div className="layer layer-1"></div>
+							</div>
 							<div className="inner bottom"></div>
 							<div className="shadow bottom"></div>
 							<div className="shadow bottom right"></div>
@@ -53,7 +55,9 @@ export default function Gameboy({title}: GameboyProps) {
 					<div className="flex flex-col items-center justify-center z-20">
 						<div className="body-frame relative bg-body"></div>
 						<div className="body-bottom">
-							<div className="base absolute bg-body w-full h-full z-20"></div>
+							<div className="base absolute bg-body w-full h-full z-20">
+								<div className="layer-1"></div>
+							</div>
 						</div>
 						{/* <div className="logo">
 							<span>Workmate</span>
@@ -75,7 +79,9 @@ export default function Gameboy({title}: GameboyProps) {
 								<div className="layer layer-7"></div>
 								<div className="layer layer-8"></div>
 							</div>
-							<div className="shadow"></div>
+							<div className="shadow">
+								<div className="layer layer-1"></div>
+							</div>
 							<div className="corner"></div>
 						</div>
 						<div className="power-button">
