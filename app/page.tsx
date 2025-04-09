@@ -9,7 +9,6 @@ import Gameboy from "./components/gameboy";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
 import CareerData from "./data/careers.json" assert {type: "json"};
 import "./styles/global.scss";
-import "./styles/gsap.scss";
 import {stacks, PARTICLE_SIZE, AMPLIFY_BY, BORDER_END, FILL_END, DUST_TIMING} from "./lib/constants";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
