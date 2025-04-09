@@ -79,6 +79,7 @@ export default function Home() {
 	const mainTitleRef = useRef<HTMLParagraphElement>(null);
 	const miniTitleRef = useRef<HTMLParagraphElement>(null);
 	const beachRef = useRef<HTMLDivElement>(null);
+	const projectsRef = useRef<HTMLDivElement>(null);
 	//해변의 dust 단계를 저장
 	const dustState = useRef<{
 		dustCanvas: HTMLCanvasElement | null;
@@ -425,12 +426,14 @@ export default function Home() {
 	}, []);
 
 	//해변 div를 고정하고 비치타월 페이드인 스크롤 + 해변 픽셀화
+	//TODO: 코드 정리 필요
 	const initDustEffect = useCallback(() => {
 		cleanupDustEffect();
 
 		if (!beachRef.current || !shoreRef.current || !towelsRef.current || !dustState.current) return;
 
 		const towels = Array.from(towelsRef.current.querySelectorAll<HTMLElement>(".towel-wrapper"));
+		const lastTowel = towels[towels.length - 1];
 		if (towels.length === 0) return;
 
 		//모바일은 기존 towel gsap 대신 fade-up 효과만 부여
@@ -588,6 +591,97 @@ export default function Home() {
 			});
 		};
 
+		const triggerDustForMobile = async () => {
+			if (!towelsRef.current) return;
+
+			const towels = towelsRef.current.querySelectorAll<HTMLDivElement>(".towel-wrapper");
+			const towelsHeight = towels[0]?.offsetHeight || 0;
+			const gap = parseFloat(getComputedStyle(towels[0]).marginTop || "0");
+			const scrollPerTowel = towelsHeight + gap;
+			const offset = -scrollPerTowel * towels.length;
+
+			await createDust(offset);
+
+			let progress = 0;
+			const duration = 1.3;
+			const start = performance.now();
+
+			const animate = (now: number) => {
+				const elapsed = (now - start) / 1000;
+				progress = Math.min(elapsed / duration, 1);
+				drawDust(progress);
+				if (progress < 1) {
+					ds.rafId = requestAnimationFrame(animate);
+				} else {
+					unlockScroll();
+				}
+			};
+
+			ds.rafId = requestAnimationFrame(animate);
+		};
+
+		const reverseDust = () => {
+			if (!dustState.current || !dustState.current.dustReady) return;
+
+			let progress = 1;
+			const duration = 1.3;
+			const start = performance.now();
+
+			const animate = (now: number) => {
+				const elapsed = (now - start) / 1000;
+				progress = 1 - Math.min(elapsed / duration, 1);
+				drawDust(progress);
+
+				if (progress > 0) {
+					dustState.current.rafId = requestAnimationFrame(animate);
+				} else {
+					// 리버스 애니메이션이 끝난 후 beachref를 원래대로 복원
+					beachRef.current!.style.opacity = "1";
+					dustState.current.dustCanvas?.remove();
+					dustState.current.dustCanvas = null;
+					dustState.current.dustCtx = null;
+					dustState.current.dustReady = false;
+					dustState.current.dustRemoved = true;
+					dustState.current.dustTriggered = false;
+					dustState.current.particles = [];
+					unlockScroll();
+				}
+			};
+
+			dustState.current.rafId = requestAnimationFrame(animate);
+		};
+
+		const observeProjectIntersection = () => {
+			const projectSection = projectsRef.current;
+			const ds = dustState.current;
+			if (!projectSection || !ds) return;
+
+			const observer = new IntersectionObserver(
+				entries => {
+					entries.forEach(entry => {
+						if (entry.intersectionRatio >= 0.1 && !ds.dustTriggered) {
+							ds.dustTriggered = true;
+							lockScroll();
+							triggerDustForMobile();
+						}
+						if (entry.intersectionRatio < 0.1 && ds.dustTriggered && ds.dustReady) {
+							ds.dustTriggered = false;
+							lockScroll();
+							reverseDust();
+						}
+					});
+				},
+				{threshold: [0.1]}
+			);
+
+			observer.observe(projectSection);
+		};
+
+		if (isMobile) {
+			observeProjectIntersection();
+			return;
+		}
+
 		const st = ScrollTrigger.create({
 			trigger: beachRef.current,
 			start: "top+=1 top",
@@ -600,53 +694,51 @@ export default function Home() {
 				const progress = self.progress;
 				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
 
-				if (!isMobile) {
-					//고사양과 저사양 애니메이션을 분리
-					// 현재까지 확인 결과로 pc 크롬을 제외하고는 저사양 애니메이션이 맞다
-					if (!minimalMode) {
-						if (!scrollRafId) {
-							scrollRafId = requestAnimationFrame(() => {
-								scrollRafId = null;
+				//고사양과 저사양 애니메이션을 분리
+				// 현재까지 확인 결과로 pc 크롬을 제외하고는 저사양 애니메이션이 맞다
+				if (!minimalMode) {
+					if (!scrollRafId) {
+						scrollRafId = requestAnimationFrame(() => {
+							scrollRafId = null;
 
-								towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
+							towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
 
-								const dynamicOffset = 0.2;
-								const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
+							const dynamicOffset = 0.2;
+							const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
 
-								towels.forEach((towel, i) => {
-									const revealStart = i / totalTowels;
-									const revealEnd = (i + 1) / totalTowels;
-									let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
-									fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
-									towelStyles[i].opacity = fadeProgress + 0.3;
-									towelStyles[i].y = 50 - 50 * fadeProgress;
+							towels.forEach((towel, i) => {
+								const revealStart = i / totalTowels;
+								const revealEnd = (i + 1) / totalTowels;
+								let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
+								fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
+								towelStyles[i].opacity = fadeProgress + 0.3;
+								towelStyles[i].y = 50 - 50 * fadeProgress;
 
-									if (i === currentTowelIndex) {
-										towel.classList.remove("highlighted");
-									} else {
-										towel.classList.add("highlighted");
-									}
-								});
+								if (i === currentTowelIndex) {
+									towel.classList.remove("highlighted");
+								} else {
+									towel.classList.add("highlighted");
+								}
 							});
-							applyTowelStyles();
-						}
-					} else {
-						//dust가 일이나기 전 단계를 전체 towel의 개수로 나누어서 각 towel의 단계를 계산
-						const stepSize = (DUST_TIMING - 0) / totalTowels;
-						const currentStep = Math.floor(progress / stepSize);
-						if (currentStep <= totalTowels) towelsRef.current!.style.transform = `translateY(${-1 * scrollPerTowel * currentStep}px)`;
-						towels.forEach((towel, i) => {
-							if (i < currentStep) {
-								towel.style.opacity = "0.5";
-								towel.classList.add("highlighted");
-							} else if (i === currentStep) {
-								towel.style.opacity = "1";
-								towel.classList.remove("highlighted");
-							} else {
-								towel.style.opacity = "0";
-							}
 						});
+						applyTowelStyles();
 					}
+				} else {
+					//dust가 일이나기 전 단계를 전체 towel의 개수로 나누어서 각 towel의 단계를 계산
+					const stepSize = (DUST_TIMING - 0) / totalTowels;
+					const currentStep = Math.floor(progress / stepSize);
+					if (currentStep <= totalTowels) towelsRef.current!.style.transform = `translateY(${-1 * scrollPerTowel * currentStep}px)`;
+					towels.forEach((towel, i) => {
+						if (i < currentStep) {
+							towel.style.opacity = "0.5";
+							towel.classList.add("highlighted");
+						} else if (i === currentStep) {
+							towel.style.opacity = "1";
+							towel.classList.remove("highlighted");
+						} else {
+							towel.style.opacity = "0";
+						}
+					});
 				}
 
 				//power2.inOut로 초반~중반 천천히, 후반 빠르게
@@ -721,6 +813,7 @@ export default function Home() {
 		return () => {
 			window.removeEventListener("resize", debouncedResize);
 			cleanupDustEffect();
+			if (dustState.current?.rafId) cancelAnimationFrame(dustState.current.rafId);
 		};
 	}, [initDustEffect, cleanupDustEffect]);
 
@@ -1242,7 +1335,7 @@ export default function Home() {
 				</section>
 			</div>
 
-			<section className="w-full full-section text-center font-dunggeunmo projects-section relative -mt-[20vh] md:-mt-0">
+			<section ref={projectsRef} className="w-full full-section text-center font-dunggeunmo projects-section relative -mt-[20vh] md:-mt-0">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
