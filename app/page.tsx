@@ -614,6 +614,7 @@ export default function Home() {
 			if (skip) {
 				beachRef.current!.style.opacity = "0";
 				ds.dustTriggered = true;
+				document.documentElement.style.overflow = "";
 				return;
 			}
 
@@ -669,10 +670,12 @@ export default function Home() {
 			let lastTouchY = 0;
 			let readyToTrigger = false;
 			let wasReadyToTrigger = false;
+			let fixedViewportHeight = window.innerHeight; //모바일 상태바 등장 전 높이를 저장
 			const buffer = 200;
 
 			const onTouchStart = (e: TouchEvent) => {
 				lastTouchY = e.touches[0].clientY;
+				fixedViewportHeight = window.innerHeight;
 			};
 
 			const onTouchMove = (e: TouchEvent) => {
@@ -686,13 +689,12 @@ export default function Home() {
 				const futureScrollY = window.scrollY - deltaY;
 				const projectsTop = projectsRef.current!.offsetTop;
 
-				if (direction === "down" && !ds.dustTriggered && futureScrollY + window.innerHeight >= projectsTop - buffer) {
+				if (direction === "down" && !ds.dustTriggered && futureScrollY + fixedViewportHeight >= projectsTop - buffer) {
 					if (!wasReadyToTrigger) {
 						document.documentElement.style.overflow = "hidden";
 						//너무 내려온 상태는 애니메이션은 스킵하고 상태만 바꿔줌
 
-						if (futureScrollY + window.innerHeight > projectsTop + projectsRef.current!.offsetHeight * 0.8) {
-							console.log("girll");
+						if (futureScrollY + fixedViewportHeight > projectsTop + projectsRef.current!.offsetHeight * 0.8) {
 							readyToTrigger = false;
 							wasReadyToTrigger = false;
 							triggerDustForMobile(true);
@@ -707,8 +709,8 @@ export default function Home() {
 				if (
 					direction === "up" &&
 					ds.dustTriggered &&
-					futureScrollY + window.innerHeight < projectsTop + buffer &&
-					futureScrollY > projectsTop - window.innerHeight * 1.5 &&
+					futureScrollY + fixedViewportHeight < projectsTop + buffer &&
+					futureScrollY > projectsTop - fixedViewportHeight * 1.5 &&
 					Math.abs(deltaY) > 5
 				) {
 					if (!wasReadyToTrigger) {
