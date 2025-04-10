@@ -168,11 +168,7 @@ section.full-section {
 }
 
 .fade-up {
-	animation: fade-up 1.3s ease-in-out forwards;
-}
-
-.fade-left {
-	animation: fade-left 1.5s ease-in-out forwards;
+	animation: fade-up 1s ease-in-out forwards;
 }
 
 .fade-up-section,

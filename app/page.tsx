@@ -436,71 +436,32 @@ export default function Home() {
 		const lastTowel = towels[towels.length - 1];
 		if (towels.length === 0) return;
 
-		//모바일은 기존 towel gsap 대신 fade-up 효과만 부여
 		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-		const visibleMap = new WeakMap<Element, boolean>();
-		const observer = new IntersectionObserver(
-			entries => {
-				entries.forEach(entry => {
-					const el = entry.target;
-					const isVisible = visibleMap.get(el) || false;
-
-					// 처음 교차하는 경우에만 추가
-					if (entry.isIntersecting && !isVisible && entry.intersectionRatio > 0.6) {
-						el.classList.add("fade-up");
-						visibleMap.set(el, true);
-					}
-
-					// 완전히 사라지면 fade-up 삭제
-					if (!entry.isIntersecting && isVisible && entry.intersectionRatio < 0.1) {
-						el.classList.remove("fade-up");
-						visibleMap.set(el, false);
-					}
-				});
-			},
-			{
-				root: null,
-				threshold: [0, 0.1, 0.6, 1],
-			}
-		);
-
-		if (isMobile) {
-			towels.forEach(towel => observer.observe(towel));
-		}
-
 		const ds = dustState.current;
-
 		const totalTowels = Object.keys(CareerData).length;
 		const towelsHeight = towels[0].offsetHeight;
 		const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
 		const scrollPerTowel = towelsHeight + gap;
-		//const totalTowelDistance = scrollPerTowel * totalTowels;
 		const totalScrollDistance = isMobile ? towelsRef.current.offsetHeight + towelsHeight : towelsRef.current.offsetHeight;
 
-		let currentDustProgress = 0;
-		let smoothedDustProgress = 0;
-
-		let scrollRafId: number | null = null;
-		const towelStyles = towels.map(() => ({opacity: 0, y: 0}));
-
-		const applyTowelStyles = () => {
-			towels.forEach((towel, i) => {
-				towel.style.transform = `translateY(${towelStyles[i].y}px)`;
-				towel.style.opacity = towelStyles[i].opacity.toString();
-			});
-			scrollRafId = null;
-		};
-
+		//mobile/pc 공용 함수
 		const createDust = async (currentY: number) => {
-			if (!beachRef.current) return;
-			//towel이 이동한 값을 가져와서 반영 20은 미세 보정
-			if (!isMobile) towelsRef.current!.style.transform = `translateY(${currentY - gap - 20}px)`;
+			if (!beachRef.current || !towelsRef.current) return;
 
-			const canvas = await html2canvas(beachRef.current!, {
-				backgroundColor: null,
-				scale: 1,
-			});
+			let canvas;
+			if (isMobile) {
+				canvas = await html2canvas(towelsRef.current, {
+					backgroundColor: "rgb(255, 215, 151)",
+					scale: 1,
+				});
+			} else {
+				//towel이 이동한 값을 가져와서 반영 20은 미세 보정
+				towelsRef.current!.style.transform = `translateY(${currentY - gap - 20}px)`;
+				canvas = await html2canvas(beachRef.current!, {
+					backgroundColor: null,
+					scale: 1,
+				});
+			}
 
 			const srcCtx = canvas.getContext("2d");
 			if (!srcCtx) return;
@@ -558,7 +519,6 @@ export default function Home() {
 
 			const {width, height} = ds.dustCanvas;
 			ds.dustCtx.clearRect(0, 0, width, height);
-			//const dustProgress = gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY);
 
 			const clampedDust = gsap.utils.clamp(0, 1, dustProgress);
 			//color를 칠하는 단계가 마무리 되었으면 원래 beachref div를 투명 처리
@@ -591,45 +551,52 @@ export default function Home() {
 			});
 		};
 
-		const triggerDustForMobile = async () => {
-			if (!towelsRef.current) return;
+		//모바일은 기존 towel gsap 대신 fade-up 효과만 부여
+		const setupMobileIntersectionObserver = () => {
+			const visibleMap = new WeakMap<Element, boolean>();
+			const observer = new IntersectionObserver(
+				entries => {
+					entries.forEach(entry => {
+						const el = entry.target;
+						const isVisible = visibleMap.get(el) || false;
 
-			const towels = towelsRef.current.querySelectorAll<HTMLDivElement>(".towel-wrapper");
-			const towelsHeight = towels[0]?.offsetHeight || 0;
-			const gap = parseFloat(getComputedStyle(towels[0]).marginTop || "0");
-			const scrollPerTowel = towelsHeight + gap;
-			const offset = -scrollPerTowel * towels.length;
+						// 처음 교차하는 경우에만 추가
+						if (entry.isIntersecting && !isVisible && entry.intersectionRatio > 0.6) {
+							el.classList.add("fade-up");
+							visibleMap.set(el, true);
+						}
 
-			await createDust(offset);
-
-			let progress = 0;
-			const duration = 1.3;
-			const start = performance.now();
-
-			const animate = (now: number) => {
-				const elapsed = (now - start) / 1000;
-				progress = Math.min(elapsed / duration, 1);
-				drawDust(progress);
-				if (progress < 1) {
-					ds.rafId = requestAnimationFrame(animate);
-				} else {
-					unlockScroll();
+						// 완전히 사라지면 fade-up 삭제
+						if (!entry.isIntersecting && isVisible && entry.intersectionRatio < 0.1) {
+							el.classList.remove("fade-up");
+							visibleMap.set(el, false);
+						}
+					});
+				},
+				{
+					root: null,
+					threshold: [0, 0.1, 0.6, 1],
 				}
-			};
+			);
 
-			ds.rafId = requestAnimationFrame(animate);
+			towels.forEach(towel => observer.observe(towel));
+			return observer;
 		};
 
-		const reverseDust = () => {
-			if (!dustState.current || !dustState.current.dustReady) return;
+		const reverseDust = async () => {
+			if (!dustState.current || !towelsRef.current) return;
 
 			let progress = 1;
-			const duration = 1.3;
+			const duration = 1;
 			const start = performance.now();
+			const easeIn = (t: number) => t * t;
 
 			const animate = (now: number) => {
 				const elapsed = (now - start) / 1000;
-				progress = 1 - Math.min(elapsed / duration, 1);
+				const linearProgress = Math.min(elapsed / duration, 1);
+				const easedProgress = easeIn(linearProgress);
+				progress = 1 - easedProgress; // 역방향
+
 				drawDust(progress);
 
 				if (progress > 0) {
@@ -651,6 +618,48 @@ export default function Home() {
 			dustState.current.rafId = requestAnimationFrame(animate);
 		};
 
+		const triggerDustForMobile = async (skipAnimation: boolean) => {
+			if (!towelsRef.current) return;
+
+			const towels = towelsRef.current.querySelectorAll<HTMLDivElement>(".towel-wrapper");
+			const towelsHeight = towels[0]?.offsetHeight || 0;
+			const gap = parseFloat(getComputedStyle(towels[0]).marginTop || "0");
+			const scrollPerTowel = towelsHeight + gap;
+			const offset = -scrollPerTowel * towels.length;
+
+			await createDust(offset);
+
+			let progress = 0;
+			const duration = 1.3;
+			const start = performance.now();
+			const easeOut = (t: number) => 1 - Math.pow(1 - t, 2); // 앞 천천히, 뒤 빠르게
+
+			const animate = (now: number) => {
+				const elapsed = (now - start) / 1000;
+				const linearProgress = Math.min(elapsed / duration, 1);
+				progress = easeOut(linearProgress);
+				drawDust(progress);
+				if (progress < 1) {
+					ds.rafId = requestAnimationFrame(animate);
+				} else {
+					unlockScroll();
+				}
+			};
+			if (!skipAnimation) {
+				ds.rafId = requestAnimationFrame(animate);
+			} else if (beachRef.current) {
+				beachRef.current.style.opacity = "0";
+			}
+		};
+
+		const isProjectVisibleEnough = () => {
+			const rect = projectsRef.current?.getBoundingClientRect();
+			if (!rect) return false;
+			const vh = window.innerHeight || document.documentElement.clientHeight;
+			const visibleHeight = Math.min(rect.bottom, vh) - Math.max(rect.top, 0);
+			return visibleHeight / rect.height > 0.2;
+		};
+
 		const observeProjectIntersection = () => {
 			const projectSection = projectsRef.current;
 			const ds = dustState.current;
@@ -659,145 +668,159 @@ export default function Home() {
 			const observer = new IntersectionObserver(
 				entries => {
 					entries.forEach(entry => {
-						if (entry.intersectionRatio >= 0.1 && !ds.dustTriggered) {
+						if (entry.intersectionRatio >= 0.05 && !ds.dustTriggered) {
+							//이미 프로젝트 영역이 너무 많이 보이면 애니메이션을 재생할 필요가 없다
+							// 스크롤이 너무 빨랐다는 뜻 == 빨리 스킵하고 싶다는 의지
+							const skipAnimation = isProjectVisibleEnough();
+							if (!skipAnimation) lockScroll();
+							triggerDustForMobile(skipAnimation);
 							ds.dustTriggered = true;
-							lockScroll();
-							triggerDustForMobile();
 						}
-						if (entry.intersectionRatio < 0.1 && ds.dustTriggered && ds.dustReady) {
+						if (entry.intersectionRatio < 0.05 && ds.dustTriggered) {
 							ds.dustTriggered = false;
 							lockScroll();
 							reverseDust();
 						}
 					});
 				},
-				{threshold: [0.1]}
+				{threshold: [0.05]}
 			);
 
 			observer.observe(projectSection);
+
+			return observer;
 		};
 
-		if (isMobile) {
-			observeProjectIntersection();
-			return;
-		}
+		// pc 전용 액션들
+		const setupDesktopScrollTrigger = () => {
+			let currentDustProgress = 0;
+			let scrollRafId: number | null = null;
+			const towelStyles = towels.map(() => ({opacity: 0, y: 0}));
 
-		const st = ScrollTrigger.create({
-			trigger: beachRef.current,
-			start: "top+=1 top",
-			end: `+=${totalScrollDistance}`,
-			pin: !isMobile,
-			pinSpacing: false,
-			anticipatePin: 1,
-			toggleActions: "play reverse play reverse",
-			onUpdate: self => {
-				const progress = self.progress;
-				const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
+			const applyTowelStyles = () => {
+				towels.forEach((towel, i) => {
+					towel.style.transform = `translateY(${towelStyles[i].y}px)`;
+					towel.style.opacity = towelStyles[i].opacity.toString();
+				});
+				scrollRafId = null;
+			};
 
-				//고사양과 저사양 애니메이션을 분리
-				// 현재까지 확인 결과로 pc 크롬을 제외하고는 저사양 애니메이션이 맞다
-				if (!minimalMode) {
-					if (!scrollRafId) {
-						scrollRafId = requestAnimationFrame(() => {
-							scrollRafId = null;
+			const st = ScrollTrigger.create({
+				trigger: beachRef.current,
+				start: "top+=1 top",
+				end: `+=${totalScrollDistance}`,
+				pin: true,
+				pinSpacing: false,
+				anticipatePin: 1,
+				toggleActions: "play reverse play reverse",
+				onUpdate: self => {
+					const progress = self.progress;
+					const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
 
-							towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
+					//고사양과 저사양 애니메이션을 분리
+					// 현재까지 확인 결과로 pc 크롬을 제외하고는 저사양 애니메이션이 맞다
+					if (!minimalMode) {
+						if (!scrollRafId) {
+							scrollRafId = requestAnimationFrame(() => {
+								scrollRafId = null;
 
-							const dynamicOffset = 0.2;
-							const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
+								towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
 
-							towels.forEach((towel, i) => {
-								const revealStart = i / totalTowels;
-								const revealEnd = (i + 1) / totalTowels;
-								let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
-								fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
-								towelStyles[i].opacity = fadeProgress + 0.3;
-								towelStyles[i].y = 50 - 50 * fadeProgress;
+								const dynamicOffset = 0.2;
+								const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
 
-								if (i === currentTowelIndex) {
-									towel.classList.remove("highlighted");
-								} else {
-									towel.classList.add("highlighted");
-								}
+								towels.forEach((towel, i) => {
+									const revealStart = i / totalTowels;
+									const revealEnd = (i + 1) / totalTowels;
+									let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
+									fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
+									towelStyles[i].opacity = fadeProgress + 0.3;
+									towelStyles[i].y = 50 - 50 * fadeProgress;
+
+									if (i === currentTowelIndex) {
+										towel.classList.remove("highlighted");
+									} else {
+										towel.classList.add("highlighted");
+									}
+								});
 							});
-						});
-						applyTowelStyles();
-					}
-				} else {
-					//dust가 일이나기 전 단계를 전체 towel의 개수로 나누어서 각 towel의 단계를 계산
-					const stepSize = (DUST_TIMING - 0) / totalTowels;
-					const currentStep = Math.floor(progress / stepSize);
-					if (currentStep <= totalTowels) towelsRef.current!.style.transform = `translateY(${-1 * scrollPerTowel * currentStep}px)`;
-					towels.forEach((towel, i) => {
-						if (i < currentStep) {
-							towel.style.opacity = "0.5";
-							towel.classList.add("highlighted");
-						} else if (i === currentStep) {
-							towel.style.opacity = "1";
-							towel.classList.remove("highlighted");
-						} else {
-							towel.style.opacity = "0";
+							applyTowelStyles();
 						}
-					});
-				}
+					} else {
+						//dust가 일이나기 전 단계를 전체 towel의 개수로 나누어서 각 towel의 단계를 계산
+						const stepSize = (DUST_TIMING - 0) / totalTowels;
+						const currentStep = Math.floor(progress / stepSize);
+						if (currentStep <= totalTowels) towelsRef.current!.style.transform = `translateY(${-1 * scrollPerTowel * currentStep}px)`;
+						towels.forEach((towel, i) => {
+							if (i < currentStep) {
+								towel.style.opacity = "0.5";
+								towel.classList.add("highlighted");
+							} else if (i === currentStep) {
+								towel.style.opacity = "1";
+								towel.classList.remove("highlighted");
+							} else {
+								towel.style.opacity = "0";
+							}
+						});
+					}
 
-				//power2.inOut로 초반~중반 천천히, 후반 빠르게
-				currentDustProgress = gsap.parseEase("power2.inOut")(gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY));
+					//power2.inOut로 초반~중반 천천히, 후반 빠르게
+					currentDustProgress = gsap.parseEase("power2.inOut")(gsap.utils.clamp(0, 1, (progress - DUST_TIMING) * AMPLIFY_BY));
 
-				if (ds.dustReady) {
-					drawDust(currentDustProgress);
-				}
+					if (ds.dustReady) {
+						drawDust(currentDustProgress);
+					}
 
-				// dust 캔버스 생성 예약 (부하 줄이기 위해 setTimeout)
-				if (progress >= DUST_TIMING && !ds.dustReady && !ds.dustTriggered) {
-					ds.dustTriggered = true;
+					// dust 캔버스 생성 예약 (부하 줄이기 위해 setTimeout)
+					if (progress >= DUST_TIMING && !ds.dustReady && !ds.dustTriggered) {
+						ds.dustTriggered = true;
+						const targetY = -towelProgress * scrollPerTowel * totalTowels;
+						createDust(targetY);
+					}
 
-					// requestAnimationFrame(() => {
-					// 	setTimeout(() => {
-					// 		const targetY = -towelProgress * scrollPerTowel * totalTowels;
-					// 		createDust(targetY);
-					// 	}, 320);
-					// });
-					const targetY = -towelProgress * scrollPerTowel * totalTowels;
-					createDust(targetY);
-				}
+					if (currentDustProgress === 0 && !ds.dustRemoved) {
+						ds.dustCanvas?.remove();
+						ds.dustCanvas = null;
+						ds.dustCtx = null;
+						ds.dustReady = false;
+						ds.dustRemoved = true;
+						ds.particles = [];
+						towelsRef.current!.style.transform = "";
+					}
 
-				if (currentDustProgress === 0 && !ds.dustRemoved) {
+					if (progress < DUST_TIMING && ds.dustTriggered) {
+						ds.dustTriggered = false;
+					}
+				},
+				onLeaveBack: () => {
 					ds.dustCanvas?.remove();
 					ds.dustCanvas = null;
 					ds.dustCtx = null;
 					ds.dustReady = false;
 					ds.dustRemoved = true;
-					ds.particles = [];
-					towelsRef.current!.style.transform = "";
-					// const newY = -towelProgress * scrollPerTowel * totalTowels;
-					// towelsRef.current!.style.transform = `translateY(${newY}px)`;
-				}
-
-				if (progress < DUST_TIMING && ds.dustTriggered) {
 					ds.dustTriggered = false;
-				}
-			},
-			onLeaveBack: () => {
-				//beachRef.current!.style.opacity = "1";
-				ds.dustCanvas?.remove();
-				ds.dustCanvas = null;
-				ds.dustCtx = null;
-				ds.dustReady = false;
-				ds.dustRemoved = true;
-				ds.dustTriggered = false;
-				ds.particles = [];
-			},
-			onLeave: () => {
-				beachRef.current!.style.opacity = "0";
-			},
-		});
+					ds.particles = [];
+				},
+				onLeave: () => {
+					beachRef.current!.style.opacity = "0";
+				},
+			});
 
-		ds.scrollTriggers.push(st);
+			ds.scrollTriggers.push(st);
+			return st;
+		};
 
-		return () => observer.disconnect();
-
-		//ds.rafId = requestAnimationFrame(animateDust);
+		if (isMobile) {
+			const towelObserver = setupMobileIntersectionObserver();
+			const projectObserver = observeProjectIntersection();
+			return () => {
+				towelObserver.disconnect();
+				projectObserver?.disconnect();
+			};
+		} else {
+			setupDesktopScrollTrigger();
+			return () => {};
+		}
 	}, [cleanupDustEffect, minimalMode]);
 
 	useEffect(() => {
@@ -1335,7 +1358,7 @@ export default function Home() {
 				</section>
 			</div>
 
-			<section ref={projectsRef} className="w-full full-section text-center font-dunggeunmo projects-section relative -mt-[20vh] md:-mt-0">
+			<section ref={projectsRef} className="w-full full-section text-center font-dunggeunmo projects-section relative">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
