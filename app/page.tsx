@@ -572,7 +572,7 @@ export default function Home() {
 				beachRef.current.style.opacity = "1";
 			}
 
-			unlockScroll();
+			document.documentElement.style.overflow = "";
 		};
 
 		const reverseDust = async () => {
@@ -626,7 +626,7 @@ export default function Home() {
 				if (t < 1) {
 					ds.rafId = requestAnimationFrame(animate);
 				} else {
-					unlockScroll();
+					document.documentElement.style.overflow = "";
 				}
 			};
 
@@ -665,43 +665,85 @@ export default function Home() {
 			return observer;
 		};
 
-		function attachScrollWatcher() {
-			let ticking = false;
-			let lastScrollY = window.scrollY;
+		function attachTouchWatcher() {
+			let lastTouchY = 0;
+			let readyToTrigger = false;
+			let wasReadyToTrigger = false;
+			const buffer = 200;
 
-			const onScroll = () => {
-				if (ticking) return;
-				ticking = true;
-				requestAnimationFrame(() => {
-					ticking = false;
-
-					const ds = dustState.current!;
-					const scrollY = window.scrollY;
-					const maxScrollY = document.body.scrollHeight - window.innerHeight;
-					const direction = scrollY > lastScrollY ? "down" : "up";
-					lastScrollY = scrollY;
-
-					const projectsTop = projectsRef.current!.offsetTop;
-					const scrollBuffer = 100;
-
-					if (direction === "down" && !ds.dustTriggered && scrollY + window.innerHeight > projectsTop) {
-						ds.dustTriggered = true;
-						lockScroll();
-						//일단은 스킵 로직 제외
-						triggerDustForMobile(false);
-						return;
-					}
-
-					if (direction === "up" && ds.dustTriggered && scrollY + window.innerHeight < projectsTop - scrollBuffer) {
-						ds.dustTriggered = false;
-						lockScroll();
-						reverseDust();
-					}
-				});
+			const onTouchStart = (e: TouchEvent) => {
+				lastTouchY = e.touches[0].clientY;
 			};
 
-			window.addEventListener("scroll", onScroll, {passive: true});
-			return () => window.removeEventListener("scroll", onScroll);
+			const onTouchMove = (e: TouchEvent) => {
+				const currentY = e.touches[0].clientY;
+				const deltaY = currentY - lastTouchY;
+				const direction = deltaY < 0 ? "down" : "up";
+				lastTouchY = currentY;
+
+				const ds = dustState.current!;
+				//const futureScrollY = Math.abs(deltaY) < 80 ? window.scrollY - deltaY : window.scrollY;
+				const futureScrollY = window.scrollY - deltaY;
+				const projectsTop = projectsRef.current!.offsetTop;
+
+				if (direction === "down" && !ds.dustTriggered && futureScrollY + window.innerHeight >= projectsTop - buffer) {
+					if (!wasReadyToTrigger) {
+						document.documentElement.style.overflow = "hidden";
+						//너무 내려온 상태는 애니메이션은 스킵하고 상태만 바꿔줌
+
+						if (futureScrollY + window.innerHeight > projectsTop + projectsRef.current!.offsetHeight * 0.8) {
+							console.log("girll");
+							readyToTrigger = false;
+							wasReadyToTrigger = false;
+							triggerDustForMobile(true);
+							return;
+						}
+						readyToTrigger = true;
+						wasReadyToTrigger = true;
+					}
+					return;
+				}
+				//projectsref가 보이는 위치거나, towel 영역이지만 이미 dust화 됐는데 도로 스크롤 업 하는 경우 (확실한 스크롤 업인지 deltaY로 확인)
+				if (
+					direction === "up" &&
+					ds.dustTriggered &&
+					futureScrollY + window.innerHeight < projectsTop + buffer &&
+					futureScrollY > projectsTop - window.innerHeight * 1.5 &&
+					Math.abs(deltaY) > 5
+				) {
+					if (!wasReadyToTrigger) {
+						document.documentElement.style.overflow = "hidden";
+						readyToTrigger = true;
+						wasReadyToTrigger = true;
+					}
+					return;
+				}
+
+				wasReadyToTrigger = false;
+			};
+
+			const onTouchEnd = () => {
+				const ds = dustState.current!;
+				if (!readyToTrigger) return;
+				if (!ds.dustTriggered) {
+					ds.dustTriggered = true;
+					triggerDustForMobile(false);
+				} else {
+					ds.dustTriggered = false;
+					reverseDust();
+				}
+				readyToTrigger = false;
+			};
+
+			window.addEventListener("touchstart", onTouchStart, {passive: true});
+			window.addEventListener("touchmove", onTouchMove, {passive: false});
+			window.addEventListener("touchend", onTouchEnd, {passive: true});
+
+			return () => {
+				window.removeEventListener("touchstart", onTouchStart);
+				window.removeEventListener("touchmove", onTouchMove);
+				window.removeEventListener("touchend", onTouchEnd);
+			};
 		}
 
 		// pc 전용 액션들
@@ -825,7 +867,7 @@ export default function Home() {
 
 		if (isMobile) {
 			const towelObserver = setupMobileIntersectionObserver();
-			attachScrollWatcher();
+			attachTouchWatcher();
 			return () => {
 				towelObserver.disconnect();
 			};
@@ -1269,7 +1311,7 @@ export default function Home() {
 					</div>
 				</div>
 
-				<div className={`fixed w-full bottom-0 p-20 pointer-events-none z-[99] transition-opacity ${showMessage ? "opacity-100" : "opacity-0"}`}>
+				<div className={`absolute w-full bottom-0 p-20 pointer-events-none z-[99] transition-opacity ${showMessage ? "opacity-100" : "opacity-0"}`}>
 					<div className="flex flex-col items-center justify-center text-white text-xl">
 						<span className="drop-shadow-md">{textFile["000"]}</span>
 						<Image src="/assets/arrow-down.svg" alt="arrow" className="animate-slide-down drop-shadow-lg" width={20} height={20}></Image>
