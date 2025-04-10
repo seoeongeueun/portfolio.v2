@@ -87,6 +87,7 @@ export default function Home() {
 		dustReady: boolean;
 		dustRemoved: boolean;
 		dustTriggered: boolean;
+		animationPhase: "idle" | "dust-in" | "dust-out"; //모바일 스크롤 트리거시 중복 콜 방지용
 		particles: any[];
 		rafId: number | null;
 		scrollTriggers: ScrollTrigger[];
@@ -96,6 +97,7 @@ export default function Home() {
 		dustReady: false,
 		dustRemoved: false,
 		dustTriggered: false,
+		animationPhase: "idle",
 		particles: [],
 		rafId: null,
 		scrollTriggers: [],
@@ -551,6 +553,86 @@ export default function Home() {
 			});
 		};
 
+		const cleanupDust = () => {
+			const ds = dustState.current;
+			if (!ds) return;
+
+			if (ds.rafId) cancelAnimationFrame(ds.rafId);
+			ds.rafId = null;
+
+			ds.dustCanvas?.remove();
+			ds.dustCanvas = null;
+			ds.dustCtx = null;
+			ds.particles = [];
+			ds.dustReady = false;
+			ds.dustRemoved = true;
+			ds.dustTriggered = false;
+
+			if (beachRef.current) {
+				beachRef.current.style.opacity = "1";
+			}
+
+			unlockScroll();
+		};
+
+		const reverseDust = async () => {
+			const ds = dustState.current;
+			if (!ds || !towelsRef.current) return;
+
+			await createDust(0); // 모바일은 currentY 의미없음 걍 0으로
+
+			if (ds.rafId) cancelAnimationFrame(ds.rafId);
+			ds.rafId = null;
+
+			const duration = 1;
+			const start = performance.now();
+			const easeIn = (t: number) => t * t;
+
+			const animate = (now: number) => {
+				const t = Math.min((now - start) / 1000 / duration, 1);
+				const reversed = 1 - easeIn(t);
+				drawDust(reversed);
+				if (t < 1) {
+					ds.rafId = requestAnimationFrame(animate);
+				} else {
+					cleanupDust();
+				}
+			};
+
+			ds.rafId = requestAnimationFrame(animate);
+		};
+
+		const triggerDustForMobile = async (skip: boolean) => {
+			const ds = dustState.current;
+			if (!towelsRef.current || !ds) return;
+
+			if (ds.rafId) cancelAnimationFrame(ds.rafId);
+			ds.rafId = null;
+
+			await createDust(0);
+
+			if (skip) {
+				beachRef.current!.style.opacity = "0";
+				ds.dustTriggered = true;
+				return;
+			}
+
+			const duration = 1.3;
+			const start = performance.now();
+
+			const animate = (now: number) => {
+				const t = Math.min((now - start) / 1000 / duration, 1);
+				drawDust(1 - Math.pow(1 - t, 2)); //ease-out 효과로 시작은 느리게 나중에 빠르게
+				if (t < 1) {
+					ds.rafId = requestAnimationFrame(animate);
+				} else {
+					unlockScroll();
+				}
+			};
+
+			ds.rafId = requestAnimationFrame(animate);
+		};
+
 		//모바일은 기존 towel gsap 대신 fade-up 효과만 부여
 		const setupMobileIntersectionObserver = () => {
 			const visibleMap = new WeakMap<Element, boolean>();
@@ -583,113 +665,44 @@ export default function Home() {
 			return observer;
 		};
 
-		const reverseDust = async () => {
-			if (!dustState.current || !towelsRef.current) return;
+		function attachScrollWatcher() {
+			let ticking = false;
+			let lastScrollY = window.scrollY;
 
-			let progress = 1;
-			const duration = 1;
-			const start = performance.now();
-			const easeIn = (t: number) => t * t;
+			const onScroll = () => {
+				if (ticking) return;
+				ticking = true;
+				requestAnimationFrame(() => {
+					ticking = false;
 
-			const animate = (now: number) => {
-				const elapsed = (now - start) / 1000;
-				const linearProgress = Math.min(elapsed / duration, 1);
-				const easedProgress = easeIn(linearProgress);
-				progress = 1 - easedProgress; // 역방향
+					const ds = dustState.current!;
+					const scrollY = window.scrollY;
+					const maxScrollY = document.body.scrollHeight - window.innerHeight;
+					const direction = scrollY > lastScrollY ? "down" : "up";
+					lastScrollY = scrollY;
 
-				drawDust(progress);
+					const projectsTop = projectsRef.current!.offsetTop;
+					const scrollBuffer = 100;
 
-				if (progress > 0) {
-					dustState.current.rafId = requestAnimationFrame(animate);
-				} else {
-					// 리버스 애니메이션이 끝난 후 beachref를 원래대로 복원
-					beachRef.current!.style.opacity = "1";
-					dustState.current.dustCanvas?.remove();
-					dustState.current.dustCanvas = null;
-					dustState.current.dustCtx = null;
-					dustState.current.dustReady = false;
-					dustState.current.dustRemoved = true;
-					dustState.current.dustTriggered = false;
-					dustState.current.particles = [];
-					unlockScroll();
-				}
+					if (direction === "down" && !ds.dustTriggered && scrollY + window.innerHeight > projectsTop) {
+						ds.dustTriggered = true;
+						lockScroll();
+						//일단은 스킵 로직 제외
+						triggerDustForMobile(false);
+						return;
+					}
+
+					if (direction === "up" && ds.dustTriggered && scrollY + window.innerHeight < projectsTop - scrollBuffer) {
+						ds.dustTriggered = false;
+						lockScroll();
+						reverseDust();
+					}
+				});
 			};
 
-			dustState.current.rafId = requestAnimationFrame(animate);
-		};
-
-		const triggerDustForMobile = async (skipAnimation: boolean) => {
-			if (!towelsRef.current) return;
-
-			const towels = towelsRef.current.querySelectorAll<HTMLDivElement>(".towel-wrapper");
-			const towelsHeight = towels[0]?.offsetHeight || 0;
-			const gap = parseFloat(getComputedStyle(towels[0]).marginTop || "0");
-			const scrollPerTowel = towelsHeight + gap;
-			const offset = -scrollPerTowel * towels.length;
-
-			await createDust(offset);
-
-			let progress = 0;
-			const duration = 1.3;
-			const start = performance.now();
-			const easeOut = (t: number) => 1 - Math.pow(1 - t, 2); // 앞 천천히, 뒤 빠르게
-
-			const animate = (now: number) => {
-				const elapsed = (now - start) / 1000;
-				const linearProgress = Math.min(elapsed / duration, 1);
-				progress = easeOut(linearProgress);
-				drawDust(progress);
-				if (progress < 1) {
-					ds.rafId = requestAnimationFrame(animate);
-				} else {
-					unlockScroll();
-				}
-			};
-			if (!skipAnimation) {
-				ds.rafId = requestAnimationFrame(animate);
-			} else if (beachRef.current) {
-				beachRef.current.style.opacity = "0";
-			}
-		};
-
-		const isProjectVisibleEnough = () => {
-			const rect = projectsRef.current?.getBoundingClientRect();
-			if (!rect) return false;
-			const vh = window.innerHeight || document.documentElement.clientHeight;
-			const visibleHeight = Math.min(rect.bottom, vh) - Math.max(rect.top, 0);
-			return visibleHeight / rect.height > 0.2;
-		};
-
-		const observeProjectIntersection = () => {
-			const projectSection = projectsRef.current;
-			const ds = dustState.current;
-			if (!projectSection || !ds) return;
-
-			const observer = new IntersectionObserver(
-				entries => {
-					entries.forEach(entry => {
-						if (entry.intersectionRatio >= 0.05 && !ds.dustTriggered) {
-							//이미 프로젝트 영역이 너무 많이 보이면 애니메이션을 재생할 필요가 없다
-							// 스크롤이 너무 빨랐다는 뜻 == 빨리 스킵하고 싶다는 의지
-							const skipAnimation = isProjectVisibleEnough();
-							if (!skipAnimation) lockScroll();
-							triggerDustForMobile(skipAnimation);
-							ds.dustTriggered = true;
-						}
-						if (entry.intersectionRatio < 0.05 && ds.dustTriggered) {
-							ds.dustTriggered = false;
-							lockScroll();
-							reverseDust();
-						}
-					});
-				},
-				{threshold: [0.05]}
-			);
-
-			observer.observe(projectSection);
-
-			return observer;
-		};
+			window.addEventListener("scroll", onScroll, {passive: true});
+			return () => window.removeEventListener("scroll", onScroll);
+		}
 
 		// pc 전용 액션들
 		const setupDesktopScrollTrigger = () => {
@@ -812,10 +825,9 @@ export default function Home() {
 
 		if (isMobile) {
 			const towelObserver = setupMobileIntersectionObserver();
-			const projectObserver = observeProjectIntersection();
+			attachScrollWatcher();
 			return () => {
 				towelObserver.disconnect();
-				projectObserver?.disconnect();
 			};
 		} else {
 			setupDesktopScrollTrigger();
