@@ -64,7 +64,7 @@ export default function Home() {
 	const [showMessage, setShowMessage] = useState<boolean>(true);
 
 	//사양 문제로 두가지 애니메이션 버전 중 저사양 버전으로 노출하려는 경우 (다양한 os 확인 전까지는 디폴트로 저사양 모드)
-	const [minimalMode, setMinimalMode] = useState<boolean>(true);
+	const [minimalMode, setMinimalMode] = useState<boolean>(false);
 
 	const poolRef = useRef<HTMLDivElement | null>(null);
 	const poolRectRef = useRef<DOMRect | null>(null);
@@ -154,8 +154,8 @@ export default function Home() {
 
 		const isKorean = navigator.language.startsWith("ko");
 		setIsEnglish(!isKorean);
-		//const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-		//setIsMobile(isMobileDevice);
+		const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+		setMinimalMode(isMobileDevice);
 
 		if (!poolRef.current) return;
 
@@ -1004,10 +1004,12 @@ export default function Home() {
 		//프로젝트 상세 페이지가 보여질때 뒷 배경 스크롤 막고 내부 스크롤은 허용
 		const main = mainRef.current;
 		if (!main) return;
-		if (!isSectionReady) {
-			//lockScroll(main);
+		if (isSectionReady) {
+			//unlockScroll(main);
+			main.style.overflow = "hidden";
 		} else {
-			unlockScroll(main);
+			//lockScroll(main);
+			main.style.overflow = "";
 		}
 	}, [isSectionReady]);
 
@@ -1144,8 +1146,8 @@ export default function Home() {
 				</svg>
 				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
-				<section ref={shoreRef} className="w-full shore relative z-20 flex flex-col lg:flex-row">
-					<div className="float-left absolute lg:relative w-full py-32 lg:py-0 md:w-1/2 md:pr-16 lg:pr-40 flex flex-col justify-start items-start shore-title">
+				<section ref={shoreRef} className="w-full shore relative z-20 flex flex-col md:flex-row">
+					<div className="float-left absolute md:relative w-full py-32 lg:py-0 md:w-1/2 md:pr-16 lg:pr-40 flex flex-col justify-start items-start shore-title">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
 							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
@@ -1247,7 +1249,7 @@ export default function Home() {
 					</div>
 				</div>
 				<div
-					className={`relative overflow-hidden gameboy-section ${isGameboyOn && "power-on"} left-1/2 -translate-x-1/2 flex flex-col items-center justify-center`}
+					className={`relative -mt-32 md:-mt-16 lg:-mt-0 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} left-1/2 -translate-x-1/2 flex flex-col items-center justify-center`}
 				>
 					<Gameboy title={selectedProject?.title} />
 				</div>
