@@ -6,6 +6,13 @@ $breakpoint-mobile: 640px;
 $breakpoint-tablet-min: 641px;
 $breakpoint-tablet-max: 1024px;
 
+.main-page {
+	> * {
+		min-height: 0;
+		overflow: visible;
+	}
+}
+
 .main-title {
 	font-weight: bold;
 	--shadow: #ff7300;
@@ -979,8 +986,6 @@ $breakpoint-tablet-max: 1024px;
 }
 
 .project-section {
-	height: 100vh;
-
 	* {
 		border-radius: 0.25rem;
 	}

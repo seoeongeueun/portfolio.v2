@@ -121,8 +121,10 @@ body,
 html {
 	background-color: var(--main-bg);
 	width: 100%;
-	min-height: 100%;
-	height: auto;
+	/* min-height: 100%;
+	height: auto; */
+	height: 100vh;
+	height: 100svh;
 	/* overflow-x: hidden;
 	overflow-y: auto; */
 	overflow: hidden;
@@ -130,18 +132,18 @@ html {
 	padding: 0;
 	/* font-smooth: never;
 	-webkit-font-smoothing: none; */
-	scrollbar-width: none;
+	/* scrollbar-width: none; */
 }
 
 html {
 	font-size: 62.5%;
-	overflow-x: hidden;
-	overflow-y: auto;
+	/* overflow-x: hidden;
+	overflow-y: auto; */
 }
 
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
 	display: none;
-}
+} */
 
 section {
 	padding-left: 15rem;
@@ -178,6 +180,7 @@ section.full-section {
 
 .pin-spacer {
 	overflow: hidden !important;
+	pointer-events: none;
 }
 
 /* canvas {

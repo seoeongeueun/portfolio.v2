@@ -150,6 +150,8 @@ export default function Home() {
 
 	//첫 시작부터 필요한 함수들
 	useEffect(() => {
+		console.log(mainRef.current!.scrollHeight, mainRef.current!.clientHeight);
+
 		const isKorean = navigator.language.startsWith("ko");
 		setIsEnglish(!isKorean);
 		//const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -179,7 +181,7 @@ export default function Home() {
 		let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
 		const checkScrollIdle = () => {
-			const scrollTop = window.scrollY || document.documentElement.scrollTop;
+			const scrollTop = mainRef.current?.scrollTop || 0;
 			const scrollHeight = document.documentElement.scrollHeight;
 			const windowHeight = window.innerHeight;
 
@@ -192,7 +194,7 @@ export default function Home() {
 		};
 
 		const handleScroll = debounce(() => {
-			const scrollTop = window.scrollY || document.documentElement.scrollTop;
+			const scrollTop = mainRef.current?.scrollTop || 0;
 			const scrollHeight = document.documentElement.scrollHeight;
 			const windowHeight = window.innerHeight;
 
@@ -212,14 +214,15 @@ export default function Home() {
 			timeoutsRef.current.push(t);
 		}, 200);
 
+		if (!mainRef.current) return;
 		//timeoutId = setTimeout(checkScrollIdle, 4000);
 		const t0 = setTimeout(checkScrollIdle, 4000);
 		timeoutsRef.current.push(t0);
 
-		window.addEventListener("scroll", handleScroll);
+		mainRef.current.addEventListener("scroll", handleScroll);
 
 		return () => {
-			window.removeEventListener("scroll", handleScroll);
+			mainRef.current?.removeEventListener("scroll", handleScroll);
 			// if (timeoutId) clearTimeout(timeoutId);
 		};
 	}, [showMessage]);
@@ -432,7 +435,7 @@ export default function Home() {
 	const initDustEffect = useCallback(() => {
 		cleanupDustEffect();
 
-		if (!beachRef.current || !shoreRef.current || !towelsRef.current || !dustState.current) return;
+		if (!beachRef.current || !shoreRef.current || !towelsRef.current || !dustState.current || !mainRef.current) return;
 
 		const towels = Array.from(towelsRef.current.querySelectorAll<HTMLElement>(".towel-wrapper"));
 		const lastTowel = towels[towels.length - 1];
@@ -444,26 +447,19 @@ export default function Home() {
 		const towelsHeight = towels[0].offsetHeight;
 		const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
 		const scrollPerTowel = towelsHeight + gap;
-		const totalScrollDistance = isMobile ? towelsRef.current.offsetHeight + towelsHeight : towelsRef.current.offsetHeight;
+		const totalScrollDistance = towelsRef.current.offsetHeight;
+		console.log(totalScrollDistance);
 
 		//mobile/pc 공용 함수
 		const createDust = async (currentY: number) => {
 			if (!beachRef.current || !towelsRef.current) return;
 
-			let canvas;
-			if (isMobile) {
-				canvas = await html2canvas(towelsRef.current, {
-					backgroundColor: "rgb(255, 215, 151)",
-					scale: 1,
-				});
-			} else {
-				//towel이 이동한 값을 가져와서 반영 20은 미세 보정
-				towelsRef.current!.style.transform = `translateY(${currentY - gap - 20}px)`;
-				canvas = await html2canvas(beachRef.current!, {
-					backgroundColor: null,
-					scale: 1,
-				});
-			}
+			//towel이 이동한 값을 가져와서 반영 20은 미세 보정
+			towelsRef.current!.style.transform = `translateY(${currentY - gap - 20}px)`;
+			const canvas = await html2canvas(beachRef.current!, {
+				backgroundColor: null,
+				scale: 1,
+			});
 
 			const srcCtx = canvas.getContext("2d");
 			if (!srcCtx) return;
@@ -478,7 +474,7 @@ export default function Home() {
 			ds.dustCanvas.height = height;
 			Object.assign(ds.dustCanvas.style, {
 				position: "fixed",
-				top: `${isMobile ? -1 * (towelsRef.current!.offsetTop + scrollPerTowel) : beachRef.current.offsetTop}px`,
+				top: `${beachRef.current.offsetTop}px`,
 				left: `${beachRef.current.offsetLeft}px`,
 				width: `${beachRef.current.offsetWidth}px`,
 				height: `${beachRef.current.offsetHeight}px`,
@@ -553,201 +549,6 @@ export default function Home() {
 			});
 		};
 
-		const cleanupDust = () => {
-			const ds = dustState.current;
-			if (!ds) return;
-
-			if (ds.rafId) cancelAnimationFrame(ds.rafId);
-			ds.rafId = null;
-
-			ds.dustCanvas?.remove();
-			ds.dustCanvas = null;
-			ds.dustCtx = null;
-			ds.particles = [];
-			ds.dustReady = false;
-			ds.dustRemoved = true;
-			ds.dustTriggered = false;
-
-			if (beachRef.current) {
-				beachRef.current.style.opacity = "1";
-			}
-
-			document.documentElement.style.overflow = "";
-		};
-
-		const reverseDust = async () => {
-			const ds = dustState.current;
-			if (!ds || !towelsRef.current) return;
-
-			await createDust(0); // 모바일은 currentY 의미없음 걍 0으로
-
-			if (ds.rafId) cancelAnimationFrame(ds.rafId);
-			ds.rafId = null;
-
-			const duration = 1;
-			const start = performance.now();
-			const easeIn = (t: number) => t * t;
-
-			const animate = (now: number) => {
-				const t = Math.min((now - start) / 1000 / duration, 1);
-				const reversed = 1 - easeIn(t);
-				drawDust(reversed);
-				if (t < 1) {
-					ds.rafId = requestAnimationFrame(animate);
-				} else {
-					cleanupDust();
-				}
-			};
-
-			ds.rafId = requestAnimationFrame(animate);
-		};
-
-		const triggerDustForMobile = async (skip: boolean) => {
-			const ds = dustState.current;
-			if (!towelsRef.current || !ds) return;
-
-			if (ds.rafId) cancelAnimationFrame(ds.rafId);
-			ds.rafId = null;
-
-			await createDust(0);
-
-			if (skip) {
-				beachRef.current!.style.opacity = "0";
-				ds.dustTriggered = true;
-				document.documentElement.style.overflow = "";
-				return;
-			}
-
-			const duration = 1.3;
-			const start = performance.now();
-
-			const animate = (now: number) => {
-				const t = Math.min((now - start) / 1000 / duration, 1);
-				drawDust(1 - Math.pow(1 - t, 2)); //ease-out 효과로 시작은 느리게 나중에 빠르게
-				if (t < 1) {
-					ds.rafId = requestAnimationFrame(animate);
-				} else {
-					document.documentElement.style.overflow = "";
-				}
-			};
-
-			ds.rafId = requestAnimationFrame(animate);
-		};
-
-		//모바일은 기존 towel gsap 대신 fade-up 효과만 부여
-		const setupMobileIntersectionObserver = () => {
-			const visibleMap = new WeakMap<Element, boolean>();
-			const observer = new IntersectionObserver(
-				entries => {
-					entries.forEach(entry => {
-						const el = entry.target;
-						const isVisible = visibleMap.get(el) || false;
-
-						// 처음 교차하는 경우에만 추가
-						if (entry.isIntersecting && !isVisible && entry.intersectionRatio > 0.6) {
-							el.classList.add("fade-up");
-							visibleMap.set(el, true);
-						}
-
-						// 완전히 사라지면 fade-up 삭제
-						if (!entry.isIntersecting && isVisible && entry.intersectionRatio < 0.1) {
-							el.classList.remove("fade-up");
-							visibleMap.set(el, false);
-						}
-					});
-				},
-				{
-					root: null,
-					threshold: [0, 0.1, 0.6, 1],
-				}
-			);
-
-			towels.forEach(towel => observer.observe(towel));
-			return observer;
-		};
-
-		function attachTouchWatcher() {
-			let lastTouchY = 0;
-			let readyToTrigger = false;
-			let wasReadyToTrigger = false;
-			let fixedViewportHeight = window.innerHeight; //모바일 상태바 등장 전 높이를 저장
-			const buffer = 200;
-
-			const onTouchStart = (e: TouchEvent) => {
-				lastTouchY = e.touches[0].clientY;
-				fixedViewportHeight = window.innerHeight;
-			};
-
-			const onTouchMove = (e: TouchEvent) => {
-				const currentY = e.touches[0].clientY;
-				const deltaY = currentY - lastTouchY;
-				const direction = deltaY < 0 ? "down" : "up";
-				lastTouchY = currentY;
-
-				const ds = dustState.current!;
-				//const futureScrollY = Math.abs(deltaY) < 80 ? window.scrollY - deltaY : window.scrollY;
-				const futureScrollY = window.scrollY - deltaY;
-				const projectsTop = projectsRef.current!.offsetTop;
-
-				if (direction === "down" && !ds.dustTriggered && futureScrollY + fixedViewportHeight >= projectsTop - buffer) {
-					if (!wasReadyToTrigger) {
-						document.documentElement.style.overflow = "hidden";
-						//너무 내려온 상태는 애니메이션은 스킵하고 상태만 바꿔줌
-
-						if (futureScrollY + fixedViewportHeight > projectsTop + projectsRef.current!.offsetHeight * 0.8) {
-							readyToTrigger = false;
-							wasReadyToTrigger = false;
-							triggerDustForMobile(true);
-							return;
-						}
-						readyToTrigger = true;
-						wasReadyToTrigger = true;
-					}
-					return;
-				}
-				//projectsref가 보이는 위치거나, towel 영역이지만 이미 dust화 됐는데 도로 스크롤 업 하는 경우 (확실한 스크롤 업인지 deltaY로 확인)
-				if (
-					direction === "up" &&
-					ds.dustTriggered &&
-					futureScrollY + fixedViewportHeight < projectsTop + buffer &&
-					futureScrollY > projectsTop - fixedViewportHeight * 1.5 &&
-					Math.abs(deltaY) > 5
-				) {
-					if (!wasReadyToTrigger) {
-						document.documentElement.style.overflow = "hidden";
-						readyToTrigger = true;
-						wasReadyToTrigger = true;
-					}
-					return;
-				}
-
-				wasReadyToTrigger = false;
-			};
-
-			const onTouchEnd = () => {
-				const ds = dustState.current!;
-				if (!readyToTrigger) return;
-				if (!ds.dustTriggered) {
-					ds.dustTriggered = true;
-					triggerDustForMobile(false);
-				} else {
-					ds.dustTriggered = false;
-					reverseDust();
-				}
-				readyToTrigger = false;
-			};
-
-			window.addEventListener("touchstart", onTouchStart, {passive: true});
-			window.addEventListener("touchmove", onTouchMove, {passive: false});
-			window.addEventListener("touchend", onTouchEnd, {passive: true});
-
-			return () => {
-				window.removeEventListener("touchstart", onTouchStart);
-				window.removeEventListener("touchmove", onTouchMove);
-				window.removeEventListener("touchend", onTouchEnd);
-			};
-		}
-
 		// pc 전용 액션들
 		const setupDesktopScrollTrigger = () => {
 			let currentDustProgress = 0;
@@ -761,13 +562,15 @@ export default function Home() {
 				});
 				scrollRafId = null;
 			};
-
+			console.log(beachRef.current!.offsetHeight);
 			const st = ScrollTrigger.create({
+				scroller: mainRef.current,
 				trigger: beachRef.current,
 				start: "top+=1 top",
 				end: `+=${totalScrollDistance}`,
 				pin: true,
 				pinSpacing: false,
+				pinType: "fixed",
 				anticipatePin: 1,
 				toggleActions: "play reverse play reverse",
 				onUpdate: self => {
@@ -800,8 +603,8 @@ export default function Home() {
 										towel.classList.add("highlighted");
 									}
 								});
+								applyTowelStyles();
 							});
-							applyTowelStyles();
 						}
 					} else {
 						//dust가 일이나기 전 단계를 전체 towel의 개수로 나누어서 각 towel의 단계를 계산
@@ -863,20 +666,29 @@ export default function Home() {
 				},
 			});
 
+			setTimeout(() => {
+				ScrollTrigger.refresh();
+			}, 100);
 			ds.scrollTriggers.push(st);
 			return st;
 		};
 
-		if (isMobile) {
-			const towelObserver = setupMobileIntersectionObserver();
-			attachTouchWatcher();
-			return () => {
-				towelObserver.disconnect();
-			};
-		} else {
-			setupDesktopScrollTrigger();
-			return () => {};
-		}
+		// ScrollTrigger.scrollerProxy(mainRef.current, {
+		// 	scrollTop(value) {
+		// 		if (value !== undefined) mainRef.current!.scrollTop = value;
+		// 		return mainRef.current!.scrollTop;
+		// 	},
+		// 	getBoundingClientRect() {
+		// 		return {
+		// 			top: 0,
+		// 			left: 0,
+		// 			width: window.innerWidth,
+		// 			height: window.innerHeight,
+		// 		};
+		// 	},
+		// 	pinType: "fixed",
+		// });
+		setupDesktopScrollTrigger();
 	}, [cleanupDustEffect, minimalMode]);
 
 	useEffect(() => {
@@ -1036,7 +848,7 @@ export default function Home() {
 			const parentContainer = cartridgeCardsContainerRef.current;
 			const cardsDiv = cartridgeCardsRef.current;
 			const clickedCard = event.currentTarget as HTMLDivElement;
-			if (!parentContainer || !cardsDiv) return;
+			if (!parentContainer || !cardsDiv || !mainRef.current) return;
 
 			const rect = clickedCard.getBoundingClientRect();
 			if (!rect || !projectKey) return;
@@ -1050,7 +862,7 @@ export default function Home() {
 			const promise = new Promise<void>(r => (resolveFn = r));
 			swiperReadyRef.current = {promise, resolve: resolveFn};
 
-			lockScroll();
+			//lockScroll(mainRef.current);
 			// 이 카드만 더블 클릭 등을 방지
 			clickedCard.classList.add("forbid-click");
 
@@ -1065,7 +877,7 @@ export default function Home() {
 
 			//이동해야하는 게임보이 위치를 계산
 			const gameboyHead = document.querySelector<HTMLDivElement>("#gameboy-head");
-			const referencePosition = gameboyHead?.getBoundingClientRect().top || window.scrollY + window.innerHeight;
+			const referencePosition = gameboyHead?.getBoundingClientRect().top || mainRef.current.scrollTop + window.innerHeight;
 			const cardPosition = rect.top;
 			const distance = referencePosition - cardPosition - cardHeight / 2.5;
 			clickedCard.style.setProperty("--y-distance", `${distance}px`);
@@ -1110,7 +922,7 @@ export default function Home() {
 						clickedCard.removeEventListener("animationend", handleAnimationEnd);
 					};
 					const handleAnimationStart = () => {
-						window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+						mainRef.current?.scrollTo({top: mainRef.current.scrollHeight, behavior: "smooth"});
 						clickedCard.removeEventListener("animationstart", handleAnimationStart);
 					};
 					clickedCard.addEventListener("animationstart", handleAnimationStart);
@@ -1190,11 +1002,12 @@ export default function Home() {
 
 	useEffect(() => {
 		//프로젝트 상세 페이지가 보여질때 뒷 배경 스크롤 막고 내부 스크롤은 허용
+		const main = mainRef.current;
+		if (!main) return;
 		if (!isSectionReady) {
-			document.documentElement.style.overflow = "";
+			//lockScroll(main);
 		} else {
-			document.documentElement.style.overflow = "hidden";
-			unlockScroll();
+			unlockScroll(main);
 		}
 	}, [isSectionReady]);
 
@@ -1224,7 +1037,7 @@ export default function Home() {
 	const toggleHeader = () => setHeaderOpen(prev => !prev);
 
 	return (
-		<div ref={mainRef} className="main-page font-medium text-white w-full h-fit flex flex-col items-center justify-start">
+		<div ref={mainRef} className="main-page font-medium text-white w-full h-full overflow-y-auto overflow-x-hidden">
 			<div className={`fixed top-0 h-fit main-header pointer-events-none w-full h-fit z-40 flex flex-row-reverse`}>
 				<button className="pointer-events-auto w-20 h-20 flex items-center justify-center float-right" onClick={toggleHeader}>
 					<div className="lifebuoy mini hover:rotate-60 transition-transform duration-300"></div>
@@ -1331,8 +1144,8 @@ export default function Home() {
 				</svg>
 				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
-				<section ref={shoreRef} className="w-full shore relative z-20">
-					<div className="float-left w-full py-32 lg:py-0 md:w-1/2 md:pr-16 lg:pr-40 flex flex-col justify-start items-start shore-title">
+				<section ref={shoreRef} className="w-full shore relative z-20 flex flex-col lg:flex-row">
+					<div className="float-left absolute lg:relative w-full py-32 lg:py-0 md:w-1/2 md:pr-16 lg:pr-40 flex flex-col justify-start items-start shore-title">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
 							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
@@ -1414,7 +1227,7 @@ export default function Home() {
 				</section>
 			</div>
 
-			<section ref={projectsRef} className="w-full full-section text-center font-dunggeunmo projects-section relative">
+			<section ref={projectsRef} className="w-full full-section text-center font-dunggeunmo projects-section relative overflow-y-hidden">
 				<p className="subtitle">PROJECTS</p>
 				<div className="w-full h-fit flex flex-row items-center justify-center gap-[5rem] text-lg md:text-xl ">
 					<div className="filter-type flex flex-row items-center gap-8">
@@ -1426,7 +1239,7 @@ export default function Home() {
 						<label>{textFile["003"]}</label>
 					</div>
 				</div>
-				<div ref={cartridgeCardsContainerRef} className="gallery px-24 flex items-center w-full overflow-x-auto overflow-y-hidden min-h-[40rem]">
+				<div ref={cartridgeCardsContainerRef} className="gallery px-24 flex items-center w-full overflow-x-auto overflow-y-hidden  min-h-[40rem]">
 					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-16 md:gap-24 md:py-40">
 						{Object.entries(projects).map(([k, v]) => (
 							<Cartridge key={v.title} projectKey={k} project={v} onSelectProject={handleCardClick} />
@@ -1434,7 +1247,7 @@ export default function Home() {
 					</div>
 				</div>
 				<div
-					className={`relative -mt-32 lg:mt-0 overflow-hidden gameboy-section ${isGameboyOn && "power-on"} left-1/2 -translate-x-1/2 flex flex-col items-center justify-center`}
+					className={`relative overflow-hidden gameboy-section ${isGameboyOn && "power-on"} left-1/2 -translate-x-1/2 flex flex-col items-center justify-center`}
 				>
 					<Gameboy title={selectedProject?.title} />
 				</div>
@@ -1552,7 +1365,7 @@ export default function Home() {
 									})}
 							</Swiper>
 							<div
-								className={`project-description ${isEnglish && "en"} w-full lg:max-w-1/2 h-1/2 lg:h-full flex flex-col gap-4 z-30 ml-0 mt-8 lg:mt-0 lg:ml-20 overflow-y-auto overflow-x-hidden`}
+								className={`project-description ${isEnglish && "en"} w-full lg:max-w-1/2 h-full flex flex-col gap-4 z-30 ml-0 mt-8 lg:mt-0 lg:ml-20 overflow-y-auto overflow-x-hidden`}
 							>
 								<div className="sub flex flex-row items-end justify-between min-h-16">
 									<p>{textFile["004"]}</p>
