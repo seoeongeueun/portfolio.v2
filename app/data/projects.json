@@ -4,7 +4,7 @@
 		"subtitle": "ORGD 2024",
 		"route": "orgd/",
 		"thumbnail": "orgd_main.jpg",
-		"tags": ["1 DEV", "PERSONAL", "EXHIBITION"],
+		"tags": ["1 DEV", "EXHIBITION"],
 		"theme": "#2e2e2e",
 		"stacks": ["js", "nextjs2", "socket", "express", "mongodb", "tailwindcss"],
 		"ppl_count": 1,
@@ -180,7 +180,7 @@
 		"route": "po/",
 		"theme": "#2febf1",
 		"stacks": ["typescript", "nextjs2", "tailwindcss"],
-		"links": [{"code": "https://github.com/seoeongeueun/portfolio.v2", "old": "https://workmatebeta.vercel.app"}],
+		"links": [{"code": "https://github.com/seoeongeueun/portfolio.v2", "old": "https://github.com/seoeongeueun/portfolio"}],
 		"introduction_kr": ["3년 전에 만든 포트폴리오의 게임 컨셉을 일부 유지하며 사용자 경험과 가독성을 중심으로 리뉴얼한 새로운 포트폴리오입니다."],
 		"contribution_kr": [
 			"기존 Redux 기반 점수 시스템과 미니 게임을 제거하고 섹션별로 새로운 GSAP 기반 스크롤 애니메이션을 구현하여 다른 재미 요소를 더했습니다. 브라우저 기본 API와 유틸 메서드를 활용해 성능 최적화에 중점을 두었습니다.",

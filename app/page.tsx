@@ -151,10 +151,10 @@ export default function Home() {
 
 	//첫 시작부터 필요한 함수들
 	useEffect(() => {
-		console.log(mainRef.current!.scrollHeight, mainRef.current!.clientHeight);
-
 		const isKorean = navigator.language.startsWith("ko");
 		setIsEnglish(!isKorean);
+
+		//모바일은 간소화 애니메이션 적용
 		const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 		setMinimalMode(isMobileDevice);
 
@@ -454,7 +454,6 @@ export default function Home() {
 		const gap = parseFloat(getComputedStyle(towels[0]).marginTop);
 		const scrollPerTowel = towelsHeight + gap;
 		const totalScrollDistance = towelsRef.current.offsetHeight;
-		console.log(totalScrollDistance);
 
 		//mobile/pc 공용 함수
 		const createDust = async (currentY: number) => {
@@ -568,7 +567,6 @@ export default function Home() {
 				});
 				scrollRafId = null;
 			};
-			console.log(beachRef.current!.offsetHeight);
 			const st = ScrollTrigger.create({
 				scroller: mainRef.current,
 				trigger: beachRef.current,
