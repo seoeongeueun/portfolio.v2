@@ -977,6 +977,7 @@ export default function Home() {
 		if (!tags) {
 			setProjects({});
 		} else {
+			console.log(ProjectsData);
 			const filteredProjects = Object.entries(ProjectsData)
 				.filter(([_, project]) => project.tags.some(tag => tags.includes(tag)))
 				.reduce<Projects>((acc, [key, project]) => {

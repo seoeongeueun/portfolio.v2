@@ -36,7 +36,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className="antialiased font-tenada">{children}</body>
+			<body className="font-tenada">{children}</body>
 		</html>
 	);
 }
