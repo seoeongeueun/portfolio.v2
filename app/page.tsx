@@ -243,6 +243,7 @@ export default function Home() {
 				attr: {scale: 50},
 				scrollTrigger: {
 					trigger: ".main-page",
+					scroller: ".main-page",
 					start: "top top",
 					end: "bottom top",
 					scrub: 0.3,
@@ -252,6 +253,7 @@ export default function Home() {
 				attr: {baseFrequency: "0.02 0.08"},
 				scrollTrigger: {
 					trigger: ".main-page",
+					scroller: ".main-page",
 					start: "top top",
 					end: "bottom top",
 					scrub: 0.3,
@@ -271,7 +273,7 @@ export default function Home() {
 
 		let moveCharsFrameId: number | null = null;
 
-		function moveChars({event, deltaX, deltaY}: {event: PointerEvent; deltaX: number; deltaY: number}) {
+		function moveChars({event, deltaX, deltaY}: {event: Event; deltaX: number; deltaY: number}) {
 			if (moveCharsFrameId) return;
 			measurePool();
 			const poolRect = poolRectRef.current;
@@ -317,7 +319,7 @@ export default function Home() {
 				gsap.to(el, {
 					x: `+=${xMovement}`,
 					y: `+=${yMovement}`,
-					rotation: `-=${deltaX * 1.2 * Math.sign(event.clientY - (charBounds.top + charBounds.height / 2))}`,
+					rotation: `-=${deltaX * 1.2 * Math.sign(event instanceof PointerEvent ? event.clientY - (charBounds.top + charBounds.height / 2) : 1)}`,
 					duration: 3,
 					ease: "expo.out",
 				});
@@ -337,10 +339,13 @@ export default function Home() {
 		const observer = Observer.create({
 			target: poolRef.current,
 			type: "pointer,touch,mouse",
-			onMove: self => {
-				const e = self.event as PointerEvent;
-				if (self.event instanceof PointerEvent && self.event.target instanceof HTMLElement && self.event.target.matches(".char")) {
-					const boost = e.pointerType === "touch" ? 3 : 1; //모바일은 이동량을 추가해줘야 비슷하게 움직임
+			onMove: (self: any) => {
+				const e = self.event;
+				const el = e?.target as HTMLElement;
+
+				if (el && el.matches(".char")) {
+					const boost = self.pointerType === "touch" ? 3 : 1;
+
 					moveChars({
 						event: e,
 						deltaX: self.deltaX * boost,
@@ -712,9 +717,9 @@ export default function Home() {
 	//호버 중인 비치타올에 turbulence 지정
 	useEffect(() => {
 		//모바일에는 사양상 미적용
-		if (typeof window !== "undefined" && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-			return;
-		}
+		// if (typeof window !== "undefined" && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+		// 	return;
+		// }
 		const allTowels = document.querySelectorAll<HTMLDivElement>(".towel");
 
 		allTowels.forEach(towel => {
@@ -752,15 +757,9 @@ export default function Home() {
 				disp?.setAttribute("scale", "0");
 			}
 
-			towel.addEventListener("mouseenter", () => {
-				startWibble();
-			});
-
+			towel.addEventListener("mouseenter", startWibble);
 			towel.addEventListener("mouseleave", () => {
-				//highlighted가 들어간 경우는 마우스와 상관 없이 wibble
-				if (!towel.classList.contains("highlighted")) {
-					stopWibble();
-				}
+				if (!towel.classList.contains("highlighted")) stopWibble();
 			});
 
 			//hightlihgted 클래스가 들어갔는지 감지
