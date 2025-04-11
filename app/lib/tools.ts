@@ -39,18 +39,18 @@ export function preventScroll(e: Event) {
 	e.stopPropagation();
 }
 
-export function lockScroll() {
-	window.addEventListener("wheel", preventScroll, {
+export function lockScroll(container: HTMLDivElement) {
+	container.addEventListener("wheel", preventScroll, {
 		passive: false,
 	});
-	window.addEventListener("touchmove", preventScroll, {
+	container.addEventListener("touchmove", preventScroll, {
 		passive: false,
 	});
 }
 
-export function unlockScroll() {
-	window.removeEventListener("wheel", preventScroll);
-	window.removeEventListener("touchmove", preventScroll);
+export function unlockScroll(container: HTMLDivElement) {
+	container.removeEventListener("wheel", preventScroll);
+	container.removeEventListener("touchmove", preventScroll);
 }
 
 export function throttle<T extends (...args: any[]) => void>(func: T, delay: number): T {
