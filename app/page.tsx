@@ -590,7 +590,7 @@ export default function Home() {
 							scrollRafId = requestAnimationFrame(() => {
 								scrollRafId = null;
 
-								towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels}px)`;
+								towelsRef.current!.style.transform = `translateY(${-towelProgress * scrollPerTowel * totalTowels - 20}px)`;
 
 								const dynamicOffset = 0.2;
 								const currentTowelIndex = Math.floor((towelProgress + dynamicOffset) * totalTowels);
