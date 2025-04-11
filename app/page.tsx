@@ -106,6 +106,7 @@ export default function Home() {
 	const swiperReadyRef = useRef<{
 		promise: Promise<void>;
 		resolve: () => void;
+		reject: (reason?: any) => void;
 	} | null>(null);
 	const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -838,6 +839,8 @@ export default function Home() {
 		const cardsDiv = cartridgeCardsRef.current;
 		if (!cardsDiv) return;
 
+		const main = mainRef.current;
+		if (main) unlockScroll(main);
 		cardsDiv.style.left = "";
 		cardsDiv.style.transition = "";
 	}, []);
@@ -858,11 +861,19 @@ export default function Home() {
 			if (projectData) setSelectedProject(projectData);
 
 			// swiperReadyRef 갱신
-			let resolveFn!: () => void;
-			const promise = new Promise<void>(r => (resolveFn = r));
-			swiperReadyRef.current = {promise, resolve: resolveFn};
+			let resolve!: () => void;
+			let reject!: (reason?: any) => void;
+			const promise = new Promise<void>((res, rej) => {
+				resolve = res;
+				reject = rej;
+			});
+			swiperReadyRef.current = {
+				promise,
+				resolve,
+				reject,
+			};
 
-			//lockScroll(mainRef.current);
+			lockScroll(parentContainer);
 			// 이 카드만 더블 클릭 등을 방지
 			clickedCard.classList.add("forbid-click");
 
@@ -991,10 +1002,18 @@ export default function Home() {
 		if (!section) return;
 
 		const run = async () => {
-			//section 내부 이미지와 swiper가 모두 로딩 되면 준비 완료로 변경 + 최소로 3초는 기다리기
-			await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current?.promise, sleep(3000)]);
+			try {
+				//section 내부 이미지와 swiper가 모두 로딩 되면 준비 완료로 변경 + 최소로 3초는 기다리기
+				await Promise.all([waitForAllImagesToLoad(section), swiperReadyRef.current?.promise, sleep(3000)]);
 
-			setIsSectionReady(true);
+				setIsSectionReady(true);
+			} catch (err) {
+				console.log("준비 중 오류 발생:", err);
+				const t = setTimeout(() => {
+					handleCloseProject();
+				}, 4000);
+				timeoutsRef.current.push(t);
+			}
 		};
 
 		run();
@@ -1005,7 +1024,8 @@ export default function Home() {
 		const main = mainRef.current;
 		if (!main) return;
 		if (isSectionReady) {
-			//unlockScroll(main);
+			const cards = cartridgeCardsContainerRef.current;
+			if (cards) unlockScroll(cards);
 			main.style.overflow = "hidden";
 		} else {
 			//lockScroll(main);
@@ -1014,9 +1034,8 @@ export default function Home() {
 	}, [isSectionReady]);
 
 	const handleCloseProject = useCallback(() => {
-		const section = projectDetailRef.current;
 		const cardsDiv = cartridgeCardsRef.current;
-		if (!section || !cardsDiv) return;
+		if (!cardsDiv) return;
 
 		handleClearChanges();
 		setSelectedProject(undefined);
@@ -1319,6 +1338,7 @@ export default function Home() {
 										}
 									} else {
 										setSelectedProject(undefined);
+										swiperReadyRef.current?.reject?.(new Error("Swiper failed to initialize"));
 									}
 								}}
 								onSlideChange={(swiper: SwiperClass) => {

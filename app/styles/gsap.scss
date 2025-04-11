@@ -9,6 +9,7 @@ $breakpoint-tablet-max: 1024px;
 
 .pool {
 	z-index: 30;
+	touch-action: none;
 	position: relative;
 	display: grid;
 	place-items: center;
