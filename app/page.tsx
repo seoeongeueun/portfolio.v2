@@ -155,8 +155,8 @@ export default function Home() {
 		setIsEnglish(!isKorean);
 
 		//모바일은 간소화 애니메이션 적용
-		const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-		setMinimalMode(isMobileDevice);
+		// const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+		// setMinimalMode(isMobileDevice);
 
 		if (!poolRef.current) return;
 
