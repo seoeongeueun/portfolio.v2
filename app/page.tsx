@@ -598,7 +598,7 @@ export default function Home() {
 									const revealEnd = (i + 1) / totalTowels;
 									let fadeProgress = (towelProgress - revealStart) / (revealEnd - revealStart);
 									fadeProgress = gsap.utils.clamp(0, 1, fadeProgress);
-									towelStyles[i].opacity = fadeProgress + 0.3;
+									towelStyles[i].opacity = fadeProgress + 0.4;
 									towelStyles[i].y = 50 - 50 * fadeProgress;
 
 									if (i === currentTowelIndex) {

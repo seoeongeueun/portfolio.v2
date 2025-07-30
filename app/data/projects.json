@@ -1,4 +1,47 @@
 {
+	"0": {
+		"title": "Small Dot",
+		"subtitle": "3D Globe Memo",
+		"route": "smalldot/",
+		"thumbnail": "smalldot_main.png",
+		"tags": ["1 DEV", "PERSONAL", "THREE.JS"],
+		"theme": "#0b283e",
+		"stacks": ["typescript", "react", "three.js", "supabase", "gsap", "tailwindcss"],
+		"ppl_count": 1,
+		"contribution_kr": [
+			"Three.js와 React Three Fiber를 활용해 GeoJSON 데이터를 기반으로 3D 지구본을 렌더링하고 국경선을 구현했습니다. 유저 클릭 시 x, y, z 좌표를 경도 / 위도로 변환해 어떤 국가가 선택되었는지 계산하고, 해당 정보를 Zustand 스토에 저장해 글로벌 상태로 관리했습니다.",
+			"섬이 많은 국가처럼 다중 폴리곤으로 분리된 영역의 경우, 클릭된 위치를 기반으로 실제 선택된 폴리곤을 식별합니다. 선택된 국가 영역을 고정 크기 셀 단위 그리드로 분할한 뒤, 유저 메모의 제목을 한 글자씩 배치할 수 있는지를 검사하는 레이아웃 로직을 구현했습니다. 한 줄에 제목 전체 배치가 가능한 경우 해당 셀에 글자를 표시해 나라 면적 위에 메모 타이틀을 시각적으로 노출했습니다.",
+			"GSAP을 활용해 카메라 이동, 초기 로딩, 컴포넌트 등장 등 전반적인 애니메이션을 제작했습니다. 또한 텍스트를 무작위로 섞은 뒤 원본으로 복원되는 스크램블 애니메이션을 구현했으며, 관련 리스너를 적절히 생성하고 클린업해 불필요한 리소스 점유를 방지했습니다. 유저 클릭 발생 시 드래그 여부를 이동 거리로 판별하고, 단순 클릭으로 특정 국가가 선택되면 해당 국가에 메모가 존재할 경우 GSAP을 이용해 카메라가 해당 좌표를 중심으로 부드럽게 회전하며 고정 줌 단계로 확대되는 로직을 구현했습니다.",
+			"Supabase를 이용해 메모 데이터의 CRUD API를 구축했습니다. React Query로 프로필과 메모 상태를 효율적으로 캐싱합니다. SQL 트리거를 이용해 메모 작성 / 삭제 시 프로필의 노트 카운트와 마지막 작성 국가를 자동 갱신하도록 설계했습니다.",
+			"Gemini API를 활용해 메모의 주제를 키워드로 반환하여 자동으로 제목으로 지정했습니다. sql 트리거를 이용해 메모가 업데이트된 시점을 자동으로 저장하고, 불필요한 토큰 사용을 줄이기 위해 짧은 시간 내 재요청이거나 변경된 글자 수가 특정 값 이하일 경우 API 호출을 생략하는 로직을 추가했습니다.",
+			"Supabase Auth 기반으로 로그인 / 회원가입 기능을 구현하고, 이메일 인증 흐름을 적용했습니다. 인증 실패 시 적절한 에러 핸들링을 추가하고, Zustand 스토어를 활용해 클라이언트 전역 상태로 로그인/로그아웃 후 UI 상태를 동기화했습니다."
+		],
+		"review_kr": [
+			"우주를 여행하는 듯한 경험을 주기 위해 3D로 지구를 구현하면서 3D 좌표 연산, 국가 판별, 메모 배치 로직을 설계하는 과정을 깊게 고민할 수 있었습니다. 프로젝트의 몰입도를 높이기 위해 GSAP 기반으로 카메라 이동, 스크램블 텍스트, 컴포넌트 전환 애니메이션을 정교하게 다듬었고, 이 과정에서 리소스 관리와 퍼포먼스 최적화가 단순한 ‘효율 문제’가 아니라 사용자 경험에 직결되는 핵심 요소라는 걸 체감했습니다.",
+			"나라 면적은 전부 다르기 때문에 irregular polygon 위에 텍스트를 배치하는 과정에서 겹침 / 공간 부족 문제를 해결하려고 다양한 탐색 로직을 시도했습니다. 모든 텍스트가 최소 한 칸의 간격을 두고 한 줄에 배치되며, 긴 문장부터 우선 배치되는 조건을 만족시키기 위해 단순 brute force 대신 greedy 탐색 기반 그리드 분할 + 조건 검증 방식을 설계했고, turf.booleanPointInPolygon으로 그리드 중심점이 국가 내부에 포함되는지를 계산하는 로직을 구현했습니다. 이 과정을 통해 제약 조건이 많은 공간 문제를 단계적으로 쪼개고 최적화하는 사고 방식을 배웠습니다."
+		],
+		"introduction_kr": [
+			"Three.js로 구현한 3D 지구를 탐색하면서 나라를 선택해 유저가 여행 기록과 감상을 메모로 남기면, Gemini API를 활용해 자동으로 요약해서 키워드를 지도 위에 시각적으로 표현해주는 인터렉티브 메모 프로젝트입니다."
+		],
+		"introduction_en": [
+			"Small Dot is an interactive memo project where users can explore a 3D globe built with Three.js, select a country, leave travel notes and impressions, and have the content automatically summarized by the Gemini API, with keywords visually displayed on the map."
+		],
+		"contribution_en": [
+			"Developed a 3D globe using Three.js and React Three Fiber, rendering GeoJSON-based country borders. Converted user 3d coordinates click into latitude/longitude to accurately detect selected countries, and managed it as global state with Zustand.",
+			"Designed a grid-based text layout algorithm to visualize note titles on irregular multi-polygon countries. Implemented greedy search with spatial constraints (minimum cell gap, longest title first) and used turf.js for polygon-point checks to maximize text placement accuracy.",
+			"Implemented smooth camera transitions, component entry animations, and text scrambling effects with GSAP, optimizing listeners and cleanup to prevent resource leaks. Added drag vs. click detection to ensure precise country selection and camera focus.",
+			"Built Supabase backend for CRUD operations with React Query caching. Added SQL triggers to auto-update note counts and last-written country per user profile.",
+			"Integrated Gemini API for keyword summary of user note and automatic note titling, reducing redundant calls with change-detection and debounce logic to optimize token usage.",
+			"Implemented authentication with Supabase Auth and email verification flow, handling errors gracefully and syncing UI state across the app."
+		],
+		"review_en": [
+			"To create an experience that feels like traveling through space, I focused on implementing a 3D globe, tackling challenges in 3D coordinate calculations, country detection, and text placement logic. I refined camera transitions, scrambled text effects, and component animations with GSAP, realizing that resource management and performance optimization are not just technical efficiency concerns but core factors shaping user experience.",
+			"Since each country has a different surface area, placing text over irregular polygons without overlap or space issues required multiple layout strategies. To meet constraints—minimum one-cell spacing and priority placement for longer titles—I designed a greedy search–based grid partitioning and validation algorithm instead of brute force, using turf.booleanPointInPolygon for accurate point-in-country detection. This project helped me develop a structured approach to solving complex spatial optimization problems step by step."
+		],
+		"links": [{"code": "https://github.com/seoeongeueun/smalldot", "web": "https://theearthisasmalldot.vercel.app/"}],
+		"images": ["smalldot1.png", "video0.mp4", "video1.mp4", "smalldot3.png", "video2.mp4", "smalldot2.png", "video3.mp4"],
+		"dark": true
+	},
 	"1": {
 		"title": "Minor Questions",
 		"subtitle": "ORGD 2024",
