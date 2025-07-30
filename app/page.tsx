@@ -1062,7 +1062,7 @@ export default function Home() {
 					<div className="lifebuoy mini hover:rotate-60 transition-transform duration-300"></div>
 				</button>
 				{headerOpen && (
-					<div className="pointer-events-auto font-normal contact-box opacity-90 drop-shadow-sm mt-4 bg-theme-orange p-4 w-fit h-fit rounded-sm border border-4 border-white text-white outline-4 outline-theme-orange">
+					<div className="pointer-events-auto font-normal contact-box opacity-90 drop-shadow-sm mt-4 bg-theme-orange p-4 w-fit h-fit rounded-sm border-4 border-white text-white outline-4 outline-theme-orange flex flex-col">
 						<div className="flex flex-row items-center mb-1">
 							<p className="text-md mr-2 mt-2">CONTACTS</p>
 							<Image src="/assets/anchor.svg" alt="anchor" width={15} height={15} />
@@ -1073,6 +1073,13 @@ export default function Home() {
 							target="__blank"
 						>
 							github.com/seoeongeueun
+						</Link>
+						<Link
+							className="text-[1rem] hover:underline underline-offset-2 decoration-white"
+							href="https://www.notion.so/1d48bfc214c580a1a84bee5c716dd3e1?source=copy_link"
+							target="__blank"
+						>
+							portfolio
 						</Link>
 						<p className="text-[1rem]">seongeun9901@gmail.com</p>
 						<div className="flex flex-row items-center justify-end w-full space-x-4 mt-2">

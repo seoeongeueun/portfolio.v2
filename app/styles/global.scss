@@ -1121,7 +1121,8 @@ $breakpoint-tablet-max: 1024px;
 			align-items: center;
 		}
 
-		img {
+		img,
+		video {
 			height: 100%;
 			width: auto;
 			object-fit: contain;
