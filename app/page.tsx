@@ -1153,7 +1153,7 @@ export default function Home() {
 				</div>
 
 				<div className={`absolute w-full bottom-0 p-20 pointer-events-none z-[99] transition-opacity ${showMessage ? "opacity-100" : "opacity-0"}`}>
-					<div className="flex flex-col items-center justify-center text-white text-xl">
+					<div className="flex flex-col items-center justify-center text-white text-xl whitespace-nowrap">
 						<span className="drop-shadow-md">{textFile["000"]}</span>
 						<Image src="/assets/arrow-down.svg" alt="arrow" className="animate-slide-down drop-shadow-lg" width={20} height={20}></Image>
 					</div>
@@ -1170,8 +1170,8 @@ export default function Home() {
 				</svg>
 				<div className="shore-overlay z-20"></div>
 				<div className="grain-overlay" />
-				<section ref={shoreRef} className="w-full shore relative z-20 flex flex-col md:flex-row">
-					<div className="float-left absolute md:relative w-full py-32 lg:py-0 md:w-1/2 md:pr-16 lg:pr-40 flex flex-col justify-start items-start shore-title">
+				<section ref={shoreRef} className="w-fit md:w-full shore relative z-20 flex flex-col md:flex-row">
+					<div className="float-left absolute md:relative py-32 lg:py-0 md:w-1/2 md:pr-16 lg:pr-40 flex flex-col justify-start items-start shore-title">
 						<div className="flex flex-row items-center justify-start">
 							<p className="subtitle">CAREER</p>
 							<div className="foot-pair flex flex-row items-center justify-start ml-[-0.8rem]">
@@ -1209,7 +1209,7 @@ export default function Home() {
 								</div>
 							</div>
 						</div>
-						<p className="description text-m whitespace-pre-line break-keep">{textFile["001"]}</p>
+						<p className="max-w-[70%] md:max-w-fit px-4 md:w-fit description text-m whitespace-pre-line break-keep">{textFile["001"]}</p>
 					</div>
 					<div
 						ref={towelsRef}
