@@ -1,32 +1,32 @@
 {
-	"name": "portfolio.v2",
-	"version": "0.1.0",
-	"private": true,
-	"scripts": {
-		"dev": "next dev --turbopack",
-		"build": "next build",
-		"start": "next start",
-		"lint": "next lint",
-		"format": "prettier --write .",
-		"format:check": "prettier --check ."
-	},
-	"dependencies": {
-		"gsap": "^3.12.7",
-		"html2canvas": "^1.4.1",
-		"next": "^15.2.4",
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0",
-		"swiper": "^11.2.6"
-	},
-	"devDependencies": {
-		"@tailwindcss/postcss": "^4.0.13",
-		"@types/node": "^20",
-		"@types/react": "^19",
-		"@types/react-dom": "^19",
-		"autoprefixer": "^10.4.21",
-		"prettier": "^3.5.3",
-		"sass": "^1.85.1",
-		"tailwindcss": "^4.0.13",
-		"typescript": "^5.9.0-dev.20250311"
-	}
+  "name": "portfolio.v2",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "gsap": "^3.12.7",
+    "html2canvas": "^1.4.1",
+    "next": "15.2.8",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "swiper": "^11.2.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.13",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
+    "prettier": "^3.5.3",
+    "sass": "^1.85.1",
+    "tailwindcss": "^4.0.13",
+    "typescript": "^5.9.0-dev.20250311"
+  }
 }
