@@ -1,6 +1,6 @@
 "use client";
 import {Fragment, useEffect, useRef} from "react";
-import {stacks, MARGIN_SIZE} from "../lib/constants";
+import {stacks, MARGIN_SIZE, GSAP_OPTION} from "../lib/constants";
 import {getRandomInt, debounce} from "../lib/tools";
 import Image from "next/image";
 import gsap from "gsap";
@@ -8,8 +8,21 @@ import {Observer} from "gsap/Observer";
 
 export default function Pool() {
 	const poolRef = useRef<HTMLDivElement | null>(null);
-	const poolRectRef = useRef<{left: number; right: number; top: number; bottom: number} | null>(null);
+	const poolRectRef = useRef<{left: number; right: number; top: number; bottom: number} | null>(null); //테두리를 제외한 내부 영역
 	const charPositionsRef = useRef<Record<string, {x: number; y: number}>>({});
+	const tweenRef = useRef<
+		Record<
+			string,
+			{
+				x: ReturnType<typeof gsap.quickTo>;
+				y: ReturnType<typeof gsap.quickTo>;
+				rot: ReturnType<typeof gsap.quickTo>;
+				sx?: ReturnType<typeof gsap.quickTo>;
+				sy?: ReturnType<typeof gsap.quickTo>; //그림자 위치용 sx와 sy
+			}
+		>
+	>({});
+	const shadowElRef = useRef<Record<string, HTMLElement | null>>({});
 
 	useEffect(() => {
 		if (!poolRef.current) return;
@@ -69,7 +82,6 @@ export default function Pool() {
 
 		function moveChars({event, deltaX, deltaY}: {event: Event; deltaX: number; deltaY: number}) {
 			if (moveCharsFrameId) return;
-			//measurePool();
 
 			const poolRect = poolRectRef.current;
 
@@ -86,7 +98,7 @@ export default function Pool() {
 				const id = el.classList.contains("char") ? el.className.match(/char-(\S+)/)?.[1] : null;
 				if (!id || !poolRef.current) return;
 
-				const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
+				const shadow = shadowElRef.current[id]; //캐싱했던 그림자 요소를 바로 사용
 				const charBounds = el.getBoundingClientRect();
 
 				const t = 3; //이동 강도
@@ -106,21 +118,38 @@ export default function Pool() {
 				const xMovement = newX - charBounds.left;
 				const yMovement = newY - charBounds.top;
 
-				gsap.to(el, {
-					x: `+=${xMovement}`,
-					y: `+=${yMovement}`,
-					rotation: `-=${deltaX * 1.2 * Math.sign(event instanceof PointerEvent ? event.clientY - (charBounds.top + charBounds.height / 2) : 1)}`,
-					duration: 3,
-					ease: "expo.out",
-				});
+				// quickTo 핸들러가 없으면 생성 (요소당 1회)
+				if (!tweenRef.current[id]) {
+					tweenRef.current[id] = {
+						x: gsap.quickTo(el, "x", GSAP_OPTION),
+						y: gsap.quickTo(el, "y", GSAP_OPTION),
+						rot: gsap.quickTo(el, "rotation", GSAP_OPTION),
+					};
 
-				if (shadow) {
-					gsap.to(shadow, {
-						x: `+=${xMovement}`,
-						y: `+=${yMovement}`,
-						duration: 3,
-						ease: "expo.out",
-					});
+					if (shadow) {
+						tweenRef.current[id].sx = gsap.quickTo(shadow, "x", GSAP_OPTION);
+						tweenRef.current[id].sy = gsap.quickTo(shadow, "y", GSAP_OPTION);
+					}
+				}
+
+				// 현재 transform 값 기반으로 위치 계산
+				const curX = gsap.getProperty(el, "x") as number;
+				const curY = gsap.getProperty(el, "y") as number;
+				const curR = gsap.getProperty(el, "rotation") as number;
+
+				tweenRef.current[id].x(curX + xMovement);
+				tweenRef.current[id].y(curY + yMovement);
+
+				// 회전도 누적 값으로
+				const rotDelta = deltaX * 1.2 * Math.sign(event instanceof PointerEvent ? event.clientY - (charBounds.top + charBounds.height / 2) : 1);
+
+				tweenRef.current[id].rot(curR - rotDelta);
+
+				if (shadow && tweenRef.current[id].sx && tweenRef.current[id].sy) {
+					const curSX = gsap.getProperty(shadow, "x") as number;
+					const curSY = gsap.getProperty(shadow, "y") as number;
+					tweenRef.current[id].sx!(curSX + xMovement);
+					tweenRef.current[id].sy!(curSY + yMovement);
 				}
 			});
 		}
@@ -192,6 +221,9 @@ export default function Pool() {
 		return () => {
 			observer.kill();
 			waveTl.kill();
+			tweenRef.current = {};
+			shadowElRef.current = {};
+
 			poolRef.current?.removeEventListener("pointermove", handleMouseMove);
 			poolRef.current?.removeEventListener("pointerleave", handleMouseLeave);
 			if (moveCharsFrameId) cancelAnimationFrame(moveCharsFrameId);
@@ -216,18 +248,28 @@ export default function Pool() {
 		};
 	}
 
+	//이미지 위치 강제 리셋
 	function resetCharAndShadowTransforms(container: HTMLElement) {
 		const allChars = container.querySelectorAll<HTMLElement>(".char");
 		allChars.forEach(char => {
 			gsap.set(char, {x: 0, y: 0, rotation: 0});
 		});
 
+		shadowElRef.current = {};
+
 		const allShadows = container.querySelectorAll<HTMLElement>(".shadow");
 		allShadows.forEach(shadow => {
 			gsap.set(shadow, {x: 0, y: 0});
+
+			//그림자 요소를 캐싱 (나중에 애니메이션 부여할때 따로 호출 안 해도 되게)
+			const id = shadow.dataset.id;
+			if (!id) return;
+
+			shadowElRef.current[id] = shadow;
 		});
 	}
 
+	//이미지를 매번 랜덤한 위치에 배치
 	function initializeCharPositions(container: HTMLElement, stacks: Record<string, any>) {
 		Object.keys(stacks).forEach(key => {
 			if (!charPositionsRef.current[key]) {
@@ -259,6 +301,7 @@ export default function Pool() {
 							<Image
 								src={`/icons/${k}.png`}
 								alt={k}
+								draggable={false}
 								className={`char char-${k} ${k}`}
 								width={100}
 								height={100}
@@ -268,6 +311,7 @@ export default function Pool() {
 								}}
 							/>
 							<div
+								data-id={k}
 								className={`shadow shadow-${k}`}
 								style={{
 									top: `calc(${y}% + 20%)`,

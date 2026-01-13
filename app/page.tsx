@@ -22,6 +22,7 @@ import {Swiper as SwiperClass} from "swiper/types";
 import {waitForAllImagesToLoad, sleep, lockScroll, unlockScroll, getRandomInt, throttle, debounce, preventScroll} from "./lib/tools";
 import "swiper/css";
 import "swiper/css/pagination";
+import "./styles/animations.css";
 
 gsap.registerPlugin(Observer);
 gsap.registerPlugin(ScrollTrigger);

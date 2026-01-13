@@ -7,6 +7,7 @@ export const stacks = {
 
 //pool 섹션
 export const MARGIN_SIZE = 0.05; //수영장 테두리는 현재 대략 5vmin
+export const GSAP_OPTION = {duration: 3, ease: "power3.out"};
 
 // beach 섹션
 export const PARTICLE_SIZE = 60; //dust particle 크기
