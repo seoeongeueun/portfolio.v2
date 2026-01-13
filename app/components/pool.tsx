@@ -222,7 +222,7 @@ export default function Pool() {
 			observer.kill();
 			waveTl.kill();
 			tweenRef.current = {};
-			shadowElRef.current = {};
+			//shadowElRef.current = {};
 
 			poolRef.current?.removeEventListener("pointermove", handleMouseMove);
 			poolRef.current?.removeEventListener("pointerleave", handleMouseLeave);
@@ -311,6 +311,9 @@ export default function Pool() {
 								}}
 							/>
 							<div
+								ref={el => {
+									if (el) shadowElRef.current[k] = el;
+								}}
 								data-id={k}
 								className={`shadow shadow-${k}`}
 								style={{
