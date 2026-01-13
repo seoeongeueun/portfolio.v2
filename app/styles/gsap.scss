@@ -1,6 +1,4 @@
-$breakpoint-mobile: 640px;
-$breakpoint-tablet-min: 641px;
-$breakpoint-tablet-max: 1024px;
+@use "./breakpoints" as *;
 
 .tiles {
 	width: 90vmin;
@@ -62,6 +60,11 @@ $breakpoint-tablet-max: 1024px;
 		width: 10rem;
 		height: auto;
 		filter: url(#turb);
+		webkit-user-drag: none; /* Safari/Chrome */
+		user-drag: none;
+		user-select: none;       /* 텍스트/이미지 선택 방지 */
+		-webkit-user-select: none;
+		touch-action: none;      /* 터치에서 스크롤/줌 제스처 방지 (필요할 때만) */
 
 		&.ducky,
 		&.javascript {

@@ -1,10 +1,7 @@
-@import "./animations.css";
-@import "./gsap";
-@import "./gameboy";
+@use "./breakpoints" as *;
+@use "./gameboy";
+@use "./gsap";
 
-$breakpoint-mobile: 640px;
-$breakpoint-tablet-min: 641px;
-$breakpoint-tablet-max: 1024px;
 
 .main-page {
 	> * {
