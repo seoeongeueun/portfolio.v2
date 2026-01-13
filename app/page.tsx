@@ -3,13 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 import TextEn from "./data/text-en.json" assert {type: "json"};
 import TextKr from "./data/text-kr.json" assert {type: "json"};
-import {Fragment, useEffect, useState, useRef, useCallback, useLayoutEffect} from "react";
+import {useEffect, useState, useRef, useCallback} from "react";
 import Cartridge from "./components/cartridge";
 import Gameboy from "./components/gameboy";
+import Pool from "./components/pool";
 import ProjectsData from "./data/projects.json" assert {type: "json"};
 import CareerData from "./data/careers.json" assert {type: "json"};
 import "./styles/global.scss";
-import {stacks, PARTICLE_SIZE, AMPLIFY_BY, BORDER_END, FILL_END, DUST_TIMING} from "./lib/constants";
+import {PARTICLE_SIZE, AMPLIFY_BY, BORDER_END, FILL_END, DUST_TIMING} from "./lib/constants";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
@@ -66,11 +67,6 @@ export default function Home() {
 	//사양 문제로 두가지 애니메이션 버전 중 저사양 버전으로 노출하려는 경우 (다양한 os 확인 전까지는 디폴트로 저사양 모드)
 	const [minimalMode, setMinimalMode] = useState<boolean>(false);
 
-	const poolRef = useRef<HTMLDivElement | null>(null);
-	const poolRectRef = useRef<DOMRect | null>(null);
-	const pseudoRectRef = useRef<{left: number; right: number; top: number; bottom: number} | null>(null);
-	const charPositionsRef = useRef<Record<string, {x: number; y: number}>>({});
-
 	const mainRef = useRef<HTMLDivElement>(null);
 	const shoreRef = useRef<HTMLDivElement>(null);
 	const towelsRef = useRef<HTMLDivElement>(null);
@@ -110,45 +106,6 @@ export default function Home() {
 	} | null>(null);
 	const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-	//pseudo element의 너비를 계산하는 함수
-	const getPseudoBounds = (element: HTMLElement, pseudo: "::before" | "::after") => {
-		const style = window.getComputedStyle(element, pseudo);
-		const width = parseFloat(style.width);
-		const height = parseFloat(style.height);
-		const top = element.getBoundingClientRect().top + parseFloat(style.top);
-		const left = element.getBoundingClientRect().left + parseFloat(style.left);
-		return {top, left, right: left + width, bottom: top + height, width, height};
-	};
-
-	function measurePool() {
-		if (!poolRef.current) return;
-		poolRectRef.current = poolRef.current.getBoundingClientRect();
-		pseudoRectRef.current = getPseudoBounds(poolRef.current, "::before");
-	}
-
-	function resetCharAndShadowTransforms(container: HTMLElement) {
-		const allChars = container.querySelectorAll<HTMLElement>(".char");
-		allChars.forEach(char => {
-			gsap.set(char, {x: 0, y: 0, rotation: 0});
-		});
-
-		const allShadows = container.querySelectorAll<HTMLElement>(".shadow");
-		allShadows.forEach(shadow => {
-			gsap.set(shadow, {x: 0, y: 0});
-		});
-	}
-
-	function initializeCharPositions(container: HTMLElement, stacks: Record<string, any>) {
-		Object.keys(stacks).forEach(key => {
-			if (!charPositionsRef.current[key]) {
-				charPositionsRef.current[key] = {
-					x: getRandomInt(40),
-					y: getRandomInt(40),
-				};
-			}
-		});
-	}
-
 	//첫 시작부터 필요한 함수들
 	useEffect(() => {
 		const isKorean = navigator.language.startsWith("ko");
@@ -157,25 +114,6 @@ export default function Home() {
 		//모바일은 간소화 애니메이션 적용
 		// const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 		// setMinimalMode(isMobileDevice);
-
-		if (!poolRef.current) return;
-
-		const debouncedResize = debounce(() => {
-			measurePool();
-
-			// 모든 char 위치 초기화
-			if (!poolRef.current) return;
-			resetCharAndShadowTransforms(poolRef.current);
-			initializeCharPositions(poolRef.current, stacks);
-		}, 200);
-
-		window.addEventListener("resize", debouncedResize);
-
-		return () => {
-			window.removeEventListener("resize", debouncedResize);
-			timeoutsRef.current.forEach(t => clearTimeout(t));
-			timeoutsRef.current = [];
-		};
 	}, []);
 
 	useEffect(() => {
@@ -235,184 +173,6 @@ export default function Home() {
 			setTextFile(TextKr);
 		}
 	}, [isEnglish]);
-
-	useEffect(() => {
-		const waveTl = gsap.timeline({repeat: 1, yoyo: true, ease: "power3.inOut"});
-		waveTl
-			.to("#dispShore", {
-				attr: {scale: 50},
-				scrollTrigger: {
-					trigger: ".main-page",
-					scroller: ".main-page",
-					start: "top top",
-					end: "bottom top",
-					scrub: 0.3,
-				},
-			})
-			.to("#turbShore", {
-				attr: {baseFrequency: "0.02 0.08"},
-				scrollTrigger: {
-					trigger: ".main-page",
-					scroller: ".main-page",
-					start: "top top",
-					end: "bottom top",
-					scrub: 0.3,
-				},
-			});
-		if (!poolRef.current) return;
-
-		measurePool();
-		resetCharAndShadowTransforms(poolRef.current);
-		initializeCharPositions(poolRef.current, stacks);
-
-		gsap.defaults({overwrite: true});
-
-		//과부화 방지용 쓰로틀 추가
-		let lastMoveTime = 0;
-		const moveThrottle = 40;
-
-		let moveCharsFrameId: number | null = null;
-
-		function moveChars({event, deltaX, deltaY}: {event: Event; deltaX: number; deltaY: number}) {
-			if (moveCharsFrameId) return;
-			measurePool();
-			const poolRect = poolRectRef.current;
-			const pseudoRect = pseudoRectRef.current;
-
-			if (!poolRect || !pseudoRect) return;
-
-			//시간으로 throttle 계산
-			if (Date.now() - lastMoveTime < moveThrottle) return;
-			lastMoveTime = Date.now();
-
-			moveCharsFrameId = requestAnimationFrame(() => {
-				moveCharsFrameId = null;
-
-				const el = event.target as HTMLElement;
-				const id = el.classList.contains("char") ? el.className.match(/char-(\S+)/)?.[1] : null;
-				if (!id || !poolRef.current) return;
-
-				const shadow = document.querySelector(`.shadow-${id}`) as HTMLElement;
-				const charBounds = el.getBoundingClientRect();
-
-				const t = 3; //이동 강도
-				let newX = charBounds.left + deltaX * t;
-				let newY = charBounds.top + deltaY * t;
-
-				const vmin = Math.min(window.innerWidth, window.innerHeight);
-				const yMargin = (vmin * 4) / 100;
-				const xMargin = (vmin * 12) / 100;
-
-				const width = charBounds.width;
-				const height = charBounds.height;
-
-				if (!poolRect || !pseudoRect) return;
-
-				if (newX < poolRect.left + xMargin) newX = poolRect.left + xMargin;
-				if (newX + width > pseudoRect.right - xMargin) newX = pseudoRect.right - xMargin - width;
-				if (newY < poolRect.top + yMargin) newY = poolRect.top + yMargin;
-				if (newY + height > poolRect.bottom - yMargin) newY = poolRect.bottom - height - yMargin;
-
-				const xMovement = newX - charBounds.left;
-				const yMovement = newY - charBounds.top;
-
-				gsap.to(el, {
-					x: `+=${xMovement}`,
-					y: `+=${yMovement}`,
-					rotation: `-=${deltaX * 1.2 * Math.sign(event instanceof PointerEvent ? event.clientY - (charBounds.top + charBounds.height / 2) : 1)}`,
-					duration: 3,
-					ease: "expo.out",
-				});
-
-				if (shadow) {
-					gsap.to(shadow, {
-						x: `+=${xMovement}`,
-						y: `+=${yMovement}`,
-						duration: 3,
-						ease: "expo.out",
-					});
-				}
-			});
-		}
-
-		//마우스 드래그
-		const observer = Observer.create({
-			target: poolRef.current,
-			type: "pointer,touch,mouse",
-			onMove: (self: any) => {
-				const e = self.event;
-				const el = e?.target as HTMLElement;
-
-				if (el && el.matches(".char")) {
-					const boost = self.pointerType === "touch" ? 3 : 1;
-
-					moveChars({
-						event: e,
-						deltaX: self.deltaX * boost,
-						deltaY: self.deltaY * boost,
-					});
-				}
-			},
-		});
-
-		let rippleFrameId: number | null = null;
-		let lastWaveTime = 0;
-		const waveThrottle = 50;
-
-		const turbWave = document.querySelector("#turbwave");
-		const dispMap = document.querySelector("#dispMap");
-
-		const handleMouseMove = (e: PointerEvent) => {
-			//과부화 방지
-			if (Date.now() - lastWaveTime < waveThrottle) return;
-			lastWaveTime = Date.now();
-
-			if (rippleFrameId) return;
-
-			rippleFrameId = requestAnimationFrame(() => {
-				rippleFrameId = null;
-				const rect = poolRef.current?.getBoundingClientRect();
-				if (!poolRef.current || !turbWave || !dispMap || !rect) return;
-
-				const x = (e.clientX - rect.left) / rect.width;
-				const y = (e.clientY - rect.top) / rect.height;
-
-				gsap.to(turbWave, {
-					attr: {baseFrequency: `${0.01 + y * 0.02} ${0.04 + x * 0.04}`},
-					duration: 0.2,
-					ease: "none",
-				});
-
-				gsap.to(dispMap, {
-					attr: {scale: 6 + y * 15},
-					duration: 0.2,
-					ease: "none",
-				});
-			});
-		};
-
-		const handleMouseLeave = () => {
-			turbWave?.setAttribute("baseFrequency", "0.01 0.03");
-			dispMap?.setAttribute("scale", "2");
-		};
-
-		// poolRef.current.addEventListener("mousemove", handleMouseMove);
-		// poolRef.current.addEventListener("mouseleave", handleMouseLeave);
-
-		poolRef.current.addEventListener("pointermove", handleMouseMove);
-		poolRef.current.addEventListener("pointerleave", handleMouseLeave);
-
-		return () => {
-			observer.kill();
-			waveTl.kill();
-			// poolRef.current?.removeEventListener("mousemove", handleMouseMove);
-			// poolRef.current?.removeEventListener("mouseleave", handleMouseLeave);
-			poolRef.current?.removeEventListener("pointermove", handleMouseMove);
-			poolRef.current?.removeEventListener("pointerleave", handleMouseLeave);
-			if (moveCharsFrameId) cancelAnimationFrame(moveCharsFrameId);
-			if (rippleFrameId) cancelAnimationFrame(rippleFrameId);
-		};
-	}, [stacks]);
 
 	//dust 상태를 초기화하는 함수
 	const cleanupDustEffect = useCallback(() => {
@@ -581,8 +341,7 @@ export default function Home() {
 					const progress = self.progress;
 					const towelProgress = gsap.utils.clamp(0, 1, progress * AMPLIFY_BY);
 
-					//고사양과 저사양 애니메이션을 분리
-					// 현재까지 확인 결과로 pc 크롬을 제외하고는 저사양 애니메이션이 맞다
+					//고사양과 저사양 애니메이션을 분리 but 아직 사용 여부는 미정
 					if (!minimalMode) {
 						if (!scrollRafId) {
 							scrollRafId = requestAnimationFrame(() => {
@@ -1113,43 +872,7 @@ export default function Home() {
 				</div>
 
 				<div className="w-full flex justify-center h-fit mt-12">
-					<div ref={poolRef} className="pool">
-						<svg width="0" height="0">
-							<defs>
-								<filter id="turb">
-									<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.03 0.08" numOctaves="1" result="turbulence" />
-									<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale="10" />
-								</filter>
-							</defs>
-						</svg>
-						{Object.keys(charPositionsRef.current).length > 0 &&
-							Object.keys(stacks).map(k => {
-								const {x, y} = charPositionsRef.current[k] || {x: 0, y: 0};
-
-								return (
-									<Fragment key={k}>
-										<Image
-											src={`/icons/${k}.png`}
-											alt={k}
-											className={`char char-${k} ${k}`}
-											width={100}
-											height={100}
-											style={{
-												top: `${y}%`,
-												left: `${x}%`,
-											}}
-										/>
-										<div
-											className={`shadow shadow-${k}`}
-											style={{
-												top: `calc(${y}% + 20%)`,
-												left: `calc(${x}% - 3%)`,
-											}}
-										></div>
-									</Fragment>
-								);
-							})}
-					</div>
+					<Pool></Pool>
 				</div>
 
 				<div className={`absolute w-full bottom-0 p-20 pointer-events-none z-[99] transition-opacity ${showMessage ? "opacity-100" : "opacity-0"}`}>

@@ -20,13 +20,12 @@ $breakpoint-tablet-max: 1024px;
 	text-transform: uppercase;
 	overflow: hidden;
 	background: var(--color-pool);
-	color: var(--color-noodle);
 	border: 5vmin solid white;
-	transform: perspective(500px) rotateX(30deg);
+	//transform: perspective(500px) rotateX(30deg);
 	box-shadow:
 		rgb(181, 233, 230) 0vmin 1vmin 0vmin 1vmin inset,
 		hsla(0 0% 0% / 0.05) 2vmin 2vmin 2vmin -2vmin,
-		rgb(181, 233, 230) 0vmin 0.8vmin 0vmin -0.5vmin,
+		rgb(181, 233, 230) 0vmin 2vmin 0vmin 0vmin,
 		rgba(34, 118, 173, 0.9) 5vmin 5vmin 12vmin 1vmin inset,
 		hsla(0 0% 0% / 0.1) 5vmin 5vmin 10vmin 1vmin inset,
 		hsl(0 0% 0% / 0.1) 0 3vmin 1vmin 1vmin inset;
@@ -102,6 +101,13 @@ $breakpoint-tablet-max: 1024px;
 
 .pool > * {
 	grid-area: pool;
+}
+
+.pool-intro {
+	color: hsla(207, 86%, 37%, 0.6);
+	filter: url(#turb) blur(1px);
+	opacity: 0.4;
+	text-shadow: 1px 0px rgb(8, 43, 88), 0px -1px rgb(22, 163, 206);
 }
 
 .shore-overlay {
