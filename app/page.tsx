@@ -831,14 +831,14 @@ export default function Home() {
 							href="https://github.com/seoeongeueun"
 							target="__blank"
 						>
-							github.com/seoeongeueun
+							{isEnglish ? "github" : "깃허브"}
 						</Link>
 						<Link
 							className="text-[1rem] hover:underline underline-offset-2 decoration-white"
 							href="https://www.notion.so/1d48bfc214c580a1a84bee5c716dd3e1?source=copy_link"
 							target="__blank"
 						>
-							portfolio
+							{isEnglish ? "portfolio" : "포트폴리오"}
 						</Link>
 						<p className="text-[1rem]">seongeun9901@gmail.com</p>
 						<div className="flex flex-row items-center justify-end w-full space-x-4 mt-2">
