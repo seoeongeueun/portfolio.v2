@@ -1,5 +1,70 @@
 {
 	"0": {
+		"title": "Sugar Heart",
+		"subtitle": "Interactive Diary",
+		"route": "sugarheart/",
+		"thumbnail": "sugarheart_main.png",
+		"tags": ["1 DEV", "PERSONAL", "AI", "THREE.JS"],
+		"theme": "#8a70be",
+		"stacks": [
+			"typescript",
+			"react",
+			"three.js",
+			"react-three-fiber",
+			"drei",
+			"gsap",
+			"mediapipe",
+			"web-speech-api",
+			"pretext",
+			"zustand",
+			"tanstack-query",
+			"react-hook-form",
+			"supabase",
+			"postgresql",
+			"aws-lambda",
+			"api-gateway",
+			"amazon-bedrock",
+			"tailwindcss",
+			"blender"
+		],
+		"ppl_count": 1,
+		"contribution_kr": [
+			"Blender로 하트 펜던트와 보석 3D 모델을 직접 제작하고, React Three Fiber와 Drei를 활용해 실시간 3D 장면으로 구현했습니다. useGLTF로 불러온 GLB 모델을 안전하게 복제한 뒤 메시와 머티리얼을 제어했으며, useFrame 기반 보간을 적용해 프레임 변화에도 자연스럽게 움직이는 펜던트 애니메이션을 제작했습니다. Three.js의 ShapeGeometry를 활용해 하트와 별 모양 파티클을 생성하고, 현재 선택된 일기의 감정 색상을 파티클과 하트 보석에 반영해 애플리케이션 상태와 3D 장면이 시각적으로 연결되도록 구현했습니다.",
+			"MediaPipe Hand Landmarker를 브라우저에 적용해 실시간 손 제스처 인식 기능을 구현했습니다. VIDEO 모드와 requestAnimationFrame 루프를 이용해 손 랜드마크를 지속적으로 추적하고, 검지와 중지의 펴짐 여부, 두 손가락의 수평 정렬, 약지와 새끼손가락의 접힘 상태를 계산하는 자체 V 제스처 판별 로직을 작성했습니다.",
+			"제스처가 감지된 경우에만 Web Speech API의 음성 인식을 제한된 시간 동안 실행하도록 설계했습니다. 유저가 저장한 주문과 음성 인식 결과에서 공백과 대소문자를 정규화한 뒤 비교해 인식 오류를 줄였으며, 카메라와 음성 인식이 필요하지 않은 상태에서는 관련 리소스를 종료해 불필요한 브라우저 자원 사용을 방지했습니다.",
+			"AWS API Gateway와 Node.js Lambda를 통해 Amazon Bedrock Nova Micro를 호출하는 감정 분석 API를 구축했습니다. 모델의 응답을 color, label, confidence 필드만 포함하는 JSON으로 제한하고, Lambda에서 JSON 추출과 파싱, 하트 색상과 감정 라벨의 조합, 신뢰도 범위를 검증했습니다. 클라이언트에서도 결과를 다시 검증해 비정상적인 AI 응답이 실제 일기 데이터에 저장되지 않도록 방어적인 구조를 적용했습니다.",
+			"Supabase PostgreSQL을 이용해 유저, 일기, 하트, 스탬프와 프로필 데이터를 관리했습니다. 유저별·연도별 범위를 TanStack Query의 쿼리 키로 분리해 캘린더 데이터를 캐싱하고, 조회한 일기를 날짜 기반 객체로 변환해 캘린더 렌더링 시 빠르게 접근할 수 있도록 구성했습니다. 일기 생성·수정·삭제 후에는 관련 쿼리만 선택적으로 무효화해 서버 상태를 동기화했습니다. PostgreSQL 트리거를 이용해 유저의 전체 일기 수와 누적 에클을 자동으로 갱신하도록 설계하고, 일기가 변경되면 프로필 쿼리를 갱신해 마녀 랭크와 에크르가 즉시 반영되도록 구현했습니다.",
+			"기본 브라우저 텍스트 흐름 대신 Pretext를 활용해 엽서 내부의 커스텀 텍스트 레이아웃 시스템을 구현했습니다. 각 줄의 텍스트 너비를 측정하고, 원형 스탬프가 차지하는 영역을 문단 너비에서 제외해 우표 주변으로 글이 자연스럽게 흐르도록 계산했습니다. 스탬프 중심 좌표를 엽서 크기에 대한 백분율로 변환해 저장하고, 데스크톱 디자인 기준 너비를 바탕으로 우표 크기와 텍스트 충돌 반경을 함께 보정해 모바일과 데스크톱에서도 유사한 레이아웃이 유지되도록 구현했습니다.",
+			"GSAP을 활용해 로그인, 캘린더, 일기 모달의 등장과 엽서가 입체적으로 열리고 닫히는 전환 애니메이션을 제작했습니다. 일기 삭제 시에는 원본 엽서를 페이드아웃하면서 별도의 오버레이를 두 조각으로 분리하는 연출을 구현했으며, GSAP Context를 컴포넌트 ref 범위로 제한하고 언마운트 시 애니메이션을 정리해 스타일과 리스너가 남지 않도록 관리했습니다."
+		],
+		"review_kr": [
+			"처음에는 애니메이션 속 하트 펜던트를 웹에서 재현하는 작은 3D 작업으로 시작했지만, 제스처와 음성을 이용한 잠금 해제, AI 감정 분석, 일기 저장, 하트 수집과 랭크 시스템을 추가하면서 하나의 완성된 서비스로 확장했습니다. 3D 장면, 브라우저 API, 서버 상태, 인증, 데이터베이스와 AWS 서비스를 하나의 사용자 흐름으로 연결하는 과정에서 개별 기능의 구현뿐만 아니라 기능 간 상태와 생명주기를 어떻게 분리하고 관리해야 하는지를 깊이 고민할 수 있었습니다.",
+			"생성형 AI를 프로젝트에 적용하면서 단순히 모델을 호출하는 것보다 언제 호출하지 않는지가 더 중요할 수 있다는 점을 배웠습니다. 일기가 수정될 때마다 Amazon Bedrock을 호출하면 비용과 응답 시간이 불필요하게 증가하기 때문에, 먼저 텍스트를 normalize하여 공백이나 줄바꿈 같은 의미 없는 변경을 제거한 뒤 기존 내용과의 유사도를 계산하는 로직을 구현했습니다. 변경량이 일정 기준 이하인 경우에는 이전 감정 분석 결과를 그대로 유지하고 Lambda를 호출하지 않도록 설계해 불필요한 토큰 사용과 API 호출을 줄였습니다. 이를 통해 AI 기능도 일반적인 서버 API처럼 비용과 리소스를 함께 고려하며 설계해야 한다는 점을 경험할 수 있었습니다."
+		],
+		"introduction_kr": [
+			"애니메이션 《슈가슈가룬》의 하트 펜던트에서 영감을 받아 제작한 인터랙티브 다이어리 프로젝트입니다. 유저가 손 제스처와 음성 주문을 이용해 펜던트의 잠금을 해제하고 일기를 작성하면, Amazon Bedrock이 일기의 주요 감정을 분석해 하트로 분류합니다. 수집한 하트의 가치에 따라 랭크가 상승하며, 일기는 스탬프를 자유롭게 찍을 수 있는 엽서 형태로 보관됩니다."
+		],
+		"introduction_en": [
+			"Sugar Heart is an interactive diary inspired by the heart pendant from the animation Sugar Sugar Rune. Users unlock the pendant with hand gestures and a spoken spell, write diary entries, and Amazon Bedrock analyzes the main emotion of each entry to classify it as a heart. Collected hearts increase the user rank, and diaries are stored as postcards that can be decorated with stamps."
+		],
+		"contribution_en": [
+			"Created the heart pendant and gem 3D models in Blender, then implemented them as a real-time scene with React Three Fiber and Drei. Safely cloned GLB models loaded through useGLTF, controlled meshes and materials, and built useFrame-based interpolation so the pendant animation stays smooth across frame changes. Used Three.js ShapeGeometry to generate heart and star particles, reflecting the selected diary emotion color in both particles and the heart gem so application state and the 3D scene stay visually connected.",
+			"Implemented real-time hand gesture recognition in the browser with MediaPipe Hand Landmarker. Used VIDEO mode and a requestAnimationFrame loop to continuously track hand landmarks, then wrote custom V-gesture detection logic based on index and middle finger extension, horizontal alignment between the two fingers, and ring and pinky finger folding.",
+			"Designed voice recognition with the Web Speech API to run only for a limited time after a gesture is detected. Normalized spacing and letter casing between the user-saved spell and recognition result to reduce recognition errors, and stopped camera and speech resources whenever they were not needed to avoid unnecessary browser resource usage.",
+			"Built an emotion analysis API that calls Amazon Bedrock Nova Micro through AWS API Gateway and a Node.js Lambda. Constrained the model response to JSON with only color, label, and confidence fields, then validated JSON extraction and parsing, heart color and emotion label combinations, and confidence ranges in Lambda. Revalidated the result on the client so abnormal AI responses could not be saved into diary data.",
+			"Managed users, diaries, hearts, stamps, and profile data with Supabase PostgreSQL. Separated calendar cache by user and year in TanStack Query keys, transformed fetched diaries into date-indexed objects for fast calendar rendering, and selectively invalidated related queries after diary create, update, and delete operations. Designed PostgreSQL triggers to automatically update total diary count and accumulated ecl, then refreshed the profile query after diary changes so witch rank and ecru values updated immediately.",
+			"Built a custom postcard text layout system with Pretext instead of relying on the browser default text flow. Measured each line width, excluded circular stamp areas from paragraph width, and calculated natural text flow around stamps. Stored stamp center coordinates as percentages of the postcard size, then adjusted stamp size and collision radius from the desktop baseline width to preserve similar layouts across mobile and desktop.",
+			"Created GSAP animations for login, calendar, diary modal entry, and 3D postcard open and close transitions. For diary deletion, implemented a transition where the original postcard fades out while a separate overlay splits into two pieces. Scoped GSAP Context to component refs and cleaned animations on unmount so styles and listeners did not remain."
+		],
+		"review_en": [
+			"This started as a small 3D attempt to recreate the heart pendant from the animation, but grew into a complete service as I added gesture and voice unlocking, AI emotion analysis, diary storage, heart collection, and a rank system. Connecting the 3D scene, browser APIs, server state, authentication, database, and AWS services into one user flow made me think deeply about how to separate and manage feature state and lifecycle, beyond simply implementing each feature.",
+			"Applying generative AI taught me that deciding when not to call a model can be as important as calling it. Since calling Amazon Bedrock on every diary edit would increase cost and latency unnecessarily, I normalized text first to remove meaningless spacing and line-break changes, then calculated similarity with the previous content. If the change stayed below a threshold, the app reused the previous emotion analysis result and skipped the Lambda call, reducing unnecessary token usage and API calls. This helped me approach AI features like regular server APIs that must be designed with cost and resource usage in mind."
+		],
+		"links": [{"code": "https://github.com/seoeongeueun/sugar-heart", "web": "https://sugar-heart.vercel.app/"}],
+		"images": ["sugarheart1.gif", "sugarheart2.png", "sugarheart3.png", "sugarheart4.gif", "sugarheart5.gif", "sugarheart6.png"],
+		"dark": true
+	},
+	"1": {
 		"title": "Small Dot",
 		"subtitle": "3D Globe Memo",
 		"route": "smalldot/",
@@ -42,7 +107,7 @@
 		"images": ["smalldot1.png", "video0.mp4", "video1.mp4", "smalldot3.png", "video2.mp4", "smalldot2.png", "video3.mp4"],
 		"dark": true
 	},
-	"1": {
+	"2": {
 		"title": "Minor Questions",
 		"subtitle": "ORGD 2024",
 		"route": "orgd/",
@@ -89,7 +154,7 @@
 		"images": ["orgd0.jpg", "orgd1.jpg", "video2.mp4", "orgd3.png", "orgd5.png", "special.png", "video1.mp4"],
 		"dark": true
 	},
-	"2": {
+	"3": {
 		"title": "HeyMap",
 		"subtitle": "Map for Popups",
 		"route": "heymap/",
@@ -136,7 +201,7 @@
 		"ppl_count": 3
 	},
 
-	"3": {
+	"4": {
 		"title": "LocalStorage",
 		"subtitle": "Meet Local Artists",
 		"thumbnail": "ls_main.png",
@@ -172,7 +237,7 @@
 		"stacks": ["php", "wordpress", "jquery", "mysql", "css3"],
 		"ppl_count": 4
 	},
-	"4": {
+	"5": {
 		"title": "Workmate",
 		"subtitle": "Retro Music Player",
 		"thumbnail": "workmate_main.png",
@@ -215,7 +280,7 @@
 		],
 		"dark": true
 	},
-	"5": {
+	"6": {
 		"title": "Portfolio",
 		"subtitle": "Portfolio Renewal",
 		"thumbnail": "portfolio_main.png",
@@ -251,7 +316,7 @@
 		"ppl_count": 1,
 		"images": ["po0.png", "po1.png", "po3.png", "po2.png", "po4.png"]
 	},
-	"6": {
+	"7": {
 		"title": "...And More!",
 		"subtitle": "Other Projects",
 		"thumbnail": "other_main.png",
