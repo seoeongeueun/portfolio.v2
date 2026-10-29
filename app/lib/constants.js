@@ -7,7 +7,8 @@ export const stacks = {
 
 //pool 섹션
 export const MARGIN_SIZE = 0.05; //수영장 테두리는 현재 대략 5vmin
-export const GSAP_OPTION = {duration: 3, ease: "power3.out"};
+export const POOL_SPEED = 1.3; //수영장 아이템 속도 배율 (2 = 2배 빠르게, 0.5 = 절반 속도). 이동 거리는 그대로, 도달 시간만 변경
+export const GSAP_OPTION = {duration: 3 / POOL_SPEED, ease: "power3.out"};
 
 // beach 섹션
 export const PARTICLE_SIZE = 60; //dust particle 크기

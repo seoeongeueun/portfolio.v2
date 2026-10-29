@@ -1,6 +1,6 @@
 "use client";
-import {Fragment, useEffect, useRef} from "react";
-import {stacks, MARGIN_SIZE, GSAP_OPTION} from "../lib/constants";
+import {Fragment, useEffect, useRef, useState} from "react";
+import {stacks, GSAP_OPTION} from "../lib/constants";
 import {getRandomInt, debounce} from "../lib/tools";
 import Image from "next/image";
 import gsap from "gsap";
@@ -8,8 +8,8 @@ import {Observer} from "gsap/Observer";
 
 export default function Pool() {
 	const poolRef = useRef<HTMLDivElement | null>(null);
-	const poolRectRef = useRef<{left: number; right: number; top: number; bottom: number} | null>(null); //테두리를 제외한 내부 영역
-	const charPositionsRef = useRef<Record<string, {x: number; y: number}>>({});
+	// 랜덤 위치는 hydration 불일치를 피하기 위해 마운트 후 state로 생성 (state라서 생성 후 리렌더됨)
+	const [charPositions, setCharPositions] = useState<Record<string, {x: number; y: number}> | null>(null);
 	const tweenRef = useRef<
 		Record<
 			string,
@@ -27,13 +27,13 @@ export default function Pool() {
 	useEffect(() => {
 		if (!poolRef.current) return;
 
-		const debouncedResize = debounce(() => {
-			measurePool();
+		setCharPositions(Object.fromEntries(Object.keys(stacks).map(key => [key, {x: getRandomInt(40), y: getRandomInt(40)}])));
 
-			// 컴포넌트 언마운트시 모든 char 위치 초기화
+		const debouncedResize = debounce(() => {
+			// 리사이즈시 모든 char 위치 초기화 후 수영장 안으로 보정
 			if (!poolRef.current) return;
 			resetCharAndShadowTransforms(poolRef.current);
-			initializeCharPositions(poolRef.current, stacks);
+			clampAllChars(poolRef.current);
 		}, 200);
 
 		window.addEventListener("resize", debouncedResize);
@@ -66,11 +66,10 @@ export default function Pool() {
 					scrub: 0.3,
 				},
 			});
-		if (!poolRef.current) return;
+		if (!poolRef.current || !charPositions) return;
 
-		measurePool();
 		resetCharAndShadowTransforms(poolRef.current);
-		initializeCharPositions(poolRef.current, stacks);
+		clampAllChars(poolRef.current);
 
 		gsap.defaults({overwrite: true});
 
@@ -82,10 +81,6 @@ export default function Pool() {
 
 		function moveChars({event, deltaX, deltaY}: {event: Event; deltaX: number; deltaY: number}) {
 			if (moveCharsFrameId) return;
-
-			const poolRect = poolRectRef.current;
-
-			if (!poolRect) return;
 
 			//시간으로 throttle 계산
 			if (Date.now() - lastMoveTime < moveThrottle) return;
@@ -102,21 +97,7 @@ export default function Pool() {
 				const charBounds = el.getBoundingClientRect();
 
 				const t = 3; //이동 강도
-				let newX = charBounds.left + deltaX * t;
-				let newY = charBounds.top + deltaY * t;
-
-				//이미지는 회전하기 때문에 w/h를 나누는 의미가 없음. 평균 값을 사용해서 계산하자
-				const IMAGE_SIZE = (charBounds.width + charBounds.height) / 2;
-
-				// newX/newY는 좌상단 기준이므로, 경계도 좌상단 기준으로 clamp
-				if (newX < poolRect.left) newX = poolRect.left;
-				if (newX + IMAGE_SIZE > poolRect.right) newX = poolRect.right - IMAGE_SIZE;
-
-				if (newY < poolRect.top) newY = poolRect.top;
-				if (newY + IMAGE_SIZE > poolRect.bottom) newY = poolRect.bottom - IMAGE_SIZE;
-
-				const xMovement = newX - charBounds.left;
-				const yMovement = newY - charBounds.top;
+				const {x: xMovement, y: yMovement} = getClampedMove(el, deltaX * t, deltaY * t);
 
 				// quickTo 핸들러가 없으면 생성 (요소당 1회)
 				if (!tweenRef.current[id]) {
@@ -229,23 +210,32 @@ export default function Pool() {
 			if (moveCharsFrameId) cancelAnimationFrame(moveCharsFrameId);
 			if (rippleFrameId) cancelAnimationFrame(rippleFrameId);
 		};
-	}, [stacks]);
+	}, [charPositions]);
 
-	function measurePool() {
-		if (!poolRef.current) return;
+	// 이미지를 (dx, dy)만큼 옮기려 할 때 수영장 내부를 벗어나지 않도록 보정된 이동량 반환
+	// 스크롤하면 뷰포트 좌표가 바뀌므로 수영장 영역은 매번 새로 측정
+	function getClampedMove(el: HTMLElement, dx: number, dy: number) {
+		const pool = poolRef.current;
+		if (!pool) return {x: 0, y: 0};
 
-		const rect = poolRef.current.getBoundingClientRect();
+		const rect = pool.getBoundingClientRect();
+		const scale = rect.width / pool.offsetWidth || 1; //부모가 scale된 경우 대비
+		const border = pool.clientLeft * scale;
+		const BUFFER_MARGIN = border / 4; //수영장 상단 테두리만 원근법을 위해 추가 두께가 부여되었기 때문에 그걸 반영
 
-		const borderPx = Math.min(window.innerWidth, window.innerHeight) * MARGIN_SIZE;
-		const BUFFER_MARGIN = borderPx / 4; //수영장 상단 테두리만 원근법을 위해 추가 두께가 부여되었기 때문에 그걸 반영
+		// 회전해도 이미지가 테두리를 넘지 않도록 회전 무관한 외접원 반지름으로 계산 (offsetWidth는 transform 영향 없음)
+		const radius = (Math.hypot(el.offsetWidth, el.offsetHeight) / 2) * scale;
 
-		// border를 제외한 내부 영역
-		poolRectRef.current = {
-			top: rect.top + borderPx + BUFFER_MARGIN,
-			left: rect.left + borderPx,
-			right: rect.right - borderPx,
-			bottom: rect.bottom - borderPx,
-		};
+		// 회전 중에도 중심점은 변하지 않으므로 중심 기준으로 clamp
+		const b = el.getBoundingClientRect();
+		const cx = b.left + b.width / 2;
+		const cy = b.top + b.height / 2;
+
+		const clamp = (v: number, min: number, max: number) => (min > max ? (min + max) / 2 : Math.min(Math.max(v, min), max));
+		const newCx = clamp(cx + dx, rect.left + border + radius, rect.right - border - radius);
+		const newCy = clamp(cy + dy, rect.top + border + BUFFER_MARGIN + radius, rect.bottom - border - radius);
+
+		return {x: newCx - cx, y: newCy - cy};
 	}
 
 	//이미지 위치 강제 리셋
@@ -269,15 +259,15 @@ export default function Pool() {
 		});
 	}
 
-	//이미지를 매번 랜덤한 위치에 배치
-	function initializeCharPositions(container: HTMLElement, stacks: Record<string, any>) {
-		Object.keys(stacks).forEach(key => {
-			if (!charPositionsRef.current[key]) {
-				charPositionsRef.current[key] = {
-					x: getRandomInt(40),
-					y: getRandomInt(40),
-				};
-			}
+	//랜덤 배치로 테두리 밖에 놓인 이미지를 수영장 안으로 옮김 (그림자도 같이)
+	function clampAllChars(container: HTMLElement) {
+		container.querySelectorAll<HTMLElement>(".char").forEach(el => {
+			const {x, y} = getClampedMove(el, 0, 0);
+			gsap.set(el, {x, y});
+
+			const id = el.className.match(/char-(\S+)/)?.[1];
+			const shadow = id ? shadowElRef.current[id] : null;
+			if (shadow) gsap.set(shadow, {x, y});
 		});
 	}
 
@@ -292,9 +282,9 @@ export default function Pool() {
 				</defs>
 			</svg>
 			{/* <span className="pool-intro lowercase max-w-10/12 text-md md:text-5xl">hover to disturb</span> */}
-			{Object.keys(charPositionsRef.current).length > 0 &&
+			{charPositions &&
 				Object.keys(stacks).map(k => {
-					const {x, y} = charPositionsRef.current[k] || {x: 0, y: 0};
+					const {x, y} = charPositions[k] || {x: 0, y: 0};
 
 					return (
 						<Fragment key={k}>
