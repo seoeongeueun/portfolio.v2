@@ -59,7 +59,7 @@
 		will-change: transform;
 		width: 10rem;
 		height: auto;
-		filter: url(#turb);
+		filter: url(#turb) var(--sink-filter);
 		webkit-user-drag: none; /* Safari/Chrome */
 		user-drag: none;
 		user-select: none;       /* 텍스트/이미지 선택 방지 */
@@ -69,7 +69,7 @@
 		&.ducky,
 		&.javascript {
 			width: 6rem;
-			filter: url(#turb) hue-rotate(20deg);
+			filter: url(#turb) var(--sink-filter) hue-rotate(20deg);
 		}
 
 		@media screen and (max-width: $breakpoint-mobile) {
@@ -78,7 +78,7 @@
 			&.ducky,
 			&.javascript {
 				width: 4rem;
-				filter: url(#turb) hue-rotate(20deg);
+				filter: url(#turb) var(--sink-filter) hue-rotate(20deg);
 			}
 		}
 	}
@@ -99,6 +99,14 @@
 			width: 3rem;
 			height: 3rem;
 		}
+	}
+
+	.sink-color {
+		flood-color: var(--color-pool);
+	}
+
+	.sink-dark-color {
+		flood-color: rgb(40, 110, 170); //multiply할 깊은 물색
 	}
 
 	// 착지 물보라용 레이어. 링은 아이템 아래(수면), 물방울은 아이템 위로

@@ -81,7 +81,8 @@ export default function Pool() {
 		resetCharAndShadowTransforms(poolRef.current);
 		clampAllChars(poolRef.current);
 
-		gsap.defaults({overwrite: true});
+		// true는 같은 타겟의 모든 tween을 죽여서 잠수 루프(scale)가 드래그(x/y)에 끊김. auto는 겹치는 속성만 정리
+		gsap.defaults({overwrite: "auto"});
 
 		//과부화 방지용 쓰로틀 추가
 		let lastMoveTime = 0;
@@ -175,7 +176,10 @@ export default function Pool() {
 
 		// 로딩 완료 후 이미지가 하나씩 위에서 떨어지고, 착지할 때마다 수영장에 물결
 		// gsap.defaults의 overwrite: true가 같은 타겟의 이전 tween을 죽이지 않도록 타임라인은 overwrite: false
-		const dropTl = gsap.timeline({defaults: {overwrite: false}, onComplete: () => (isDropping = false)});
+		const dropTl = gsap.timeline({defaults: {overwrite: false}, onComplete: () => {
+				isDropping = false;
+			},
+		});
 		const DROP_DURATION = 0.5;
 		const DROP_GAP = 0.2; //이미지 간 낙하 간격
 
@@ -186,21 +190,33 @@ export default function Pool() {
 
 			// 위에서 보는 시점이므로 크게 보이다가 가속하며 작아져 착지
 			// visibility: hidden 상태에서는 from의 autoAlpha 종료값이 0으로 읽히므로 fromTo로 명시
-			dropTl.fromTo(el, {autoAlpha: 0, scale: 1.8, rotation: "random(-25, 25)"}, {autoAlpha: 1, scale: 1, rotation: 0, duration: DROP_DURATION, ease: "power3.in"}, at);
-			// 착지: 물속으로 가라앉았다가 (작아지고 반투명해져 물색이 비침) 다시 떠오르며 살짝 출렁임
+			dropTl.fromTo(el, {scale: 1.8, rotation: "random(-25, 25)"}, {scale: 1, rotation: 0, duration: DROP_DURATION, ease: "power3.in"}, at);
+			dropTl.fromTo(el, {autoAlpha: 0}, {autoAlpha: 1, duration: 0.15}, at); //등장할 때만 짧게 페이드인
+			// 착지: 물속으로 가라앉았다가 (작아지고 물빛이 덮임) 다시 떠오르며 살짝 출렁임
 			const land = at + DROP_DURATION;
 			const SINK_DURATION = 0.35;
 			const RISE_DURATION = 0.9;
 			dropTl.call(() => splash(el), [], land);
-			dropTl.to(el, {scale: 0.88, autoAlpha: 0.75, duration: SINK_DURATION, ease: "power2.out"}, land);
-			dropTl.to(el, {scale: 1, autoAlpha: 1, duration: RISE_DURATION, ease: "back.out(1.8)"}, land + SINK_DURATION);
+			// 투명도 대신 잠수 필터의 물빛으로 잠긴 느낌 표현
+			const mix = id ? document.querySelector(`#sink-${id} .sink-mix`) : null;
+			const dark = id ? document.querySelector(`#sink-${id} .sink-dark`) : null;
+			dropTl.to(el, {scale: 0.88, duration: SINK_DURATION, ease: "power2.out"}, land);
+			dropTl.to(el, {scale: 1, duration: RISE_DURATION, ease: "back.out(1.8)"}, land + SINK_DURATION);
+			if (mix) {
+				dropTl.to(mix, {attr: {slope: 0.5}, duration: SINK_DURATION, ease: "power2.out"}, land);
+				dropTl.to(mix, {attr: {slope: 0}, duration: RISE_DURATION, ease: "sine.inOut"}, land + SINK_DURATION);
+			}
+			if (dark) {
+				dropTl.to(dark, {attr: {slope: 0.6}, duration: SINK_DURATION, ease: "power2.out"}, land);
+				dropTl.to(dark, {attr: {slope: 0}, duration: RISE_DURATION, ease: "sine.inOut"}, land + SINK_DURATION);
+			}
 			if (shadow) {
 				gsap.set(shadow, {clearProps: "opacity"}); //이전에 실행된 타임라인이 남긴 inline opacity 제거 (strict mode 재실행 대비)
 				const shadowOpacity = parseFloat(getComputedStyle(shadow).opacity); //css에 지정된 그림자 투명도 유지
 				dropTl.fromTo(shadow, {autoAlpha: 0, scale: 0.2}, {autoAlpha: shadowOpacity, scale: 1, duration: DROP_DURATION, ease: "power2.in"}, at);
 				// 가라앉는 동안 그림자도 아이템과 겹치며 흐려짐
-				dropTl.to(shadow, {scale: 0.85, autoAlpha: shadowOpacity * 0.7, duration: SINK_DURATION, ease: "power2.out"}, land);
-				dropTl.to(shadow, {scale: 1, autoAlpha: shadowOpacity, duration: RISE_DURATION, ease: "back.out(1.8)"}, land + SINK_DURATION);
+				dropTl.to(shadow, {scale: 0.85, duration: SINK_DURATION, ease: "power2.out"}, land);
+				dropTl.to(shadow, {scale: 1, duration: RISE_DURATION, ease: "back.out(1.8)"}, land + SINK_DURATION);
 			}
 
 			// 착지마다 물결이 튀었다가 기본 물결 값으로 돌아오므로, 마지막 착지 후에도 수영장이 잔잔히 일렁임
@@ -209,6 +225,47 @@ export default function Pool() {
 				dropTl.fromTo(turbWave, {attr: {baseFrequency: "0.01 0.02"}}, {attr: {baseFrequency: POOL_TURBULENCE.baseFrequency}, duration: 1.2, ease: "power2.out", immediateRender: false}, at + DROP_DURATION);
 		});
 
+		// 물결(turbulence)이 일 때만 아이템이 살짝 가라앉으며 물빛(노이즈 패치)이 덮이고, 잔잔해지면 다시 떠오름
+		// 포인터와 가까운 아이템일수록 깊이 잠기므로 다 같이 움직이지 않음. level 0 = 수면, 1 = 최대로 잠김
+		type SinkTarget = {el: HTMLElement; shadow: HTMLElement | null; mix: Element | null; dark: Element | null; depth: number; level: number; tl?: gsap.core.Timeline};
+		const sinkTargets: SinkTarget[] = Array.from(poolRef.current.querySelectorAll<HTMLElement>(".char")).map(el => {
+			const id = el.className.match(/char-(\S+)/)?.[1];
+			return {
+				el,
+				shadow: id ? shadowElRef.current[id] : null,
+				mix: id ? document.querySelector(`#sink-${id} .sink-mix`) : null,
+				dark: id ? document.querySelector(`#sink-${id} .sink-dark`) : null,
+				depth: gsap.utils.random(0.6, 1), //아이템마다 잠기는 깊이를 다르게
+				level: 0,
+			};
+		});
+		const applySinkLevel = (t: SinkTarget) => {
+			gsap.set(t.el, {scale: 1 - 0.06 * t.level});
+			if (t.shadow) gsap.set(t.shadow, {scale: 1 - 0.1 * t.level});
+			if (t.mix) gsap.set(t.mix, {attr: {slope: 0.6 * t.level}});
+			if (t.dark) gsap.set(t.dark, {attr: {slope: 0.7 * t.level}});
+		};
+		// 물결이 일면 빠르게 잠기고, 움직임이 멈추면 잠시 뒤 천천히 떠오름
+		const stirWater = (e: PointerEvent) => {
+			const rect = poolRef.current?.getBoundingClientRect();
+			if (!rect) return;
+			const reach = rect.width * 0.45; //이 거리 밖의 아이템은 영향 없음
+
+			sinkTargets.forEach(t => {
+				const b = t.el.getBoundingClientRect();
+				const dist = Math.hypot(e.clientX - (b.left + b.width / 2), e.clientY - (b.top + b.height / 2));
+				const target = gsap.utils.clamp(0, 1, 1 - dist / reach) * t.depth;
+				if (target < 0.05) return;
+
+				t.tl?.kill();
+				t.tl = gsap
+					.timeline({defaults: {onUpdate: () => applySinkLevel(t)}})
+					.to(t, {level: Math.max(target, t.level), duration: 0.6, ease: "power2.out"})
+					// 떠오르는 대기/속도를 아이템마다 다르게 해서 동시에 떠오르지 않도록
+					.to(t, {level: 0, duration: gsap.utils.random(0.4, 1.6), ease: "sine.inOut"}, `+=${gsap.utils.random(0, 0.2)}`);
+			});
+		};
+
 		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) dropTl.progress(1);
 
 		const handleMouseMove = (e: PointerEvent) => {
@@ -216,6 +273,7 @@ export default function Pool() {
 			//과부화 방지
 			if (Date.now() - lastWaveTime < waveThrottle) return;
 			lastWaveTime = Date.now();
+			stirWater(e);
 
 			if (rippleFrameId) return;
 
@@ -253,6 +311,7 @@ export default function Pool() {
 			observer.kill();
 			waveTl.kill();
 			dropTl.kill();
+			sinkTargets.forEach(t => t.tl?.kill());
 			tweenRef.current = {};
 			//shadowElRef.current = {};
 
@@ -381,6 +440,27 @@ export default function Pool() {
 						<feTurbulence id="turbwave" type="fractalNoise" baseFrequency={POOL_TURBULENCE.baseFrequency} numOctaves="1" result="turbulence" />
 						<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale={POOL_TURBULENCE.scale} />
 					</filter>
+					{/* 아이템별 잠수 필터: 노이즈 모양의 수영장 색을 아이템 위에 덮음 (over 합성이라 원본이 투명해지지 않음). .sink-mix의 slope(물빛 진하기)를 gsap으로 조절 */}
+					{Object.keys(stacks).map((k, i) => (
+						<filter key={k} id={`sink-${k}`}>
+							<feTurbulence type="fractalNoise" baseFrequency="0.02 0.035" numOctaves="2" seed={i + 1} result="noise" />
+							<feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3 0 0 0 -0.9" result="patches" />
+							<feFlood className="sink-color" result="color" />
+							<feComposite in="color" in2="patches" operator="in" result="water" />
+							<feComposite in="water" in2="SourceAlpha" operator="in" result="tint" />
+							<feComponentTransfer in="tint" result="tintAmount">
+								<feFuncA className="sink-mix" type="linear" slope="0" />
+							</feComponentTransfer>
+							{/* 잠길수록 깊은 물색을 multiply로 곱해 어두워짐 (색이 덮이는 게 아니라 원본 색이 물색에 물듦). .sink-dark의 slope로 조절 */}
+							<feFlood className="sink-dark-color" result="dark" />
+							<feComposite in="dark" in2="SourceAlpha" operator="in" result="darkMask" />
+							<feComponentTransfer in="darkMask" result="darkAmount">
+								<feFuncA className="sink-dark" type="linear" slope="0" />
+							</feComponentTransfer>
+							<feBlend in="darkAmount" in2="SourceGraphic" mode="multiply" result="darkened" />
+							<feComposite in="tintAmount" in2="darkened" operator="over" />
+						</filter>
+					))}
 				</defs>
 			</svg>
 			<div ref={ringLayerRef} className="splash-layer rings" />
@@ -410,6 +490,7 @@ export default function Pool() {
 									top: `${y}%`,
 									left: `${x}%`,
 									visibility: "hidden", //등장 애니메이션(dropTl)에서 보이게 처리
+									["--sink-filter" as string]: `url(#sink-${k})`,
 								}}
 							/>
 							<div
