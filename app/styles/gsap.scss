@@ -100,6 +100,35 @@
 			height: 3rem;
 		}
 	}
+
+	// 착지 물보라용 레이어. 링은 아이템 아래(수면), 물방울은 아이템 위로
+	.splash-layer {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+
+		&.rings {
+			z-index: 5;
+			filter: url(#turb);
+		}
+
+		&.drops {
+			z-index: 15;
+		}
+	}
+
+	.splash-ring {
+		position: absolute;
+		border-radius: 50%;
+		border: 3px solid rgba(255, 255, 255, 0.8);
+		box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+	}
+
+	.splash-drop {
+		position: absolute;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.2);
+	}
 }
 
 .pool > * {

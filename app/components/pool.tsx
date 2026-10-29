@@ -6,10 +6,17 @@ import Image from "next/image";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
 
+// 수영장 기본 물결 값 (svg 초기값이자 낙하 애니메이션이 끝난 뒤 유지되는 값)
+const POOL_TURBULENCE = {baseFrequency: "0.03 0.08", scale: 10};
+
 export default function Pool() {
 	const poolRef = useRef<HTMLDivElement | null>(null);
 	// 랜덤 위치는 hydration 불일치를 피하기 위해 마운트 후 state로 생성 (state라서 생성 후 리렌더됨)
 	const [charPositions, setCharPositions] = useState<Record<string, {x: number; y: number}> | null>(null);
+	const [loadedChars, setLoadedChars] = useState<Record<string, boolean>>({}); //로딩 바 진행률용
+	const totalChars = Object.keys(stacks).length;
+	const loadedCount = Object.keys(loadedChars).length;
+	const allLoaded = loadedCount >= totalChars;
 	const tweenRef = useRef<
 		Record<
 			string,
@@ -23,6 +30,8 @@ export default function Pool() {
 		>
 	>({});
 	const shadowElRef = useRef<Record<string, HTMLElement | null>>({});
+	const ringLayerRef = useRef<HTMLDivElement | null>(null);
+	const dropLayerRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
 		if (!poolRef.current) return;
@@ -66,7 +75,8 @@ export default function Pool() {
 					scrub: 0.3,
 				},
 			});
-		if (!poolRef.current || !charPositions) return;
+		// 이미지 크기를 알아야 clamp 가능하므로 모두 로드된 후에 시작
+		if (!poolRef.current || !charPositions || !allLoaded) return;
 
 		resetCharAndShadowTransforms(poolRef.current);
 		clampAllChars(poolRef.current);
@@ -78,9 +88,10 @@ export default function Pool() {
 		const moveThrottle = 40;
 
 		let moveCharsFrameId: number | null = null;
+		let isDropping = true; //등장 애니메이션 중에는 overwrite로 끊기지 않도록 인터랙션 막기
 
 		function moveChars({event, deltaX, deltaY}: {event: Event; deltaX: number; deltaY: number}) {
-			if (moveCharsFrameId) return;
+			if (moveCharsFrameId || isDropping) return;
 
 			//시간으로 throttle 계산
 			if (Date.now() - lastMoveTime < moveThrottle) return;
@@ -162,7 +173,46 @@ export default function Pool() {
 		const turbWave = document.querySelector("#turbwave");
 		const dispMap = document.querySelector("#dispMap");
 
+		// 로딩 완료 후 이미지가 하나씩 위에서 떨어지고, 착지할 때마다 수영장에 물결
+		// gsap.defaults의 overwrite: true가 같은 타겟의 이전 tween을 죽이지 않도록 타임라인은 overwrite: false
+		const dropTl = gsap.timeline({defaults: {overwrite: false}, onComplete: () => (isDropping = false)});
+		const DROP_DURATION = 0.5;
+		const DROP_GAP = 0.2; //이미지 간 낙하 간격
+
+		poolRef.current.querySelectorAll<HTMLElement>(".char").forEach((el, i) => {
+			const at = i * DROP_GAP;
+			const id = el.className.match(/char-(\S+)/)?.[1];
+			const shadow = id ? shadowElRef.current[id] : null;
+
+			// 위에서 보는 시점이므로 크게 보이다가 가속하며 작아져 착지
+			// visibility: hidden 상태에서는 from의 autoAlpha 종료값이 0으로 읽히므로 fromTo로 명시
+			dropTl.fromTo(el, {autoAlpha: 0, scale: 1.8, rotation: "random(-25, 25)"}, {autoAlpha: 1, scale: 1, rotation: 0, duration: DROP_DURATION, ease: "power3.in"}, at);
+			// 착지: 물속으로 가라앉았다가 (작아지고 반투명해져 물색이 비침) 다시 떠오르며 살짝 출렁임
+			const land = at + DROP_DURATION;
+			const SINK_DURATION = 0.35;
+			const RISE_DURATION = 0.9;
+			dropTl.call(() => splash(el), [], land);
+			dropTl.to(el, {scale: 0.88, autoAlpha: 0.75, duration: SINK_DURATION, ease: "power2.out"}, land);
+			dropTl.to(el, {scale: 1, autoAlpha: 1, duration: RISE_DURATION, ease: "back.out(1.8)"}, land + SINK_DURATION);
+			if (shadow) {
+				gsap.set(shadow, {clearProps: "opacity"}); //이전에 실행된 타임라인이 남긴 inline opacity 제거 (strict mode 재실행 대비)
+				const shadowOpacity = parseFloat(getComputedStyle(shadow).opacity); //css에 지정된 그림자 투명도 유지
+				dropTl.fromTo(shadow, {autoAlpha: 0, scale: 0.2}, {autoAlpha: shadowOpacity, scale: 1, duration: DROP_DURATION, ease: "power2.in"}, at);
+				// 가라앉는 동안 그림자도 아이템과 겹치며 흐려짐
+				dropTl.to(shadow, {scale: 0.85, autoAlpha: shadowOpacity * 0.7, duration: SINK_DURATION, ease: "power2.out"}, land);
+				dropTl.to(shadow, {scale: 1, autoAlpha: shadowOpacity, duration: RISE_DURATION, ease: "back.out(1.8)"}, land + SINK_DURATION);
+			}
+
+			// 착지마다 물결이 튀었다가 기본 물결 값으로 돌아오므로, 마지막 착지 후에도 수영장이 잔잔히 일렁임
+			if (dispMap) dropTl.fromTo(dispMap, {attr: {scale: 20}}, {attr: {scale: POOL_TURBULENCE.scale}, duration: 1.2, ease: "power2.out", immediateRender: false}, at + DROP_DURATION);
+			if (turbWave)
+				dropTl.fromTo(turbWave, {attr: {baseFrequency: "0.01 0.02"}}, {attr: {baseFrequency: POOL_TURBULENCE.baseFrequency}, duration: 1.2, ease: "power2.out", immediateRender: false}, at + DROP_DURATION);
+		});
+
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) dropTl.progress(1);
+
 		const handleMouseMove = (e: PointerEvent) => {
+			if (isDropping) return;
 			//과부화 방지
 			if (Date.now() - lastWaveTime < waveThrottle) return;
 			lastWaveTime = Date.now();
@@ -202,6 +252,7 @@ export default function Pool() {
 		return () => {
 			observer.kill();
 			waveTl.kill();
+			dropTl.kill();
 			tweenRef.current = {};
 			//shadowElRef.current = {};
 
@@ -210,7 +261,7 @@ export default function Pool() {
 			if (moveCharsFrameId) cancelAnimationFrame(moveCharsFrameId);
 			if (rippleFrameId) cancelAnimationFrame(rippleFrameId);
 		};
-	}, [charPositions]);
+	}, [charPositions, allLoaded]);
 
 	// 이미지를 (dx, dy)만큼 옮기려 할 때 수영장 내부를 벗어나지 않도록 보정된 이동량 반환
 	// 스크롤하면 뷰포트 좌표가 바뀌므로 수영장 영역은 매번 새로 측정
@@ -259,6 +310,57 @@ export default function Pool() {
 		});
 	}
 
+	// 아이템 착지 지점에 퍼지는 물결 링과 튀는 물방울 생성 (애니메이션 끝나면 제거)
+	function splash(el: HTMLElement) {
+		const pool = poolRef.current;
+		const ringLayer = ringLayerRef.current;
+		const dropLayer = dropLayerRef.current;
+		if (!pool || !ringLayer || !dropLayer) return;
+
+		// 레이어는 수영장 padding box 기준이므로 뷰포트 좌표를 레이어 좌표로 변환
+		const rect = pool.getBoundingClientRect();
+		const scale = rect.width / pool.offsetWidth || 1;
+		const b = el.getBoundingClientRect();
+		const cx = (b.left + b.width / 2 - rect.left) / scale - pool.clientLeft;
+		const cy = (b.top + b.height / 2 - rect.top) / scale - pool.clientTop;
+		const size = el.offsetWidth;
+
+		const spawn = (layer: HTMLElement, className: string, px: number) => {
+			const node = document.createElement("div");
+			node.className = className;
+			node.style.width = node.style.height = `${px}px`;
+			node.style.left = `${cx}px`;
+			node.style.top = `${cy}px`;
+			layer.appendChild(node);
+			gsap.set(node, {xPercent: -50, yPercent: -50});
+			return node;
+		};
+
+		// 물결 링: 시간차로 3겹 퍼짐
+		for (let i = 0; i < 3; i++) {
+			const ring = spawn(ringLayer, "splash-ring", size);
+			gsap.fromTo(
+				ring,
+				{scale: 0.4, opacity: 0.4},
+				{scale: 1.6 + i * 0.5, opacity: 0, duration: 1.4 + i * 0.3, delay: i * 0.18, ease: "power2.out", onComplete: () => ring.remove()},
+			);
+		}
+
+		// 물방울: 사방으로 튀었다가 (위에서 보는 시점이라 커졌다 작아짐) 사라짐
+		const DROP_COUNT = 6;
+		for (let i = 0; i < DROP_COUNT; i++) {
+			const drop = spawn(dropLayer, "splash-drop", gsap.utils.random(4, 8));
+			const angle = (i / DROP_COUNT) * Math.PI * 2 + gsap.utils.random(-0.3, 0.3);
+			const dist = size * gsap.utils.random(0.4, 0.7);
+			const duration = gsap.utils.random(0.5, 0.8);
+			gsap
+				.timeline({defaults: {overwrite: false}, onComplete: () => drop.remove()}) //같은 물방울에 x/y와 scale tween이 동시에 걸리므로 overwrite 끔
+				.to(drop, {x: Math.cos(angle) * dist, y: Math.sin(angle) * dist, duration, ease: "power2.out"}, 0)
+				.fromTo(drop, {scale: 0.5}, {scale: 1.6, duration: duration / 2, ease: "power1.out"}, 0)
+				.to(drop, {scale: 0.3, opacity: 0, duration: duration / 2, ease: "power1.in"}, duration / 2);
+		}
+	}
+
 	//랜덤 배치로 테두리 밖에 놓인 이미지를 수영장 안으로 옮김 (그림자도 같이)
 	function clampAllChars(container: HTMLElement) {
 		container.querySelectorAll<HTMLElement>(".char").forEach(el => {
@@ -276,11 +378,18 @@ export default function Pool() {
 			<svg width="0" height="0">
 				<defs>
 					<filter id="turb">
-						<feTurbulence id="turbwave" type="fractalNoise" baseFrequency="0.03 0.08" numOctaves="1" result="turbulence" />
-						<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale="10" />
+						<feTurbulence id="turbwave" type="fractalNoise" baseFrequency={POOL_TURBULENCE.baseFrequency} numOctaves="1" result="turbulence" />
+						<feDisplacementMap id="dispMap" in="SourceGraphic" in2="turbulence" scale={POOL_TURBULENCE.scale} />
 					</filter>
 				</defs>
 			</svg>
+			<div ref={ringLayerRef} className="splash-layer rings" />
+			<div ref={dropLayerRef} className="splash-layer drops" />
+			{!allLoaded && (
+				<div className="w-1/2 h-2 rounded-full bg-white/40 overflow-hidden z-20" role="progressbar" aria-valuemin={0} aria-valuemax={totalChars} aria-valuenow={loadedCount}>
+					<div className="h-full bg-white transition-[width] duration-300" style={{width: `${(loadedCount / totalChars) * 100}%`}} />
+				</div>
+			)}
 			{/* <span className="pool-intro lowercase max-w-10/12 text-md md:text-5xl">hover to disturb</span> */}
 			{charPositions &&
 				Object.keys(stacks).map(k => {
@@ -295,9 +404,12 @@ export default function Pool() {
 								className={`char char-${k} ${k}`}
 								width={100}
 								height={100}
+								onLoad={() => setLoadedChars(prev => ({...prev, [k]: true}))}
+								onError={() => setLoadedChars(prev => ({...prev, [k]: true}))} //실패해도 로딩 바가 멈추지 않도록
 								style={{
 									top: `${y}%`,
 									left: `${x}%`,
+									visibility: "hidden", //등장 애니메이션(dropTl)에서 보이게 처리
 								}}
 							/>
 							<div
@@ -309,6 +421,7 @@ export default function Pool() {
 								style={{
 									top: `calc(${y}% + 20%)`,
 									left: `calc(${x}% - 3%)`,
+									visibility: "hidden", //등장 애니메이션(dropTl)에서 보이게 처리
 								}}
 							></div>
 						</Fragment>
