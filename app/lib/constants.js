@@ -9,6 +9,12 @@ export const stacks = {
 export const MARGIN_SIZE = 0.05; //수영장 테두리는 현재 대략 5vmin
 export const POOL_SPEED = 1.3; //수영장 아이템 속도 배율 (2 = 2배 빠르게, 0.5 = 절반 속도). 이동 거리는 그대로, 도달 시간만 변경
 export const GSAP_OPTION = {duration: 3 / POOL_SPEED, ease: "power3.out"};
+export const POOL_TURBULENCE = {baseFrequency: "0.03 0.08", scale: 10}; // 수영장 기본 물결 값 (svg 초기값이자 낙하 애니메이션이 끝난 뒤 유지되는 값)
+export const DROP_DURATION = 0.5; // 아이템 낙하 시간
+export const DROP_GAP = 0.2; //이미지 간 낙하 간격
+export const SINK_DURATION = 0.4; // 착지 후 가라앉는 시간
+export const RISE_DURATION = 0.9; // 가라앉은 뒤 떠오르는 시간
+export const SPLASH_DROP_COUNT = 6; // 착지 시 튀는 물방울 개수
 
 // beach 섹션
 export const PARTICLE_SIZE = 60; //dust particle 크기

@@ -4,13 +4,12 @@ import {Project} from "@/app/page";
 
 type CartridgePropsType = {
 	project: Project;
-	projectKey: string;
-	onSelectProject: (event: React.MouseEvent<HTMLDivElement>, projectKey: string) => void;
+	onSelectProject: (event: React.MouseEvent<HTMLDivElement>, project: Project) => void;
 };
 
-export default function Cartridge({project, projectKey, onSelectProject}: CartridgePropsType) {
+export default function Cartridge({project, onSelectProject}: CartridgePropsType) {
 	return (
-		<div className={`card card-${projectKey} w-fit`} onClick={event => onSelectProject(event, projectKey)}>
+		<div className="card w-fit" onClick={event => onSelectProject(event, project)}>
 			<div className="relative cartridge-container">
 				<div className="head"></div>
 				<div className="flex flex-col cartridge-body items-center justify-between">

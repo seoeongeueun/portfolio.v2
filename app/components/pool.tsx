@@ -1,13 +1,10 @@
 "use client";
 import {Fragment, useEffect, useRef, useState} from "react";
-import {stacks, GSAP_OPTION} from "../lib/constants";
+import {stacks, GSAP_OPTION, POOL_TURBULENCE, DROP_DURATION, DROP_GAP, SINK_DURATION, RISE_DURATION, SPLASH_DROP_COUNT} from "../lib/constants";
 import {getRandomInt, debounce} from "../lib/tools";
 import Image from "next/image";
 import gsap from "gsap";
 import {Observer} from "gsap/Observer";
-
-// 수영장 기본 물결 값 (svg 초기값이자 낙하 애니메이션이 끝난 뒤 유지되는 값)
-const POOL_TURBULENCE = {baseFrequency: "0.03 0.08", scale: 10};
 
 export default function Pool() {
 	const poolRef = useRef<HTMLDivElement | null>(null);
@@ -180,8 +177,6 @@ export default function Pool() {
 				isDropping = false;
 			},
 		});
-		const DROP_DURATION = 0.5;
-		const DROP_GAP = 0.2; //이미지 간 낙하 간격
 
 		poolRef.current.querySelectorAll<HTMLElement>(".char").forEach((el, i) => {
 			const at = i * DROP_GAP;
@@ -194,10 +189,8 @@ export default function Pool() {
 			dropTl.fromTo(el, {autoAlpha: 0}, {autoAlpha: 1, duration: 0.15}, at); //등장할 때만 짧게 페이드인
 			// 착지: 물속으로 가라앉았다가 (작아지고 물빛이 덮임) 다시 떠오르며 살짝 출렁임
 			const land = at + DROP_DURATION;
-			const SINK_DURATION = 0.35;
-			const RISE_DURATION = 0.9;
 			dropTl.call(() => splash(el), [], land);
-			// 투명도 대신 잠수 필터의 물빛으로 잠긴 느낌 표현
+			// 필터의 물빛으로 잠긴 느낌 표현
 			const mix = id ? document.querySelector(`#sink-${id} .sink-mix`) : null;
 			const dark = id ? document.querySelector(`#sink-${id} .sink-dark`) : null;
 			dropTl.to(el, {scale: 0.88, duration: SINK_DURATION, ease: "power2.out"}, land);
@@ -235,7 +228,7 @@ export default function Pool() {
 				shadow: id ? shadowElRef.current[id] : null,
 				mix: id ? document.querySelector(`#sink-${id} .sink-mix`) : null,
 				dark: id ? document.querySelector(`#sink-${id} .sink-dark`) : null,
-				depth: gsap.utils.random(0.6, 1), //아이템마다 잠기는 깊이를 다르게
+				depth: gsap.utils.random(0.5, 1), //아이템마다 잠기는 깊이를 다르게
 				level: 0,
 			};
 		});
@@ -262,7 +255,7 @@ export default function Pool() {
 					.timeline({defaults: {onUpdate: () => applySinkLevel(t)}})
 					.to(t, {level: Math.max(target, t.level), duration: 0.6, ease: "power2.out"})
 					// 떠오르는 대기/속도를 아이템마다 다르게 해서 동시에 떠오르지 않도록
-					.to(t, {level: 0, duration: gsap.utils.random(0.4, 1.6), ease: "sine.inOut"}, `+=${gsap.utils.random(0, 0.2)}`);
+					.to(t, {level: 0.1, duration: gsap.utils.random(0.5, 1.5), ease: "sine.inOut"}, `+=${gsap.utils.random(0, 0.2)}`);
 			});
 		};
 
@@ -406,10 +399,9 @@ export default function Pool() {
 		}
 
 		// 물방울: 사방으로 튀었다가 (위에서 보는 시점이라 커졌다 작아짐) 사라짐
-		const DROP_COUNT = 6;
-		for (let i = 0; i < DROP_COUNT; i++) {
+		for (let i = 0; i < SPLASH_DROP_COUNT; i++) {
 			const drop = spawn(dropLayer, "splash-drop", gsap.utils.random(4, 8));
-			const angle = (i / DROP_COUNT) * Math.PI * 2 + gsap.utils.random(-0.3, 0.3);
+			const angle = (i / SPLASH_DROP_COUNT) * Math.PI * 2 + gsap.utils.random(-0.3, 0.3);
 			const dist = size * gsap.utils.random(0.4, 0.7);
 			const duration = gsap.utils.random(0.5, 0.8);
 			gsap

@@ -49,14 +49,10 @@ export interface Project {
 	review_kr?: string[];
 }
 
-interface Projects {
-	[key: string]: Project;
-}
-
 export default function Home() {
 	const [isEnglish, setIsEnglish] = useState<boolean>(true);
 	const [textFile, setTextFile] = useState<TextFileType>(TextEn);
-	const [projects, setProjects] = useState<Projects>(ProjectsData);
+	const [projects, setProjects] = useState<Project[]>(ProjectsData);
 	const [tags, setTags] = useState<string[]>(["WORK", "PERSONAL"]);
 	const [selectedProject, setSelectedProject] = useState<Project>();
 	const [isGameboyOn, setIsGameboyOn] = useState<boolean>(false);
@@ -604,18 +600,17 @@ export default function Home() {
 
 	/* 카트리지 (=통칭 카드) 호버 & 선택 이벤트 관리 */
 	const handleCardClick = useCallback(
-		(event: React.MouseEvent<HTMLDivElement>, projectKey: string) => {
+		(event: React.MouseEvent<HTMLDivElement>, projectData: Project) => {
 			const parentContainer = cartridgeCardsContainerRef.current;
 			const cardsDiv = cartridgeCardsRef.current;
 			const clickedCard = event.currentTarget as HTMLDivElement;
 			if (!parentContainer || !cardsDiv || !mainRef.current) return;
 
 			const rect = clickedCard.getBoundingClientRect();
-			if (!rect || !projectKey) return;
+			if (!rect) return;
 
 			// 선택한 프로젝트 정보 가져오기
-			const projectData = ProjectsData[projectKey as keyof typeof ProjectsData];
-			if (projectData) setSelectedProject(projectData);
+			setSelectedProject(projectData);
 
 			// swiperReadyRef 갱신
 			let resolve!: () => void;
@@ -735,16 +730,9 @@ export default function Home() {
 
 	useEffect(() => {
 		if (!tags) {
-			setProjects({});
+			setProjects([]);
 		} else {
-			console.log(ProjectsData);
-			const filteredProjects = Object.entries(ProjectsData)
-				.filter(([_, project]) => project.tags.some(tag => tags.includes(tag)))
-				.reduce<Projects>((acc, [key, project]) => {
-					acc[key] = project;
-					return acc;
-				}, {});
-			setProjects(filteredProjects);
+			setProjects(ProjectsData.filter(project => project.tags.some(tag => tags.includes(tag))));
 		}
 	}, [tags]);
 
@@ -830,14 +818,14 @@ export default function Home() {
 						<Link
 							className="text-[1rem] hover:underline underline-offset-2 decoration-white"
 							href="https://github.com/seoeongeueun"
-							target="__blank"
+							target="_blank"
 						>
 							{isEnglish ? "github" : "깃허브"}
 						</Link>
 						<Link
 							className="text-[1rem] hover:underline underline-offset-2 decoration-white"
 							href="https://www.notion.so/1d48bfc214c580a1a84bee5c716dd3e1?source=copy_link"
-							target="__blank"
+							target="_blank"
 						>
 							{isEnglish ? "portfolio" : "포트폴리오"}
 						</Link>
@@ -991,8 +979,8 @@ export default function Home() {
 				</div>
 				<div ref={cartridgeCardsContainerRef} className="gallery px-24 flex items-center w-full overflow-x-auto overflow-y-hidden  min-h-[40rem]">
 					<div ref={cartridgeCardsRef} className="cartridge-loop h-fit flex flex-row w-full gap-16 md:gap-24 md:py-40">
-						{Object.entries(projects).map(([k, v]) => (
-							<Cartridge key={v.title} projectKey={k} project={v} onSelectProject={handleCardClick} />
+						{projects.map(v => (
+							<Cartridge key={v.title} project={v} onSelectProject={handleCardClick} />
 						))}
 					</div>
 				</div>
@@ -1135,7 +1123,7 @@ export default function Home() {
 														<Link
 															key={`${i}-${k}`}
 															href={v}
-															target="__blank"
+															target="_blank"
 															className="flex flex-col items-center justify-center w-fit"
 														>
 															<Image src={icon} alt={alt} width={50} height={50} />
